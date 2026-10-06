@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESTA — Đánh giá CLDV &amp; Chế tài</title>
+<meta name="description" content="Ghi nhận vi phạm, lập biên bản chế tài, tổng hợp khấu trừ tháng và thông báo nhà thầu dịch vụ An ninh – Vệ sinh cho L'MAK 68, Lite The Venture, 127 Hồng Hà, 130 Hồng Hà.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Cormorant+Garamond:ital,wght@1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --aub:#411437; --aub-d:#2B1526; --aub-08:rgba(65,20,55,.08); --aub-15:rgba(65,20,55,.15);
+  --cream:#F3DEBF; --cream-l:#F5ECD0; --paper:#FAFAF7; --card:#FFFDF8;
+  --copper:#A46427; --copper-l:#F4E6D6; --taupe:#A99586; --stone:#625045;
+  --ink:#1B1418; --ink-2:#4A3F45; --ink-3:#7A6E72; --line:#E6DCCD; --line-2:#D6C8B4;
+  --bad:#9E3B2C; --bad-l:#F6E3DE; --ok:#2F5D46; --ok-l:#E3EEE6;
+  --r:6px; --shadow:0 1px 2px rgba(43,21,38,.06), 0 4px 14px rgba(43,21,38,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Montserrat',system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{width:100%;border:1px solid var(--line-2);border-radius:4px;background:#fff;padding:8px 10px;font-size:12.5px;outline:none;transition:border-color .15s, box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--copper);box-shadow:0 0 0 3px rgba(164,100,39,.15)}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+textarea{resize:vertical;min-height:62px}
+label.f{display:block;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--stone);margin:0 0 5px}
+.hint{font-size:11px;color:var(--ink-3);margin-top:4px}
+.req{color:var(--copper)}
+.hidden{display:none!important}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;border-radius:4px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s, border-color .15s, opacity .15s;letter-spacing:.01em}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-p{background:var(--aub);color:var(--cream-l)} .btn-p:hover:not(:disabled){background:var(--aub-d)}
+.btn-c{background:var(--copper);color:#fff} .btn-c:hover:not(:disabled){background:#8c531e}
+.btn-o{background:transparent;border-color:var(--line-2);color:var(--ink-2)} .btn-o:hover:not(:disabled){border-color:var(--aub);color:var(--aub)}
+.btn-g{background:transparent;color:var(--aub);padding:6px 8px} .btn-g:hover{background:var(--aub-08)}
+.btn-bad{background:transparent;border-color:#d9b3aa;color:var(--bad)} .btn-bad:hover{background:var(--bad-l)}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-sm{padding:5px 10px;font-size:11.5px}
+.ico{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ======== LOGIN ======== */
+#login{min-height:100vh;display:flex;align-items:stretch;background:var(--cream)}
+#login .brandside{flex:0 0 40%;background:linear-gradient(160deg,var(--aub) 0%,var(--aub-d) 100%);color:var(--cream);padding:56px 48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+#login .brandside::after{content:'✱';position:absolute;right:-60px;bottom:-110px;font-size:420px;line-height:1;color:rgba(243,222,191,.06)}
+.wm{display:flex;align-items:center;gap:12px}
+.wm .star{color:var(--copper);font-size:26px;line-height:1}
+.wm .t1{font-weight:800;font-size:22px;letter-spacing:.18em}
+.wm .t2{font-weight:300;font-size:9.5px;letter-spacing:.32em;opacity:.8}
+#login h1{font-weight:300;font-size:30px;line-height:1.25;margin:0 0 14px;letter-spacing:-.01em}
+#login h1 b{font-weight:700}
+#login .lede{font-size:13px;opacity:.8;max-width:360px}
+#login .quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--cream);opacity:.85}
+#login .formside{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 20px}
+.lcard{width:min(400px,100%);background:var(--card);border-radius:4px;padding:34px 30px;box-shadow:0 20px 50px rgba(43,21,38,.12);position:relative}
+.lcard::before{content:'';position:absolute;top:0;left:22px;right:22px;height:2px;background:var(--copper)}
+.lcard h2{margin:0 0 4px;font-size:17px;color:var(--aub)}
+.lcard .sub{color:var(--ink-3);font-size:12px;margin-bottom:22px}
+.lcard .row{margin-bottom:14px}
+.err{background:var(--bad-l);color:var(--bad);border-radius:4px;padding:8px 10px;font-size:12px;margin-bottom:12px}
+.demo-note{background:var(--copper-l);color:#6d4218;border-radius:4px;padding:9px 11px;font-size:11.5px;margin-bottom:16px}
+@media (max-width:820px){#login{flex-direction:column}#login .brandside{flex:none;padding:32px 24px}#login .quote{display:none}}
+
+/* ======== SHELL ======== */
+header.top{background:var(--aub);color:var(--cream-l);position:sticky;top:0;z-index:40}
+.topin{max-width:1640px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:22px;min-height:58px}
+.topin .wm .t1{font-size:16px} .topin .wm .star{font-size:20px}
+.topin .apptitle{white-space:nowrap;border-left:1px solid rgba(243,222,191,.22);padding-left:18px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;opacity:.9}
+nav.tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+nav.tabs button{background:none;border:0;color:rgba(245,236,208,.72);padding:19px 10px 17px;font-size:12px;white-space:nowrap;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px}
+nav.tabs button:hover{color:var(--cream-l)}
+nav.tabs button.on{color:var(--cream-l);border-bottom-color:var(--copper)}
+nav.tabs .badge{background:var(--copper);color:#fff;border-radius:9px;font-size:10px;padding:0 6px;line-height:16px}
+.userchip{display:flex;align-items:center;gap:10px;font-size:11.5px}
+.userchip .av{width:30px;height:30px;border-radius:50%;background:var(--copper);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.userchip .rl{opacity:.7;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.userchip button{background:none;border:1px solid rgba(243,222,191,.3);color:var(--cream-l);border-radius:4px;padding:5px 9px;cursor:pointer;font-size:11px}
+.userchip .who{white-space:nowrap}
+@media (max-width:1380px){.topin .apptitle{display:none}}
+@media (max-width:1100px){.userchip .who{display:none}}
+@media (max-width:900px){.topin{flex-wrap:wrap;gap:8px;padding:8px 12px}nav.tabs{order:3;width:100%;margin-left:0;overflow-x:auto;flex-wrap:nowrap}nav.tabs button{padding:10px 9px}.userchip{margin-left:auto}}
+.demo-bar{background:var(--copper);color:#fff;font-size:11.5px;text-align:center;padding:5px 12px}
+main{max-width:1640px;margin:0 auto;padding:22px 20px 60px}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.pagehead h2{margin:0;font-size:20px;font-weight:700;color:var(--aub);letter-spacing:-.01em}
+.pagehead .kicker{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--copper);font-weight:600;margin-bottom:4px}
+.pagehead .desc{color:var(--ink-3);font-size:12px;margin-top:3px}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar select,.toolbar input{width:auto;min-width:130px}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:linear-gradient(0deg,rgba(245,236,208,.35),rgba(245,236,208,.35))}
+.card-h h3{margin:0;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--aub);display:flex;align-items:center;gap:9px}
+.step{width:22px;height:22px;border-radius:50%;background:var(--aub);color:var(--cream-l);font-size:11px;display:inline-flex;align-items:center;justify-content:center;letter-spacing:0}
+.card-b{padding:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.span2{grid-column:span 2}
+@media (max-width:640px){.grid2,.grid3{grid-template-columns:1fr}.span2{grid-column:auto}}
+
+/* create workspace */
+.ws{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:20px;align-items:start}
+.ws-left{display:flex;flex-direction:column;gap:16px;min-width:0}
+.ws>*,.sumgrid>*,.dgrid>*{min-width:0}
+.ws-right{position:sticky;top:76px}
+@media (max-width:1180px){.ws{grid-template-columns:1fr}.ws-right{position:static}}
+.segs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.segs.two{grid-template-columns:1fr 1fr}
+.seg{border:1px solid var(--line-2);background:#fff;border-radius:4px;padding:9px 8px;cursor:pointer;text-align:center;font-size:12px;font-weight:600;color:var(--ink-2);transition:all .15s}
+.seg small{display:block;font-weight:400;font-size:10px;color:var(--ink-3)}
+.seg:hover{border-color:var(--aub)}
+.seg.on{background:var(--aub);border-color:var(--aub);color:var(--cream-l)} .seg.on small{color:rgba(245,236,208,.75)}
+.seg:disabled{opacity:.4;cursor:not-allowed}
+@media (max-width:640px){.segs{grid-template-columns:1fr 1fr}}
+.kv{background:var(--cream-l);border-radius:4px;padding:11px 13px;font-size:12px;display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin-top:12px}
+.kv dt{color:var(--stone)} .kv dd{margin:0;font-weight:600;text-align:right}
+.flag{display:flex;gap:8px;align-items:flex-start;background:var(--copper-l);color:#6d4218;border-radius:4px;padding:8px 10px;font-size:11.5px;margin-top:8px}
+.flag.bad{background:var(--bad-l);color:var(--bad)}
+.flag.ok{background:var(--ok-l);color:var(--ok)}
+.flag .ico{margin-top:1px}
+.line-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.lineitem{border:1px solid var(--line);border-left:3px solid var(--copper);border-radius:4px;padding:10px 12px;background:#fff;display:grid;grid-template-columns:1fr auto;gap:4px 12px}
+.lineitem .t{font-weight:600;font-size:12px}
+.lineitem .m{font-size:11px;color:var(--ink-3)}
+.lineitem .amt{font-weight:700;color:var(--aub);text-align:right;font-variant-numeric:tabular-nums}
+.lineitem .acts{grid-column:2;display:flex;gap:2px;justify-content:flex-end}
+.totalbar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--aub);color:var(--cream-l);border-radius:4px;margin-top:10px;font-size:12px}
+.totalbar b{font-size:15px;font-variant-numeric:tabular-nums}
+.levelpills{display:flex;gap:6px;flex-wrap:wrap}
+.lp{border:1px solid var(--line-2);border-radius:14px;padding:4px 10px;font-size:11.5px;cursor:pointer;background:#fff}
+.lp.on{background:var(--copper);border-color:var(--copper);color:#fff}
+.suggest{font-size:11px;color:var(--copper);margin-top:5px;font-weight:600}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.photos .ph{position:relative;aspect-ratio:4/3;border-radius:4px;overflow:hidden;background:var(--cream-l)}
+.photos img{width:100%;height:100%;object-fit:cover;display:block}
+.photos .x{position:absolute;top:4px;right:4px;background:rgba(27,20,24,.7);color:#fff;border:0;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;line-height:22px}
+.drop{border:1.5px dashed var(--line-2);border-radius:4px;padding:16px;text-align:center;color:var(--ink-3);cursor:pointer;font-size:12px;background:#fff}
+.drop:hover{border-color:var(--copper);color:var(--copper)}
+.actionbar{position:sticky;bottom:0;z-index:5;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;box-shadow:0 -6px 20px rgba(43,21,38,.06)}
+.actionbar .st{margin-right:auto;font-size:11.5px;color:var(--ink-3)}
+
+/* status pills */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:10px;padding:2px 9px;font-size:10.5px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+.pill::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.s-draft{background:#EEE9E3;color:var(--stone)}
+.s-pending{background:var(--copper-l);color:#8a5320}
+.s-approved{background:var(--ok-l);color:var(--ok)}
+.s-returned{background:var(--bad-l);color:var(--bad)}
+
+/* preview */
+.pv-wrap{background:#E9E2D6;border-radius:var(--r);padding:18px;max-height:calc(100vh - 110px);overflow:auto}
+.pv-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:11px;color:var(--stone);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.pv-scale{transform-origin:top left}
+@media (max-width:1180px){.pv-wrap{max-height:none}}
+
+/* tables */
+.tbl-wrap{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:12px}
+table.t th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--stone);font-weight:700;padding:10px 12px;border-bottom:1.5px solid var(--line-2);background:var(--cream-l);white-space:nowrap}
+table.t td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t tr:hover td{background:rgba(245,236,208,.35)}
+table.t .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.t .muted{color:var(--ink-3);font-size:11px}
+.empty{padding:40px 20px;text-align:center;color:var(--ink-3)}
+
+/* dashboard */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+@media (max-width:900px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{padding:16px 18px}
+.kpi .l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--stone);font-weight:600}
+.kpi .v{font-size:26px;font-weight:700;color:var(--aub);margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kpi .s{font-size:11px;color:var(--ink-3);margin-top:2px}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:1000px){.dgrid{grid-template-columns:1fr}}
+.hbar{display:grid;grid-template-columns:170px 1fr 110px;gap:10px;align-items:center;padding:6px 0;font-size:12px}
+.hbar .trk{height:14px;position:relative}
+.hbar .fill{height:100%;background:var(--aub);border-radius:0 4px 4px 0;min-width:2px}
+.hbar .val{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.hbar .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vbars{display:flex;align-items:flex-end;gap:14px;height:180px;padding:10px 4px 0;border-bottom:1px solid var(--line-2)}
+.vbars .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative}
+.vbars .bar{width:min(46px,70%);background:var(--aub);border-radius:4px 4px 0 0;min-height:2px;cursor:default}
+.vbars .bar.cur{background:var(--copper)}
+.vbars .cap{font-size:10.5px;font-weight:600;color:var(--ink-2);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.vlabels{display:flex;gap:14px;padding:6px 4px 0}
+.vlabels div{flex:1;text-align:center;font-size:10.5px;color:var(--ink-3)}
+.tip{position:fixed;pointer-events:none;background:var(--aub-d);color:var(--cream-l);font-size:11px;padding:6px 9px;border-radius:4px;z-index:100;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+
+/* summary */
+.sumgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:1180px){.sumgrid{grid-template-columns:1fr}}
+.calc{display:grid;grid-template-columns:1fr auto;gap:7px 16px;font-size:12.5px}
+.calc .k{color:var(--ink-2)} .calc .v{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.calc .tot{border-top:1.5px solid var(--aub);padding-top:8px;font-weight:700;color:var(--aub);font-size:14px}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(27,20,24,.5);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+.modal{background:var(--card);border-radius:6px;width:min(560px,100%);box-shadow:0 30px 70px rgba(0,0,0,.3)}
+.modal.wide{width:min(980px,100%)}
+.modal .mh{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.modal .mh h3{margin:0;font-size:15px;color:var(--aub)}
+.modal .mb{padding:18px 20px;max-height:70vh;overflow:auto}
+.modal .mf{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+
+/* toast */
+#toasts{position:fixed;bottom:22px;right:22px;z-index:120;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--aub-d);color:var(--cream-l);padding:11px 16px;border-radius:4px;font-size:12.5px;box-shadow:0 10px 30px rgba(0,0,0,.25);border-left:3px solid var(--copper);max-width:380px;animation:tin .2s ease}
+.toast.bad{border-left-color:#e48a78}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#busy{position:fixed;inset:0;background:rgba(250,250,247,.75);z-index:110;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--aub);font-weight:600}
+.spin{width:34px;height:34px;border:3px solid var(--aub-15);border-top-color:var(--copper);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ============== DOCUMENT (A4) ============== */
+.doc{width:794px;min-height:1123px;background:#fff;color:#111;padding:54px 60px 60px;font-family:'Montserrat',sans-serif;font-size:11.5px;line-height:1.55;box-shadow:0 4px 18px rgba(43,21,38,.12);position:relative}
+.doc.pdf{width:688px;min-height:0;padding:0;box-shadow:none}
+.doc .strip{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid var(--aub);padding-bottom:8px;margin-bottom:14px}
+.doc .strip .b{display:flex;align-items:center;gap:8px;color:var(--aub)}
+.doc .strip .b .s{color:var(--copper);font-size:16px;line-height:1}
+.doc .strip .b .n{font-weight:800;letter-spacing:.2em;font-size:12px}
+.doc .strip .b .m{font-weight:300;letter-spacing:.24em;font-size:7.5px}
+.doc .strip .r{font-size:8.5px;letter-spacing:.14em;color:var(--stone);text-transform:uppercase}
+.doc .hdr{display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center;font-size:10.5px;margin-bottom:14px}
+.doc .hdr b{display:block}
+.doc .hdr .ul{display:inline-block;border-top:1px solid #111;width:110px;margin-top:3px}
+.doc .hdr .date{font-style:italic;margin-top:6px}
+.doc h1{text-align:center;font-size:16px;font-weight:800;color:var(--aub);margin:14px 0 2px;letter-spacing:.02em}
+.doc .h1sub{text-align:center;font-size:11px;font-weight:600;margin-bottom:12px}
+.doc .basis{font-style:italic;font-size:10.8px;margin:0 0 10px;padding-left:0;list-style:none}
+.doc .basis li::before{content:'– '}
+.doc h4{font-size:11.5px;font-weight:700;color:var(--aub);text-transform:uppercase;margin:12px 0 5px;letter-spacing:.03em;border-left:3px solid var(--copper);padding-left:8px}
+.doc .parties{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;font-size:11px}
+.doc .parties .pb{border:1px solid #ddd;border-radius:3px;padding:7px 9px}
+.doc .parties .pt{font-weight:700;font-size:10px;letter-spacing:.06em;color:var(--stone);text-transform:uppercase;margin-bottom:2px}
+.doc table.dt{width:100%;border-collapse:collapse;font-size:10.5px;margin:4px 0}
+.doc table.dt th{background:var(--aub);color:#fff;font-weight:600;padding:6px 6px;border:1px solid var(--aub);text-align:center;font-size:9.5px;letter-spacing:.03em}
+.doc table.dt td{border:1px solid #cfc6bb;padding:6px 6px;vertical-align:top}
+.doc table.dt tr{page-break-inside:avoid}
+.doc table.dt .c{text-align:center} .doc table.dt .r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.doc table.dt tfoot td{font-weight:700;background:#f7f1e8}
+.doc .words{font-style:italic;margin:4px 0 8px}
+.doc p{margin:0 0 6px;text-align:justify}
+.doc .imgs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.doc .imgs figure{margin:0;page-break-inside:avoid}
+.doc .imgs img{width:100%;height:190px;object-fit:cover;border:1px solid #ddd;display:block}
+.doc .imgs figcaption{font-size:9.5px;color:#666;text-align:center;margin-top:2px}
+.doc .sign{display:grid;gap:10px;margin-top:18px;text-align:center;font-size:10.5px;page-break-inside:avoid}
+.doc .sign .role{font-weight:700;text-transform:uppercase;font-size:10px}
+.doc .sign .note{font-style:italic;font-size:9.5px;color:#555}
+.doc .sign .space{height:58px}
+.doc .sign .nm{font-weight:700}
+.doc .watermark{position:absolute;top:42%;left:0;right:0;text-align:center;font-size:64px;font-weight:800;color:rgba(158,59,44,.10);transform:rotate(-24deg);pointer-events:none;letter-spacing:.06em}
+.doc .approval{margin-top:14px;border:1px solid #cfe0d4;background:#f2f8f4;color:#2F5D46;padding:6px 9px;font-size:9.5px;border-radius:3px}
+.doc .foot{margin-top:22px;border-top:1px solid #ddd;padding-top:6px;font-size:8px;letter-spacing:.2em;color:var(--taupe);text-align:center}
+.doc .box{border:1px solid #ddd;border-radius:3px;padding:7px 9px;margin:4px 0;min-height:30px}
+.doc .pb-before{page-break-before:always}
+.doc .kpirow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:6px 0 4px}
+.doc .kpirow div{border:1px solid #e3d9cb;border-radius:3px;padding:6px 8px;background:#fbf7f0}
+.doc .kpirow .l{font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--stone)}
+.doc .kpirow .v{font-size:13px;font-weight:700;color:var(--aub)}
+.doc .alert{border-left:3px solid var(--bad);background:#fbefec;padding:5px 9px;margin:4px 0;font-size:10.5px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="toasts"></div>
+<script>
+/* =====================================================================
+   DỮ LIỆU GỐC TRÍCH TỪ HỢP ĐỒNG (seed). Admin chỉnh sửa trên web ->
+   bản sửa lưu ở Firestore (ct_contracts) và được ưu tiên hơn bản gốc này.
+   Nguồn: bản scan HĐ anh Bill cung cấp ngày 06/10/2026.
+   ===================================================================== */
+const BUILDINGS = {
+  lmak68:  {name:"L'MAK 68",          short:'LMAK68', addr:"68 Phan Đăng Lưu, P. Đức Nhuận, TP. Hồ Chí Minh"},
+  venture: {name:"Lite The Venture",  short:'VENT',   addr:"62 Trần Huy Liệu, P. Phú Nhuận, TP. Hồ Chí Minh"},
+  hh127:   {name:"127 Hồng Hà",       short:'127HH',  addr:"127 Hồng Hà, P. Đức Nhuận, TP. Hồ Chí Minh"},
+  hh130:   {name:"130 Hồng Hà",       short:'130HH',  addr:"130 – 132 Hồng Hà, P. Đức Nhuận, TP. Hồ Chí Minh"},
+};
+const SERVICES = {
+  SECURITY: {name:'An ninh', full:'Dịch vụ An ninh – Bảo vệ', code:'AN'},
+  CLEANING: {name:'Vệ sinh', full:'Dịch vụ Vệ sinh – Làm sạch', code:'VS'},
+};
+
+/* Level helper: t = hình thức xử lý, a = tiền cố định, pct/base = % theo giá trị, min/max = khung tiền */
+const lv  = (a, t) => ({a, t});
+const nh  = (t='Nhắc nhở và lập biên bản') => ({a:0, t});
+
+const ITEMS_UNICARE = [
+  {code:'01', title:'Nhân viên ăn mặc không đúng quy định, sử dụng ngôn từ thiếu văn minh (chửi thề…), làm việc riêng trong giờ làm việc', levels:[lv(200000,'Phạt 200.000đ/trường hợp')]},
+  {code:'02', title:'Nhân viên hút thuốc lá tại tòa nhà trong giờ làm việc', levels:[lv(200000,'Phạt 200.000đ/trường hợp')]},
+  {code:'03', title:'Nhân viên tụ tập nói chuyện trong giờ làm việc', levels:[lv(200000,'Phạt 200.000đ/trường hợp')]},
+  {code:'04', title:'Nhân viên mất lịch sự với khách hàng, bị khách hàng phản ánh hay BQL tòa nhà/nhân viên Bên A phản ánh', levels:[lv(200000,'Phạt 200.000đ/trường hợp')]},
+  {code:'05', title:'Nhân viên tự ý rời bỏ vị trí, trốn việc, ngủ trong giờ làm việc', levels:[lv(200000,'Phạt 200.000đ/trường hợp')]},
+  {code:'06', title:'Gian lận, thiếu tập trung, trộm cắp, sử dụng chất gây nghiện (ma túy…)', levels:[lv(1000000,'Phạt 1.000.000đ/trường hợp và buộc sa thải; Bên B bổ sung nhân sự phù hợp')], comp:true},
+  {code:'07', title:'Nhân viên gây mất an ninh, trật tự: đánh nhau, gây gổ…', levels:[lv(1000000,'Phạt 1.000.000đ/trường hợp và buộc sa thải; Bên B bổ sung nhân sự phù hợp')]},
+  {code:'08', title:'Không cung cấp đủ số lượng nhân sự', levels:[lv(0,'Không được tính công ngày thiếu (giảm trừ khi nghiệm thu)')], qtyLabel:'Số công thiếu'},
+  {code:'09', title:'Có hành vi không hợp tác, không hỗ trợ khách hàng/BQL tòa nhà bị Bên A phát hiện', levels:[lv(200000,'Phạt 200.000đ/trường hợp')]},
+  {code:'10', title:'Khách hàng phản ánh về chất lượng dịch vụ như không sạch, thiếu giấy… hoặc bị BQL tòa nhà phát hiện', levels:[lv(200000,'Phạt 200.000đ/trường hợp')]},
+];
+const TIERS_UNICARE = [
+  {min:80, max:100, pct:0,   label:'Mức A – Tốt',       action:'Không áp dụng trừ phí'},
+  {min:59.0001, max:79.9999, pct:1, label:'Mức B – Khá', action:'Trừ 1% phí dịch vụ tháng'},
+  {min:0,  max:49.9999, pct:1.5, label:'Mức C – Không đạt', action:'Trừ 1,5% phí dịch vụ tháng, gửi công văn nhắc nhở'},
+];
+
+const CONTRACT_SEED = {
+  /* ---------------- L'MAK 68 – AN NINH ---------------- */
+  lmak68_SECURITY: {
+    building:'lmak68', service:'SECURITY',
+    partyA:{name:"CÔNG TY TNHH L'MAK 68", tax:'0316284936', addr:'68 Phan Đăng Lưu, Phường Đức Nhuận, TP. Hồ Chí Minh', rep:'Ông NGUYỄN HOÀNG NAM', repRole:'Giám đốc'},
+    partyB:{name:'CÔNG TY TNHH DỊCH VỤ BẢO VỆ VIỆT NHẬT THĂNG LONG SEPRE 24', tax:'0310828308', addr:'549/44/34 Lê Văn Thọ, Phường An Hội Tây, TP. Hồ Chí Minh', rep:'Ông NGUYỄN ANH TÚ', repRole:'Tổng Giám đốc'},
+    contractNo:'10/08/23/VNTLS24', contractDate:'2023-08-10',
+    appendix:'Phụ lục số 11 ký ngày 15/05/2026 (điều chỉnh đơn giá + bộ tiêu chuẩn Audit)',
+    penaltyRef:'Phụ lục 01 – Phạt vi phạm (đính kèm HĐ 10/08/23/VNTLS24) và Điều 3 Phụ lục số 11',
+    termFrom:'2023-08-10', termTo:'', termNote:'Gia hạn theo các phụ lục 01–11',
+    monthlyFee:56375000, feeNote:'2 vị trí 24/24h × 19.250.000 + 1 vị trí 12/24h × 9.625.000 + 1 vị trí 12/24h (T2–T6) × 8.250.000 (chưa VAT)',
+    contractValue:676500000,
+    capPct:8,
+    offensePeriod:'month',
+    clauses:{
+      deduct:'Bên A được quyền trừ thẳng vào phí dịch vụ chưa thanh toán cho Bên B kèm biên bản ghi nhận hành vi vi phạm có chữ ký của người vi phạm, nhân viên của Bên B hoặc chữ ký của người làm chứng (trường hợp người vi phạm không ký), hình ảnh liên quan (Mục I.2 Phụ lục 01).',
+      notice:'Điều 9.4 HĐ: Bên A thông báo bằng văn bản cho Bên B về vi phạm; nếu sau văn bản nhắc nhở lần 2 Bên B không có biện pháp khắc phục hữu hiệu, Bên A có quyền chấm dứt HĐ mà không chịu chế tài. Điều 4.1 PL11: Bên B thay thế nhân sự không đáp ứng trong tối đa 24 giờ.',
+      termination:'Điều 2.3.n: Bên A được chấm dứt HĐ nếu Bên B không bố trí tối thiểu 1 vị trí/ca trực, hoặc bị lập biên bản ≥ 03 lần/tháng hoặc 05 lần cộng dồn về việc không bố trí đủ bảo vệ. Mục I.3 PL01: chấm dứt do lỗi Bên B → phạt tối đa 8% giá trị HĐ.',
+      compensation:'Điều 4.3 PL11: Bên B bồi thường 100% giá trị tổn thất tài sản xảy ra trong ca trực do lỗi nhân viên Bên B (ngủ gật, rời vị trí, sai quy trình…), xác định qua camera hoặc biên bản sự việc.',
+    },
+    remedyDays:1,
+    items:[
+      {code:'01', title:'Lấy cắp tài sản', levels:[lv(500000,'Phạt 500.000đ/lần ngay lần đầu; thay đổi nhân viên ngay lập tức')], comp:true, ref:'PL01 – STT 01'},
+      {code:'02', title:'Tác phong nơi làm việc (quần áo, cà vạt, mũ, giày, tóc, râu, cơ thể…) không sạch sẽ, chỉnh tề, không phù hợp', levels:[nh('Nhắc nhở'), lv(100000,'Phạt 100.000đ'), lv(200000,'Phạt 200.000đ; thay đổi nhân viên')], ref:'PL01 – STT 02'},
+      {code:'04', title:'Uống bia, rượu (hoặc các chất có cồn) trong giờ làm việc', levels:[lv(200000,'Phạt 200.000đ'), lv(400000,'Phạt 400.000đ; thay đổi nhân viên')], ref:'PL01 – STT 04'},
+      {code:'05', title:'Ngủ cố ý trong giờ làm việc (ngủ gật, bỏ chốt)', levels:[nh('Nhắc nhở'), lv(200000,'Phạt 200.000đ'), lv(400000,'Phạt 400.000đ; thay đổi nhân viên')], ref:'PL01 – STT 05; PL11 mục 2.IV'},
+      {code:'06', title:'Sử dụng laptop, máy tính bảng; chơi điện tử, nghe nhạc, xem phim hoặc các hình thức gây sao lãng công việc trong giờ làm việc', levels:[nh('Nhắc nhở'), lv(100000,'Phạt 100.000đ'), lv(200000,'Phạt 200.000đ; thay đổi nhân viên')], ref:'PL01 – STT 06'},
+      {code:'07', title:'Hành hung, đánh nhau trong khuôn viên tòa nhà', levels:[lv(500000,'Phạt 500.000đ/lần ngay lần đầu; thay đổi nhân viên ngay lập tức')], ref:'PL01 – STT 07'},
+      {code:'08', title:'Chơi bài bạc hoặc các hình thức cá cược trong khuôn viên tòa nhà', levels:[lv(500000,'Phạt 500.000đ/lần ngay lần đầu; thay đổi nhân viên ngay lập tức')], ref:'PL01 – STT 08'},
+      {code:'09', title:'Tự ý cho người nhà, bạn bè vào bên trong khu vực bảo vệ', levels:[nh('Nhắc nhở'), lv(100000,'Phạt 100.000đ'), lv(200000,'Phạt 200.000đ; thay đổi nhân viên')], ref:'PL01 – STT 09'},
+      {code:'10', title:'Đùa giỡn với nhân viên khác hay khách hàng trong ca trực', levels:[nh('Nhắc nhở'), lv(100000,'Phạt 100.000đ'), lv(200000,'Phạt 200.000đ; thay đổi nhân viên')], ref:'PL01 – STT 10'},
+      {code:'LS', title:'Thất lạc, bóc mở, làm hư hỏng thư từ/hóa đơn của khách hàng LiteSpace', levels:[lv(2000000,'Phạt 2.000.000đ/vụ việc + bồi thường 100% thiệt hại thực tế phát sinh')], comp:true, ref:'PL11 – Điều 3 (Các lỗi vi phạm)'},
+      {code:'NS', title:'Bố trí không đủ bảo vệ tại Mục tiêu (thiếu vị trí/ca trực)', levels:[lv(0,'Lập biên bản ghi nhận; không thanh toán giờ công thiếu/tăng ca bù (Đ2.3.o). ≥03 BB/tháng hoặc 05 BB cộng dồn: Bên A có quyền chấm dứt HĐ')], qtyLabel:'Số vị trí/ca thiếu', ref:'HĐ Điều 2.3.m–n', countRule:{perMonth:3, cumulative:5}},
+    ],
+    tiers:[
+      {min:85, max:100, pct:0, label:'Đạt chuẩn (≥ 85%)', action:'Thanh toán 100% hóa đơn dịch vụ tháng'},
+      {min:75, max:84.9999, pct:0, label:'Cảnh báo (75% – 84%)', action:'Bên A lập biên bản nhắc nhở chất lượng; Bên B chấn chỉnh nội bộ trong 03 ngày'},
+      {min:0, max:74.9999, pct:0, label:'Không đạt (< 75%)', action:'Bên B bố trí 01 nhân sự tăng cường miễn phí 03 ngày liên tục; Phòng Vận hành Bên B xuống dự án đào tạo, giám sát trong 03 ngày'},
+    ],
+    tierRules:{consecutiveBelow:{threshold:85, months:3, pct:10, text:'Dưới 85% trong 03 tháng liên tiếp → phạt 10% phí dịch vụ tháng đó; bắt buộc đào tạo lại toàn đội hoặc đổi Chỉ huy trưởng trong 03 ngày'}, windowBelow:{threshold:75, months:3, window:6, text:'Có ≥ 03 tháng trong chu kỳ 06 tháng đạt < 75% → Bên A có quyền đơn phương chấm dứt HĐ không cần bồi thường'}},
+    rewards:'Thưởng 500.000đ/lần: đề cao cảnh giác, phát hiện ngăn ngừa nguy cơ; ngăn chặn, bắt được trộm, trả lại tài sản (PL01 mục III).',
+    flags:['PL01 bản scan không có STT 03 (đánh số nhảy 02 → 04).'],
+  },
+
+  /* ---------------- L'MAK 68 – VỆ SINH ---------------- */
+  lmak68_CLEANING: {
+    building:'lmak68', service:'CLEANING',
+    partyA:{name:"CÔNG TY TNHH L'MAK 68", tax:'0316284936', addr:'68 Phan Đăng Lưu, Phường Đức Nhuận, TP. Hồ Chí Minh', rep:'Ông NGUYỄN HOÀNG NAM', repRole:'Giám đốc'},
+    partyB:{name:'CÔNG TY TNHH UNICARE JP', tax:'0317276952', addr:'45/5 Đường số 9, Phường Hiệp Bình, TP. Hồ Chí Minh', rep:'Ông NGUYỄN THÁI TIẾN', repRole:'Giám đốc'},
+    contractNo:'68/2025/HDDVVS/UNC-LMAK68', contractDate:'2025-06-24',
+    appendix:'', penaltyRef:'Phụ lục 02 – Mục II Phạt vi phạm (HĐ 68/2025/HDDVVS/UNC-LMAK68)',
+    termFrom:'2025-07-01', termTo:'2026-06-30', termNote:'',
+    monthlyFee:47400000, feeNote:'06 nhân viên vệ sinh 8/24h × 7.900.000 (chưa VAT 8%)',
+    contractValue:568800000, capPct:8, offensePeriod:'month',
+    clauses:{
+      deduct:'Bên A được quyền trừ thẳng vào phí dịch vụ chưa thanh toán cho Bên B kèm biên bản ghi nhận hành vi vi phạm có chữ ký của người vi phạm, nhân viên Bên B hoặc chữ ký người làm chứng, hình ảnh liên quan (Mục II.1.2 Phụ lục 02).',
+      notice:'Điều 6.2.13 HĐ: Bên B khắc phục, sửa chữa vi phạm trong vòng 03 ngày kể từ khi Bên A thông báo; quá hạn không khắc phục phải bồi thường toàn bộ thiệt hại. Điều 9.2: không khắc phục trong 07 ngày kể từ ngày được thông báo → phạt 8% giá trị phần HĐ bị vi phạm.',
+      termination:'Điều 8.3: Một bên có quyền đơn phương chấm dứt HĐ nếu bên kia vi phạm và không khắc phục trong 30 ngày kể từ ngày nhận thông báo yêu cầu khắc phục.',
+      compensation:'Điều 6.2.11: Bên B bồi thường 100% giá trị tài sản bị hư hại, mất mát do lỗi Bên B.',
+    },
+    remedyDays:3,
+    items: ITEMS_UNICARE.map(x=>({...x, ref:'PL02 mục II – STT '+x.code})),
+    tiers: TIERS_UNICARE,
+    tierRules:{},
+    flags:['Thời hạn HĐ theo hồ sơ: 01/07/2025 – 30/06/2026 → đã hết hạn, cần bổ sung phụ lục gia hạn.','Khung điểm HĐ bỏ trống 50% – 59%: khi rơi vào khoảng này, Quản lý vận hành nhập mức trừ thủ công.'],
+  },
+
+  /* ---------------- 127 HỒNG HÀ – AN NINH ---------------- */
+  hh127_SECURITY: {
+    building:'hh127', service:'SECURITY',
+    partyA:{name:"CÔNG TY TNHH L'MAK ĐAKAO", tax:'0316351325', addr:'127 Hồng Hà, Phường Đức Nhuận, TP. Hồ Chí Minh', rep:'Ông NGUYỄN HOÀNG NAM', repRole:'Giám đốc'},
+    partyB:{name:'CÔNG TY TNHH DỊCH VỤ BẢO VỆ TẬP ĐOÀN BECAMEX', tax:'0317813861', addr:'101 Lê Thị Hồng, Phường 17, Quận Gò Vấp, TP. Hồ Chí Minh', rep:'Bà NGUYỄN THỊ TRANG', repRole:'Giám đốc'},
+    contractNo:'012402/HDAN/BCM-LMĐK', contractDate:'2024-01-01',
+    appendix:'', penaltyRef:'Phụ lục 1 – Phạt vi phạm (đính kèm HĐ 012402/HDAN/BCM-LMĐK)',
+    termFrom:'2024-01-01', termTo:'2024-12-31', termNote:'',
+    monthlyFee:43000000, feeNote:'Cổng KS bãi xe 24/24h (02 NV) 17.200.000 + Tuần tra bãi xe 12/24h 8.600.000 + Tuần tra nội khu 24/24h (02 NV) 17.200.000 (chưa VAT)',
+    contractValue:516000000, capPct:8, offensePeriod:'month',
+    clauses:{
+      deduct:'Bên A được quyền trừ thẳng vào phí dịch vụ chưa thanh toán cho Bên B kèm biên bản ghi nhận hành vi vi phạm có chữ ký của người vi phạm, nhân viên Bên B hoặc chữ ký người làm chứng, hình ảnh liên quan (Mục I.2 Phụ lục 1).',
+      notice:'Bên A thông báo bằng văn bản cho Bên B về vi phạm; nếu sau văn bản nhắc nhở lần 2 Bên B không có biện pháp khắc phục hữu hiệu, Bên A có quyền chấm dứt HĐ mà không chịu chế tài.',
+      termination:'Mục I.3 Phụ lục 1: chấm dứt HĐ do vi phạm của Bên B → Bên B bị phạt tối đa 8% giá trị HĐ (xác định theo phí dịch vụ hàng tháng đã nghiệm thu).',
+      compensation:'Điều 10: Bên B bồi thường giá trị thiệt hại tài sản trong khu vực được giao bảo vệ do lỗi nhân viên Bên B.',
+    },
+    remedyDays:2,
+    items:[
+      {code:'01', title:'Trang phục, tác phong không chỉnh tề', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(400000,'Phạt 400.000đ')]},
+      {code:'02', title:'Không có công cụ hỗ trợ theo quy định tại vị trí trực (bộ đàm, gậy điều phối, còi…) hoặc không có đồng phục phù hợp', levels:[nh('Nhắc nhở và phải bổ sung trong vòng 48 giờ'), lv(400000,'Phạt 400.000đ và phải bổ sung trong vòng 48 giờ'), lv(800000,'Phạt 800.000đ và phải bổ sung trong vòng 48 giờ')]},
+      {code:'03', title:'Hút thuốc trong ca làm việc, không đúng nơi quy định', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(500000,'Điều chuyển khỏi Mục tiêu và phạt 500.000đ')]},
+      {code:'04', title:'Bàn giao ca không đúng giờ quy định', levels:[nh(), lv(400000,'Phạt 400.000đ'), lv(800000,'Phạt 800.000đ')]},
+      {code:'05', title:'Bên B không cung cấp đủ nhân sự trực tại các vị trí theo Hợp đồng', levels:[lv(500000,'500.000đ/vị trí, đồng thời trừ phí dịch vụ tương ứng vị trí thiếu nhân sự'), lv(1000000,'1.000.000đ/vị trí, đồng thời trừ phí dịch vụ tương ứng vị trí thiếu nhân sự'), lv(0,'Lần thứ 3: xem xét dừng Hợp đồng')], qtyLabel:'Số vị trí thiếu'},
+      {code:'06', title:'Tiếp người không phận sự (người thân, bạn bè…) trong lúc làm nhiệm vụ', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(400000,'Phạt 400.000đ')]},
+      {code:'07', title:'Sử dụng công cụ hỗ trợ sai mục đích (ca hát, chửi thề, cãi nhau qua bộ đàm…)', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(400000,'Phạt 400.000đ')]},
+      {code:'08', title:'Làm các công việc khác không đúng nghiệp vụ trong giờ trực: đọc sách, báo, nghe nhạc, dùng điện thoại chơi game…', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(400000,'Phạt 400.000đ')]},
+      {code:'09', title:'Quản lý xe cộ, hàng hóa trong phạm vi bảo vệ không đúng quy trình, để xe không đúng nơi quy định, gây lộn xộn, mất trật tự', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(400000,'Phạt 400.000đ')]},
+      {code:'10', title:'Không hỗ trợ Ban quản lý tòa nhà khi có nhu cầu chính đáng (không trái nguyên tắc bảo vệ chuyên nghiệp)', levels:[nh(), lv(400000,'Phạt 400.000đ'), lv(600000,'Điều chuyển khỏi Mục tiêu và phạt 600.000đ')]},
+      {code:'12', title:'Ngôn phong, thái độ giao tiếp không nhã nhặn, lịch sự', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(400000,'Điều chuyển khỏi Mục tiêu và phạt 400.000đ')]},
+      {code:'13', title:'Ngủ trong ca trực', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(400000,'Phạt 400.000đ')]},
+      {code:'14', title:'Gác chân hoặc ngồi gục trên bàn, ghế; đồng phục (quần áo, giày, tóc, râu, cơ thể, trang sức) không sạch sẽ, chỉnh tề, thiếu bảng tên, tác phong không nghiêm túc', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(500000,'Điều chuyển khỏi Mục tiêu và phạt 500.000đ')]},
+      {code:'15', title:'Không có mặt tại vị trí trực quá 10 phút kể từ lúc được triệu tập (trừ lý do chính đáng hoặc vệ sinh cá nhân)', levels:[nh(), lv(200000,'Phạt 200.000đ'), lv(500000,'Điều chuyển khỏi Mục tiêu và phạt 500.000đ')]},
+      {code:'16', title:'Sử dụng các chất ma túy, chất kích thích, chất có nồng độ cồn, đánh bài trong giờ làm việc tại Mục tiêu', levels:[lv(2000000,'Điều chuyển khỏi Mục tiêu và phạt 2.000.000đ')]},
+      {code:'17', title:'Cấu kết với người ngoài trộm cắp/vận chuyển tài sản, hàng hóa trái phép; không trung thực, gian lận, lấy trộm tài sản', levels:[lv(2000000,'Bồi thường thiệt hại, thay đổi nhân sự, chịu trách nhiệm trước pháp luật và phạt 2.000.000đ')], comp:true},
+      {code:'18', title:'Để người ngoài mang rác, xà bần, vật dơ bẩn, các vật khác… vào khu vực bảo vệ', levels:[nh('Phải dọn dẹp sạch sẽ, đồng thời nhắc nhở và lập biên bản'), lv(200000,'Phải dọn dẹp sạch sẽ, đồng thời phạt 200.000đ'), lv(500000,'Phải dọn dẹp sạch sẽ, đồng thời phạt 500.000đ')]},
+      {code:'19', title:'Không tuần tra và phát hiện tài sản khách hàng để ngoài hành lang, thang bộ…; không thực hiện công việc BQL giao, không hỗ trợ xử lý sự cố', levels:[nh(), lv(500000,'Phạt 500.000đ'), lv(1000000,'Điều chuyển nhân sự và phạt 1.000.000đ')]},
+      {code:'20', title:'Không bổ sung danh sách nhân viên khi thay đổi; không cung cấp giấy chứng nhận đào tạo, PCCC, nghiệp vụ bảo vệ', levels:[nh(), lv(300000,'Phạt 300.000đ'), lv(600000,'Điều chuyển khỏi Mục tiêu và phạt 600.000đ')]},
+      {code:'21', title:'Gian lận trong công việc: che giấu thông tin, báo cáo sai…', levels:[nh(), lv(500000,'Phạt 500.000đ'), lv(1000000,'Điều chuyển nhân sự và phạt 1.000.000đ')]},
+      {code:'22', title:'Thái độ vòi vĩnh, nói tục, giao tiếp "không đúng chuẩn mực" với khách hàng, đồng nghiệp, nhân viên BQL làm ảnh hưởng hình ảnh, uy tín công ty quản lý', levels:[lv(200000,'Phạt 200.000đ + điều chuyển khỏi Mục tiêu'), lv(500000,'Phạt 500.000đ + điều chuyển khỏi Mục tiêu'), lv(0,'Xem xét chấm dứt Hợp đồng')]},
+      {code:'23', title:'Không nghiêm túc, lơ là, chây lười; không chép đầy đủ sổ giao ca; không ghi nhật ký ca trực; không hoàn thành trách nhiệm được giao', levels:[nh('Nhắc nhở Chỉ huy và điều chuyển nhân viên khỏi Mục tiêu'), lv(500000,'Phạt Chỉ huy 500.000đ + điều chuyển khỏi Mục tiêu'), lv(0,'Xem xét chấm dứt Hợp đồng')]},
+      {code:'24', title:'Nhân viên trực tại Mục tiêu không có tên trong danh sách gửi Bên A (bố trí không đúng nhân sự)', levels:[nh(), lv(500000,'Phạt 500.000đ'), lv(1000000,'Điều chuyển khỏi Mục tiêu và phạt 1.000.000đ')]},
+      {code:'25', title:'Để xảy ra tình trạng lấn chiếm, sử dụng diện tích chung vi phạm nội quy tòa nhà', levels:[nh(), lv(1000000,'Phạt 1.000.000đ'), lv(0,'Xem xét dừng Hợp đồng')]},
+      {code:'26', title:'Để tài xế, nhà thầu thi công tụ tập hút thuốc, nói chuyện, xả rác, lau rửa xe có nước ở khu vực công cộng', levels:[nh(), lv(500000,'Phạt 500.000đ'), lv(1200000,'Điều chuyển khỏi Mục tiêu và phạt 1.200.000đ')]},
+      {code:'27', title:'Không nhắc nhà thầu thực hiện theo nội quy thi công', levels:[nh(), lv(600000,'Phạt 600.000đ'), lv(1200000,'Điều chuyển khỏi Mục tiêu và phạt 1.200.000đ')]},
+      {code:'28', title:'Bị khách hàng gửi phản ánh, phê bình đến BQL, Chủ đầu tư (không giải trình được lý do chính đáng)', levels:[nh(), lv(600000,'Phạt 600.000đ'), lv(1200000,'Điều chuyển khỏi Mục tiêu và phạt 1.200.000đ')]},
+      {code:'29', title:'Cố ý gây trầy xước xe, phá hoại xe đậu trong bãi xe', levels:[lv(1000000,'Phạt 1.000.000đ + điều chuyển khỏi Mục tiêu'), {pct:5, base:'contract', t:'5% giá trị Hợp đồng + chấm dứt Hợp đồng'}], comp:true},
+      {code:'30', title:'Nhân viên Bên B không hợp tác, không nghe theo sự điều động hợp lý của BQL để giải quyết công việc, sự cố', levels:[nh(), lv(500000,'Phạt 500.000đ + điều chuyển khỏi Mục tiêu'), lv(1000000,'Phạt 1.000.000đ + điều chuyển khỏi Mục tiêu')]},
+      {code:'31', title:'Nhân viên bảo vệ đình công, không làm việc', levels:[{pct:5, base:'fee', t:'5% giá trị Hợp đồng/tháng'}, {pct:5, base:'contract', t:'5% giá trị Hợp đồng + chấm dứt Hợp đồng'}]},
+      {code:'32', title:'Tự ý ngắt nguồn thiết bị/không bảo quản nguồn điện camera, làm mất dữ liệu camera, camera không hoạt động do lỗi kỹ thuật trong 1 giờ nhưng không báo cáo Bên A trong 1 giờ', levels:[{pct:5, base:'contract', t:'5% giá trị Hợp đồng + chấm dứt Hợp đồng'}]},
+      {code:'33', title:'Sao chép thông tin camera; cho người lạ không đăng ký vào phòng camera; sao chụp hình ảnh camera không báo trước BQL', levels:[{pct:5, base:'contract', t:'5% giá trị Hợp đồng + chấm dứt Hợp đồng'}]},
+      {code:'34', title:'Ở lại khuôn viên tòa nhà khi không có phận sự hoặc hết giờ làm việc; dẫn bạn bè, người không phận sự vào tòa nhà', levels:[nh(), lv(500000,'Phạt 500.000đ + điều chuyển khỏi Mục tiêu'), lv(1000000,'Phạt 1.000.000đ + điều chuyển khỏi Mục tiêu')]},
+      {code:'35', title:'Sai quy trình giữ xe chưa có xác nhận BQL (xe không thẻ, không xuất vé, thu sai phí, sai mẫu vé/thẻ, không hủy vé, dùng lại vé, tẩy xóa vé, ghi thiếu thông tin, gian lận báo cáo phí xe)', levels:[nh(), lv(500000,'Phạt 500.000đ + điều chuyển khỏi Mục tiêu'), lv(1000000,'Phạt 1.000.000đ + điều chuyển khỏi Mục tiêu')]},
+      {code:'36', title:'Để vật dụng cá nhân, đồ ăn thức uống không đúng nơi quy định gây mất mỹ quan', levels:[nh(), lv(500000,'Phạt 500.000đ'), lv(1000000,'Phạt 1.000.000đ')]},
+    ].map(x=>({...x, ref:x.ref||('PL1 – STT '+x.code)})),
+    tiers:[], tierRules:{},
+    rewards:'Thưởng 500.000đ/lần: đề cao cảnh giác, phát hiện ngăn ngừa nguy cơ; ngăn chặn, bắt được trộm, trả lại tài sản (PL1 mục III).',
+    flags:['Thời hạn HĐ theo hồ sơ: 01/01/2024 – 31/12/2024 → cần cập nhật HĐ/phụ lục đang hiệu lực.','PL1 bản scan không có STT 11 (đánh số nhảy 10 → 12).','PL2 chỉ có thang điểm 3–5, không quy định % trừ phí theo điểm.'],
+  },
+
+  /* ---------------- 127 HỒNG HÀ – VỆ SINH ---------------- */
+  hh127_CLEANING: {
+    building:'hh127', service:'CLEANING',
+    partyA:{name:"CÔNG TY TNHH L'MAK ĐAKAO", tax:'0316351325', addr:'127 Hồng Hà, Phường Đức Nhuận, TP. Hồ Chí Minh', rep:'Ông NGUYỄN HOÀNG NAM', repRole:'Giám đốc'},
+    partyB:{name:'CÔNG TY TNHH UNICARE JP', tax:'0317276952', addr:'49/30 Đường số 19, P. Hiệp Bình Chánh, TP. Thủ Đức, TP. Hồ Chí Minh', rep:'Ông BÙI QUANG KHOA', repRole:'Giám đốc (theo ủy quyền)'},
+    contractNo:'127/2023/HDDVVS/UNC-LMDK', contractDate:'2023-12-31',
+    appendix:'', penaltyRef:'Phụ lục 02 – Mục II Phạt vi phạm (HĐ 127/2023/HDDVVS/UNC-LMDK)',
+    termFrom:'2024-01-01', termTo:'2024-12-31', termNote:'',
+    monthlyFee:17000000, feeNote:'01 NV vệ sinh 8/24h × 7.500.000 + 01 NV vệ sinh 12/24h × 9.500.000 (chưa VAT 8%)',
+    contractValue:204000000, capPct:8, offensePeriod:'month',
+    clauses:{
+      deduct:'Bên A được quyền trừ thẳng vào phí dịch vụ chưa thanh toán cho Bên B kèm biên bản ghi nhận hành vi vi phạm có chữ ký của người vi phạm, nhân viên Bên B hoặc chữ ký người làm chứng, hình ảnh liên quan (Mục II.1.2 Phụ lục 02).',
+      notice:'Bên B khắc phục, sửa chữa vi phạm trong vòng 03 ngày kể từ khi Bên A thông báo. Không khắc phục trong 07 ngày kể từ ngày được thông báo → phạt 8% giá trị phần HĐ bị vi phạm.',
+      termination:'Một bên có quyền đơn phương chấm dứt HĐ nếu bên kia vi phạm và không khắc phục trong thời hạn yêu cầu.',
+      compensation:'Bên B bồi thường 100% giá trị tài sản bị hư hại, mất mát do lỗi Bên B.',
+    },
+    remedyDays:3,
+    items: ITEMS_UNICARE.map(x=>({...x, ref:'PL02 mục II – STT '+x.code})),
+    tiers: TIERS_UNICARE, tierRules:{},
+    flags:['Thời hạn HĐ theo hồ sơ: 01/01/2024 – 31/12/2024 → cần cập nhật HĐ/phụ lục đang hiệu lực.','Khung điểm HĐ bỏ trống 50% – 59%: khi rơi vào khoảng này, Quản lý vận hành nhập mức trừ thủ công.'],
+  },
+
+  /* ---------------- 130 HỒNG HÀ – VỆ SINH ---------------- */
+  hh130_CLEANING: {
+    building:'hh130', service:'CLEANING',
+    partyA:{name:'CÔNG TY CỔ PHẦN ĐẦU TƯ LE HOLDING', tax:'0315738898', addr:'Tầng 1-5 Tháp TMDV dự án Orchard Parkview, 130 - 132 Hồng Hà, Phường Đức Nhuận, TP. Hồ Chí Minh', rep:'Ông NGUYỄN HOÀNG NAM', repRole:'Tổng Giám đốc'},
+    partyB:{name:'CÔNG TY TNHH ĐẦU TƯ THƯƠNG MẠI VÀ DỊCH VỤ NHÀ SẠCH', tax:'0317802531', addr:'Số 227/1/68 Nguyễn Tư Giản, Phường An Hội Tây, TP. Hồ Chí Minh', rep:'Ông NGUYỄN VĂN HOÀI', repRole:'Giám đốc Điều hành'},
+    contractNo:'050826/HĐDV/NS-LH', contractDate:'2026-08-05',
+    appendix:'', penaltyRef:'Phụ lục – Mục II Phạt vi phạm (HĐ 050826/HĐDV/NS-LH)',
+    termFrom:'2026-08-15', termTo:'2027-08-14', termNote:'Tự động gia hạn nếu hai bên không có thông báo mới',
+    monthlyFee:18200000, feeNote:'Ca 06h30–16h00: 8.000.000 + Ca 06h30–19h00: 10.200.000 (chưa VAT 8%)',
+    contractValue:218400000, capPct:8, offensePeriod:'month',
+    clauses:{
+      deduct:'Bên A được quyền trừ thẳng vào phí dịch vụ chưa thanh toán cho Bên B kèm biên bản ghi nhận hành vi vi phạm có chữ ký của người vi phạm, nhân viên Bên B hoặc chữ ký người làm chứng, hình ảnh liên quan (Mục II.1.2 Phụ lục).',
+      notice:'Điều 6.4 HĐ: Bên A có quyền yêu cầu Bên B khắc phục ngay hoặc thay thế nhân sự trong thời hạn do Bên A quy định; nếu Bên B không khắc phục/không thay thế, Bên A có quyền đơn phương chấm dứt HĐ ngay lập tức, không phải chịu phạt hay bồi thường, và yêu cầu Bên B bồi thường toàn bộ thiệt hại thực tế.',
+      termination:'STT 13 Phụ lục: vi phạm từ 03 lần trở lên trong tháng → Bên A có quyền đơn phương chấm dứt HĐ, không phải bồi thường. Điều VII: vi phạm nghĩa vụ bị phạt 8% giá trị phần nghĩa vụ bị vi phạm.',
+      compensation:'STT 05 Phụ lục: nhân viên gây thiệt hại tài sản → bồi thường 100% + phạt 5% – 10% giá trị tài sản hư hỏng.',
+    },
+    remedyDays:1,
+    items:[
+      {code:'01', title:'Không thực hiện công việc đúng thời gian quy định', levels:[{pct:0.1, pctMax:0.5, base:'contract', t:'0,1% – 0,5% giá trị Hợp đồng cho mỗi ngày vi phạm (tính theo ngày trễ)'}], qtyLabel:'Số ngày trễ'},
+      {code:'02', title:'Chất lượng vệ sinh không đạt yêu cầu (bẩn, mùi, còn rác, vết bẩn…)', levels:[{min:200000, max:500000, t:'200.000đ – 500.000đ/lần vi phạm; có thể yêu cầu làm lại không tính thêm phí'}]},
+      {code:'03', title:'Không đủ số lượng nhân sự theo hợp đồng', levels:[lv(300000,'300.000đ/người thiếu/lần (phạt từng ca làm)')], qtyLabel:'Số người thiếu'},
+      {code:'04', title:'Sử dụng nhân sự không có giấy tờ, không được đào tạo', levels:[lv(1000000,'1.000.000đ/lần; Bên A có quyền từ chối tiếp nhận nhân sự')]},
+      {code:'05', title:'Nhân viên gây thiệt hại tài sản cho Bên A', levels:[{pct:5, pctMax:10, base:'asset', t:'Bồi thường 100% + phạt 5% – 10% giá trị tài sản hư hỏng (căn cứ biên bản xác nhận)'}], comp:true},
+      {code:'06', title:'Không mặc đồng phục, không đeo thẻ khi làm việc', levels:[lv(200000,'200.000đ/lần')]},
+      {code:'07', title:'Không có mặt đúng giờ, tự ý rời vị trí', levels:[lv(300000,'300.000đ/lần (lập biên bản kèm hình ảnh)')]},
+      {code:'08', title:'Tự ý thay đổi nhân viên mà không báo trước', levels:[lv(500000,'500.000đ/lần (lập biên bản kèm hình ảnh)')]},
+      {code:'09', title:'Tụ tập nói chuyện, dùng điện thoại cá nhân trong giờ làm, ngủ, bỏ vị trí, trốn việc, không thực hiện nhiệm vụ hoặc hành vi ảnh hưởng chất lượng dịch vụ và hoạt động tòa nhà', levels:[lv(500000,'500.000đ/lần'), lv(500000,'500.000đ/lần; vi phạm lần 2 yêu cầu đổi người')]},
+      {code:'10', title:'Nhân viên bất lịch sự với khách hàng, bị khách hàng phản ánh với BQL/nhân viên Bên A', levels:[lv(300000,'300.000đ/lần'), lv(300000,'300.000đ/lần; vi phạm lần 2 yêu cầu đổi người')]},
+      {code:'11', title:'Nhân viên gây mất trật tự, gây gổ, đánh nhau, mất an ninh…', levels:[lv(1000000,'1.000.000đ/lần; Bên B bổ sung nhân sự phù hợp tại tòa nhà')]},
+      {code:'12', title:'Vi phạm quy định an toàn lao động', levels:[{min:1000000, max:null, t:'Tùy mức độ, tối thiểu 1.000.000đ/lần; có thể chấm dứt HĐ nếu nghiêm trọng'}]},
+    ].map(x=>({...x, ref:'PL mục II – STT '+x.code})),
+    countRule:{perMonth:3, text:'STT 13: vi phạm từ 03 lần trở lên trong tháng → Bên A có quyền đơn phương chấm dứt HĐ, không phải bồi thường'},
+    tiers:[
+      {min:80, max:100, pct:0, label:'Mức A – Tốt', action:'Không áp dụng trừ phí'},
+      {min:51.0001, max:79.9999, pct:5, label:'Mức B – Khá', action:'Trừ 5% phí dịch vụ tháng'},
+      {min:0, max:49.9999, pct:8, label:'Mức C – Không đạt', action:'Trừ 8% phí dịch vụ tháng, gửi công văn nhắc nhở'},
+    ], tierRules:{},
+    flags:['Khung điểm HĐ bỏ trống 50% – 51%: khi rơi vào khoảng này, Quản lý vận hành nhập mức trừ thủ công.'],
+  },
+
+  /* ---------------- CHƯA CÓ HỢP ĐỒNG ---------------- */
+  hh130_SECURITY: {building:'hh130', service:'SECURITY', missing:true},
+  venture_SECURITY: {building:'venture', service:'SECURITY', missing:true},
+  venture_CLEANING: {building:'venture', service:'CLEANING', missing:true},
+};
+
+function blankContract(b, s){
+  return {
+    building:b, service:s, missing:true,
+    partyA:{name:'', tax:'', addr:BUILDINGS[b].addr, rep:'', repRole:''},
+    partyB:{name:'', tax:'', addr:'', rep:'', repRole:''},
+    contractNo:'', contractDate:'', appendix:'', penaltyRef:'Phụ lục phạt vi phạm',
+    termFrom:'', termTo:'', termNote:'', monthlyFee:0, feeNote:'', contractValue:0, capPct:8, offensePeriod:'month',
+    clauses:{deduct:'Bên A được quyền trừ thẳng vào phí dịch vụ chưa thanh toán cho Bên B kèm biên bản ghi nhận hành vi vi phạm có chữ ký các bên hoặc người làm chứng và hình ảnh liên quan.', notice:'', termination:'', compensation:''},
+    remedyDays:3, items:[], tiers:[], tierRules:{}, flags:['Chưa có hợp đồng trên hệ thống — Quản lý vận hành cần nhập thông tin HĐ và danh mục lỗi.'],
+  };
+}
+Object.keys(CONTRACT_SEED).forEach(k=>{
+  const c = CONTRACT_SEED[k];
+  if(c.missing) CONTRACT_SEED[k] = blankContract(c.building, c.service);
+});
+
+</script>
+<script>
+/* =====================================================================
+   CORE — cấu hình Firebase, tiện ích, lớp dữ liệu (Firebase / Demo)
+   ===================================================================== */
+// Project Firebase RIÊNG cho web Đánh giá CLDV & Chế tài (tách khỏi app Báo cáo vận hành).
+// >>> Dán cấu hình web app của project mới vào đây (Firebase Console → Project settings → Your apps).
+const firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
+  projectId: "PASTE_PROJECT_ID",
+  storageBucket: "PASTE_PROJECT_ID.firebasestorage.app",
+  messagingSenderId: "PASTE_SENDER_ID",
+  appId: "PASTE_APP_ID"
+};
+const FIREBASE_READY = firebaseConfig.apiKey.indexOf('PASTE_')!==0;
+// Phân quyền theo email đăng nhập (khớp với firestore.rules). Đổi email ở cả 2 nơi nếu cần.
+const ACCOUNTS = {
+  'qlvh@esta-cldv.vn':        {role:'admin', name:'Quản lý vận hành Non-CBD'},
+  'bql.lmak68@esta-cldv.vn':  {role:'bql', building:'lmak68',  name:"BQL L'MAK 68"},
+  'bql.venture@esta-cldv.vn': {role:'bql', building:'venture', name:'BQL Lite The Venture'},
+  'bql.127hh@esta-cldv.vn':   {role:'bql', building:'hh127',   name:'BQL 127 Hồng Hà'},
+  'bql.130hh@esta-cldv.vn':   {role:'bql', building:'hh130',   name:'BQL 130 Hồng Hà'},
+};
+const DEMO = !!window.FORCE_DEMO || !FIREBASE_READY || typeof firebase === 'undefined' || /[?&]demo=1/.test(location.search);
+
+/* ---------- utils ---------- */
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nl2br = s => esc(s).replace(/\n/g,'<br>');
+const fmt = n => (Math.round(Number(n)||0)).toLocaleString('vi-VN');
+const fmtd = n => fmt(n) + 'đ';
+const pad = (n, l=2) => String(n).padStart(l,'0');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+const nowLocal = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const curPeriod = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; };
+const periodOf = dt => (dt||'').slice(0,7);
+const periodLabel = p => p ? `${p.slice(5,7)}/${p.slice(0,4)}` : '';
+const addMonths = (p, k) => { let y=+p.slice(0,4), m=+p.slice(5,7)+k; while(m<1){m+=12;y--;} while(m>12){m-=12;y++;} return `${y}-${pad(m)}`; };
+const dDMY = iso => { if(!iso) return ''; const d=iso.slice(0,10).split('-'); return d.length===3?`${d[2]}/${d[1]}/${d[0]}`:iso; };
+const dLong = iso => { if(!iso) return 'ngày … tháng … năm …'; const d=iso.slice(0,10).split('-'); return `ngày ${d[2]} tháng ${d[1]} năm ${d[0]}`; };
+const tHM = iso => iso && iso.length>=16 ? iso.slice(11,16).replace(':','h') : '';
+const stripTitle = s => String(s||'').replace(/^(Ông|Bà|Mr\.?|Ms\.?)\s+/i,'');
+const ckey = (b,s) => `${b}_${s}`;
+const STATUS = {draft:'Nháp', pending:'Chờ duyệt', approved:'Đã duyệt', returned:'Trả lại'};
+const statusPill = s => `<span class="pill s-${s}">${STATUS[s]||s}</span>`;
+const ICON = {
+  plus:'<path d="M12 5v14M5 12h14"/>', file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>', sum:'<path d="M4 4h16v16H4z"/><path d="M4 10h16M10 4v16"/>',
+  mail:'<path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/>', chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  pdf:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M12 12v6M9 15l3 3 3-3"/>',
+  save:'<path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7 3v6h8M7 21v-7h10v7"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>', check:'<path d="M20 6 9 17l-5-5"/>', undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>', trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
+  alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>', img:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>',
+  out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>', x:'<path d="M18 6 6 18M6 6l12 12"/>', copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+};
+const ic = n => `<svg class="ico" viewBox="0 0 24 24">${ICON[n]||''}</svg>`;
+
+function toast(msg, bad){
+  const t=document.createElement('div'); t.className='toast'+(bad?' bad':''); t.textContent=msg;
+  $('#toasts').appendChild(t); setTimeout(()=>t.remove(), bad?6000:3200);
+}
+function busy(on, text='Đang xử lý…'){
+  let b=$('#busy');
+  if(on){ if(!b){ b=document.createElement('div'); b.id='busy'; document.body.appendChild(b);} b.innerHTML=`<div class="spin"></div><div>${esc(text)}</div>`; }
+  else if(b) b.remove();
+}
+function modal({title, body, foot, wide, onMount}){
+  const bg=document.createElement('div'); bg.className='modal-bg';
+  bg.innerHTML=`<div class="modal ${wide?'wide':''}"><div class="mh"><h3>${esc(title)}</h3><button class="btn btn-g" data-x>${ic('x')}</button></div><div class="mb">${body}</div>${foot?`<div class="mf">${foot}</div>`:''}</div>`;
+  document.body.appendChild(bg);
+  const close=()=>bg.remove();
+  bg.addEventListener('click', e=>{ if(e.target===bg || e.target.closest('[data-x]')) close(); });
+  if(onMount) onMount(bg, close);
+  return {el:bg, close};
+}
+function confirmBox(title, msg, okText='Đồng ý', danger){
+  return new Promise(res=>{
+    modal({title, body:`<p style="margin:0">${msg}</p>`, foot:`<button class="btn btn-o" data-x>Hủy</button><button class="btn ${danger?'btn-bad':'btn-p'}" data-ok>${esc(okText)}</button>`,
+      onMount:(el,close)=>{ el.querySelector('[data-ok]').onclick=()=>{close();res(true);}; el.querySelectorAll('[data-x]').forEach(b=>b.addEventListener('click',()=>res(false))); }});
+  });
+}
+function promptBox(title, label, placeholder=''){
+  return new Promise(res=>{
+    modal({title, body:`<label class="f">${esc(label)}</label><textarea id="pbx" rows="3" placeholder="${esc(placeholder)}"></textarea>`,
+      foot:`<button class="btn btn-o" data-x>Hủy</button><button class="btn btn-p" data-ok>Xác nhận</button>`,
+      onMount:(el,close)=>{ const ta=el.querySelector('#pbx'); ta.focus(); el.querySelector('[data-ok]').onclick=()=>{const v=ta.value.trim(); close(); res(v||'');}; el.querySelectorAll('[data-x]').forEach(b=>b.addEventListener('click',()=>res(null))); }});
+  });
+}
+
+/* ---------- Số tiền bằng chữ ---------- */
+function numToWords(n){
+  n=Math.round(Number(n)||0); if(n===0) return 'Không đồng';
+  const ch=['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+  const read3=(num, full)=>{
+    const h=Math.floor(num/100), t=Math.floor(num%100/10), u=num%10; let s=[];
+    if(full || h>0){ s.push(ch[h]+' trăm'); }
+    if(t>1){ s.push(ch[t]+' mươi'); if(u===1) s.push('mốt'); else if(u===5) s.push('lăm'); else if(u>0) s.push(ch[u]); }
+    else if(t===1){ s.push('mười'); if(u===5) s.push('lăm'); else if(u>0) s.push(ch[u]); }
+    else { if(u>0 && (full||h>0)) s.push('lẻ'); if(u>0) s.push(ch[u]); }
+    return s.join(' ');
+  };
+  const units=['',' nghìn',' triệu',' tỷ',' nghìn tỷ',' triệu tỷ'];
+  let parts=[], i=0, neg=n<0; n=Math.abs(n);
+  const groups=[]; while(n>0){ groups.push(n%1000); n=Math.floor(n/1000); }
+  for(let k=groups.length-1;k>=0;k--){
+    const g=groups[k]; if(g===0) continue;
+    parts.push(read3(g, k<groups.length-1)+units[k]);
+  }
+  let s=parts.join(' ').replace(/\s+/g,' ').trim(); s=s.charAt(0).toUpperCase()+s.slice(1)+' đồng';
+  return (neg?'Âm ':'')+s;
+}
+
+/* ---------- Nén ảnh ---------- */
+function compressImage(file, maxDim=1280, q=0.72){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>{ const img=new Image(); img.onload=()=>{
+      let {width:w,height:h}=img; const s=Math.min(1, maxDim/Math.max(w,h)); w=Math.round(w*s); h=Math.round(h*s);
+      const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,w,h); x.drawImage(img,0,0,w,h);
+      let out=c.toDataURL('image/jpeg', q);
+      if(out.length>700000) out=c.toDataURL('image/jpeg', 0.55);
+      res(out);
+    }; img.onerror=rej; img.src=fr.result; };
+    fr.onerror=rej; fr.readAsDataURL(file);
+  });
+}
+
+/* =====================================================================
+   DATA STORE
+   ===================================================================== */
+const DB = { records:[], contracts:{}, audits:{}, notices:[] };
+let STORE = null;
+
+/* ---------- Demo (lưu trong trình duyệt) ---------- */
+const LocalStore = (()=>{
+  const KEY='esta_chetai_demo_v1';
+  const photos={};
+  let listeners=null;
+  function load(){
+    try{ const raw=localStorage.getItem(KEY); if(raw){ const o=JSON.parse(raw); Object.assign(DB, {records:o.records||[], contracts:o.contracts||{}, audits:o.audits||{}, notices:o.notices||[]}); Object.assign(photos, o.photos||{}); return true; } }catch(e){}
+    return false;
+  }
+  function persist(){
+    try{ localStorage.setItem(KEY, JSON.stringify({records:DB.records, contracts:DB.contracts, audits:DB.audits, notices:DB.notices, photos})); }
+    catch(e){ try{ localStorage.setItem(KEY, JSON.stringify({records:DB.records, contracts:DB.contracts, audits:DB.audits, notices:DB.notices})); }catch(_){} }
+  }
+  return {
+    async init(user, onChange){ listeners=onChange; if(!load()){ seedDemo(); persist(); } onChange('all'); },
+    async saveRecord(r){ r.updatedAt=new Date().toISOString(); const i=DB.records.findIndex(x=>x.id===r.id); if(i>=0) DB.records[i]=r; else DB.records.push(r); persist(); listeners('records'); return r.id; },
+    async deleteRecord(id){ DB.records=DB.records.filter(x=>x.id!==id); delete photos[id]; persist(); listeners('records'); },
+    async savePhotos(id, b, arr){ photos[id]=arr.slice(); persist(); },
+    async loadPhotos(id){ return (photos[id]||[]).slice(); },
+    async saveContract(k, c){ DB.contracts[k]=c; persist(); listeners('contracts'); },
+    async resetContract(k){ delete DB.contracts[k]; persist(); listeners('contracts'); },
+    async saveAudit(k, a){ DB.audits[k]=a; persist(); listeners('audits'); },
+    async saveNotice(n){ const i=DB.notices.findIndex(x=>x.id===n.id); if(i>=0) DB.notices[i]=n; else DB.notices.push(n); persist(); listeners('notices'); },
+    async deleteNotice(id){ DB.notices=DB.notices.filter(x=>x.id!==id); persist(); listeners('notices'); },
+    resetDemo(){ try{localStorage.removeItem(KEY);}catch(e){} location.reload(); },
+  };
+})();
+
+/* ---------- Firebase Firestore ---------- */
+const FireStore = (()=>{
+  let db, unsub=[];
+  const clean = o => JSON.parse(JSON.stringify(o));
+  return {
+    async init(user, onChange){
+      db=firebase.firestore();
+      unsub.forEach(u=>u()); unsub=[];
+      const scoped = (col) => user.role==='admin' ? db.collection(col) : db.collection(col).where('building','==',user.building);
+      const err = (what)=> e=>{ console.error(what, e); toast('Không tải được '+what+': '+(e.code||e.message)+'. Kiểm tra Firestore Rules (xem hướng dẫn).', true); };
+      unsub.push(db.collection('ct_contracts').onSnapshot(s=>{ DB.contracts={}; s.forEach(d=>DB.contracts[d.id]=d.data()); onChange('contracts'); }, err('hợp đồng')));
+      unsub.push(scoped('ct_records').onSnapshot(s=>{ DB.records=[]; s.forEach(d=>DB.records.push({...d.data(), id:d.id})); onChange('records'); }, err('biên bản')));
+      unsub.push(scoped('ct_audits').onSnapshot(s=>{ DB.audits={}; s.forEach(d=>DB.audits[d.id]=d.data()); onChange('audits'); }, err('điểm đánh giá')));
+      unsub.push(scoped('ct_notices').onSnapshot(s=>{ DB.notices=[]; s.forEach(d=>DB.notices.push({...d.data(), id:d.id})); onChange('notices'); }, err('thông báo')));
+    },
+    async saveRecord(r){ r.updatedAt=new Date().toISOString(); await db.collection('ct_records').doc(r.id).set(clean(r)); return r.id; },
+    async deleteRecord(id){
+      const rec=DB.records.find(r=>r.id===id); const n=rec?(rec.photoCount||0):8;
+      for(let i=0;i<n;i++) await db.collection('ct_photos').doc(`${id}_${i}`).delete().catch(()=>{});
+      await db.collection('ct_records').doc(id).delete();
+    },
+    async savePhotos(id, b, arr, prevCount=0){
+      const col=db.collection('ct_photos');
+      for(let i=0;i<Math.max(arr.length, prevCount);i++){
+        const ref=col.doc(`${id}_${i}`);
+        if(i<arr.length) await ref.set({recordId:id, building:b, idx:i, data:arr[i]});
+        else await ref.delete().catch(()=>{});
+      }
+    },
+    async loadPhotos(id){
+      const rec=DB.records.find(r=>r.id===id); const n=rec?(rec.photoCount||0):0; const out=[];
+      for(let i=0;i<n;i++){ const s=await db.collection('ct_photos').doc(`${id}_${i}`).get().catch(()=>null); if(s&&s.exists) out.push(s.data().data); }
+      return out;
+    },
+    async saveContract(k, c){ await db.collection('ct_contracts').doc(k).set(clean(c)); },
+    async resetContract(k){ await db.collection('ct_contracts').doc(k).delete(); },
+    async saveAudit(k, a){ await db.collection('ct_audits').doc(k).set(clean(a)); },
+    async saveNotice(n){ await db.collection('ct_notices').doc(n.id).set(clean(n)); },
+    async deleteNotice(id){ await db.collection('ct_notices').doc(id).delete(); },
+  };
+})();
+
+/* =====================================================================
+   BUSINESS LOGIC
+   ===================================================================== */
+function getContract(key){
+  const saved = DB.contracts[key];
+  const seed = CONTRACT_SEED[key];
+  if(saved) return {...seed, ...saved, _edited:true};
+  return seed ? {...seed} : null;
+}
+function contractKeysFor(user){
+  const keys=[]; Object.keys(BUILDINGS).forEach(b=>{ if(user.role==='admin' || user.building===b){ ['SECURITY','CLEANING'].forEach(s=>keys.push(ckey(b,s))); } });
+  return keys;
+}
+function contractLabel(k){ const c=getContract(k); return `${BUILDINGS[c.building].name} · ${SERVICES[c.service].name}`; }
+function contractExpired(c){ return c.termTo && c.termTo < new Date().toISOString().slice(0,10); }
+function partyBShort(c){ return (c.partyB&&c.partyB.name||'(chưa có nhà thầu)').replace(/^CÔNG TY (TNHH|CỔ PHẦN|CP)\s*/i,'').replace(/^DỊCH VỤ BẢO VỆ\s*/i,'DVBV '); }
+
+/** Số tiền của 1 dòng lỗi theo HĐ */
+function levelOf(item, level){ const L=item.levels||[]; if(!L.length) return {a:0,t:''}; return L[Math.min(Math.max(level,1),L.length)-1]; }
+function baseValue(c, lvl, line){
+  if(lvl.base==='fee') return Number(c.monthlyFee)||0;
+  if(lvl.base==='contract') return Number(c.contractValue)||0;
+  if(lvl.base==='asset') return Number(line.assetValue)||0;
+  return 0;
+}
+function contractAmount(c, item, line){
+  const l=levelOf(item, line.level); const q=Math.max(1, Number(line.qty)||1);
+  if(l.pct!=null){ const p=line.pctUsed!=null?Number(line.pctUsed):l.pct; return Math.round(baseValue(c,l,line)*p/100)*q; }
+  if(l.min!=null) return (Number(l.min)||0)*q;
+  return (Number(l.a)||0)*q;
+}
+function amountRange(c, item, line){
+  const l=levelOf(item, line.level); const q=Math.max(1, Number(line.qty)||1);
+  if(l.pct!=null && l.pctMax!=null){ const b=baseValue(c,l,line); return [Math.round(b*l.pct/100)*q, Math.round(b*l.pctMax/100)*q]; }
+  if(l.min!=null) return [l.min*q, l.max!=null?l.max*q:null];
+  return null;
+}
+/** Đếm số lần vi phạm trước đó cùng mã lỗi (để gợi ý Lần 1/2/3) */
+function priorCount(rec, code, uptoLineIdx){
+  const c=getContract(rec.contractKey); const per = c && c.offensePeriod==='term' ? null : periodOf(rec.dateTime);
+  let n=0;
+  DB.records.forEach(r=>{
+    if(r.id===rec.id || r.contractKey!==rec.contractKey || r.status==='returned') return;
+    if(per && periodOf(r.dateTime)!==per) return;
+    if((r.dateTime||'') > (rec.dateTime||'')) return;
+    (r.lines||[]).forEach(l=>{ if(l.code===code) n++; });
+  });
+  (rec.lines||[]).forEach((l,i)=>{ if(i<uptoLineIdx && l.code===code) n++; });
+  return n;
+}
+function recTotals(r){ let fine=0, comp=0; (r.lines||[]).forEach(l=>{ fine+=Number(l.amount)||0; comp+=Number(l.comp)||0; }); return {fine, comp}; }
+function nextRecordNo(rec){
+  const y=(rec.dateTime||nowLocal()).slice(0,4); const svc=SERVICES[rec.service].code; const b=BUILDINGS[rec.building].short;
+  const same=DB.records.filter(r=>r.no && r.building===rec.building && r.service===rec.service && (r.no.split('/')[1]===y));
+  let mx=0; same.forEach(r=>{ const n=parseInt(r.no,10); if(n>mx) mx=n; });
+  return `${pad(mx+1,3)}/${y}/BB-${svc}-${b}`;
+}
+function nextNoticeNo(n){
+  const y=(n.date||nowLocal()).slice(0,4); const b=BUILDINGS[n.building].short;
+  const same=DB.notices.filter(x=>x.no && x.building===n.building && x.no.split('/')[1]===y);
+  let mx=0; same.forEach(x=>{ const k=parseInt(x.no,10); if(k>mx) mx=k; });
+  return `${pad(mx+1,3)}/${y}/TB-ESTA-${b}`;
+}
+
+/** Tổng hợp tháng cho 1 hợp đồng */
+function monthSummary(key, period){
+  const c=getContract(key);
+  const recs=DB.records.filter(r=>r.contractKey===key && periodOf(r.dateTime)===period).sort((a,b)=>(a.dateTime||'').localeCompare(b.dateTime||''));
+  const approved=recs.filter(r=>r.status==='approved');
+  const notApproved=recs.filter(r=>r.status==='pending'||r.status==='draft');
+  let fines=0, comp=0, lines=0; approved.forEach(r=>{ const t=recTotals(r); fines+=t.fine; comp+=t.comp; lines+=(r.lines||[]).length; });
+  const fee=Number(c.monthlyFee)||0;
+  const audit=DB.audits[`${key}_${period}`]||{};
+  const score = audit.score===''||audit.score==null ? null : Number(audit.score);
+  let tier=null, gap=false;
+  if(score!=null && (c.tiers||[]).length){ tier=(c.tiers||[]).find(t=>score>=t.min-1e-9 && score<=t.max+1e-9)||null; if(!tier) gap=true; }
+  let qPct = tier ? Number(tier.pct)||0 : 0;
+  if(gap || (audit.manualPct!=null && audit.manualPct!=='')) qPct = Number(audit.manualPct)||0;
+  const alerts=[]; let extraPct=0;
+  const R=c.tierRules||{};
+  if(R.consecutiveBelow && score!=null){
+    const th=R.consecutiveBelow.threshold, m=R.consecutiveBelow.months; let ok=true;
+    for(let i=0;i<m;i++){ const a=DB.audits[`${key}_${addMonths(period,-i)}`]; const s=a&&a.score!==''&&a.score!=null?Number(a.score):null; if(s==null||s>=th){ok=false;break;} }
+    if(ok){ extraPct=R.consecutiveBelow.pct; alerts.push({lv:'bad', t:R.consecutiveBelow.text}); }
+  }
+  if(R.windowBelow){
+    let cnt=0; for(let i=0;i<R.windowBelow.window;i++){ const a=DB.audits[`${key}_${addMonths(period,-i)}`]; const s=a&&a.score!==''&&a.score!=null?Number(a.score):null; if(s!=null&&s<R.windowBelow.threshold) cnt++; }
+    if(cnt>=R.windowBelow.months) alerts.push({lv:'bad', t:`${cnt} tháng < ${R.windowBelow.threshold}% trong 06 tháng gần nhất. `+R.windowBelow.text});
+  }
+  if(gap) alerts.push({lv:'warn', t:`Điểm ${score}% nằm ngoài các khung của HĐ — mức trừ đang dùng là mức nhập thủ công (${qPct}%).`});
+  const qualityDeduct=Math.round(fee*(qPct+extraPct)/100);
+  const penaltyTotal=fines+qualityDeduct;
+  const capAmt=Math.round(fee*(Number(c.capPct)||8)/100);
+  if(fee>0 && penaltyTotal>capAmt) alerts.push({lv:'warn', t:`Tổng tiền phạt ${fmtd(penaltyTotal)} vượt ${c.capPct||8}% phí dịch vụ tháng (${fmtd(capAmt)}). Điều 301 Luật Thương mại 2005: mức phạt vi phạm không quá 8% giá trị phần nghĩa vụ bị vi phạm — Quản lý vận hành cân nhắc trước khi chốt.`});
+  // ngưỡng số lần vi phạm
+  if(c.countRule && c.countRule.perMonth && lines>=c.countRule.perMonth) alerts.push({lv:'bad', t:`${lines} lỗi vi phạm đã duyệt trong tháng. ${c.countRule.text}`});
+  (c.items||[]).forEach(it=>{
+    if(!it.countRule) return;
+    const m=approved.reduce((s,r)=>s+(r.lines||[]).filter(l=>l.code===it.code).length,0);
+    const all=DB.records.filter(r=>r.contractKey===key&&r.status==='approved').reduce((s,r)=>s+(r.lines||[]).filter(l=>l.code===it.code).length,0);
+    if(m>=it.countRule.perMonth) alerts.push({lv:'bad', t:`Lỗi "${it.title}": ${m} biên bản trong tháng (ngưỡng ${it.countRule.perMonth}) → Bên A có quyền chấm dứt HĐ (${it.ref}).`});
+    else if(it.countRule.cumulative && all>=it.countRule.cumulative) alerts.push({lv:'bad', t:`Lỗi "${it.title}": ${all} biên bản cộng dồn (ngưỡng ${it.countRule.cumulative}) → Bên A có quyền chấm dứt HĐ (${it.ref}).`});
+  });
+  approved.forEach(r=>(r.lines||[]).forEach(l=>{ if(/chấm dứt|dừng/i.test(l.action||'')) alerts.push({lv:'bad', t:`BB ${r.no}: lỗi "${l.title}" có chế tài "${l.action}".`}); }));
+  if(notApproved.length) alerts.push({lv:'warn', t:`Còn ${notApproved.length} biên bản chưa duyệt trong tháng — chưa được tính vào tổng hợp.`});
+  return {c, recs, approved, notApproved, fines, comp, fee, audit, score, tier, gap, qPct, extraPct, qualityDeduct, penaltyTotal, capAmt, total:penaltyTotal+comp, alerts, lines};
+}
+
+/* =====================================================================
+   DOCUMENT RENDERERS — Biên bản / Tổng hợp tháng / Thông báo (A4)
+   ===================================================================== */
+const FOOTER = `ESTA PROPERTY MANAGEMENT &nbsp;·&nbsp; A L'MAK COMPANY &nbsp;·&nbsp; HO CHI MINH CITY`;
+
+function docStrip(right){
+  return `<div class="strip"><div class="b"><span class="s">✱</span><div><div class="n">ESTA</div><div class="m">PROPERTY MANAGEMENT</div></div></div><div class="r">${esc(right)}</div></div>`;
+}
+function docHdr(c, no, dateISO){
+  const b=BUILDINGS[c.building];
+  return `<div class="hdr">
+    <div><b>${esc(c.partyA.name||'BÊN SỬ DỤNG DỊCH VỤ')}</b><b>BAN QUẢN LÝ TÒA NHÀ ${esc(b.name.toUpperCase())}</b><span class="ul"></span><div style="margin-top:4px">Số: ${esc(no||'……/……/……')}</div></div>
+    <div><b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</b><b style="font-weight:600">Độc lập – Tự do – Hạnh phúc</b><span class="ul"></span><div class="date">TP. Hồ Chí Minh, ${dLong(dateISO)}</div></div>
+  </div>`;
+}
+function basisList(c){
+  const li=[];
+  li.push(`Căn cứ Bộ luật Dân sự số 91/2015/QH13 và Luật Thương mại số 36/2005/QH11;`);
+  if(c.contractNo) li.push(`Căn cứ Hợp đồng dịch vụ số ${esc(c.contractNo)}${c.contractDate?` ký ngày ${dDMY(c.contractDate)}`:''} giữa ${esc(c.partyA.name)} và ${esc(c.partyB.name)};`);
+  if(c.appendix) li.push(`Căn cứ ${esc(c.appendix)};`);
+  if(c.penaltyRef) li.push(`Căn cứ ${esc(c.penaltyRef)};`);
+  return li;
+}
+function signBlock(cols){
+  return `<div class="sign" style="grid-template-columns:repeat(${cols.length},1fr)">${cols.map(c=>`<div><div class="role">${esc(c.role)}</div><div class="note">${esc(c.note||'(Ký, ghi rõ họ tên)')}</div><div class="space"></div><div class="nm">${esc(c.name||'')}</div></div>`).join('')}</div>`;
+}
+
+/* ---------- BIÊN BẢN ---------- */
+function renderRecordDoc(rec, photos, opt={}){
+  const c=getContract(rec.contractKey); const b=BUILDINGS[rec.building]; const S=SERVICES[rec.service];
+  const t=recTotals(rec);
+  const lines=rec.lines||[];
+  const rows = lines.length ? lines.map((l,i)=>`<tr>
+      <td class="c">${i+1}</td>
+      <td><b>${esc(l.title)}</b><div style="color:#666;font-size:9.5px">${esc(l.ref||'')}</div></td>
+      <td class="c">${l.level||1}</td>
+      <td class="c">${l.qty||1}</td>
+      <td>${nl2br(l.detail||'')}</td>
+      <td>${esc(l.action||'')}${l.comp?`<div style="font-size:9.5px;color:#666">Bồi thường: ${fmtd(l.comp)}</div>`:''}</td>
+      <td class="r">${fmt(l.amount)}</td></tr>`).join('')
+    : `<tr><td colspan="7" class="c" style="color:#999;padding:16px">(Chưa có lỗi vi phạm)</td></tr>`;
+  const imgs=(photos||[]).filter(Boolean);
+  const approved=rec.status==='approved';
+  const sigs=[{role:'Đại diện Bên A', note:'(BQL Tòa nhà)', name:rec.repA}, {role:'Đại diện Bên B', note:'(Nhà thầu)', name:rec.repB}];
+  if(rec.violator) sigs.push({role:'Người vi phạm', name:(rec.violator||'').split(/[-–(]/)[0].trim()});
+  if(rec.witness) sigs.push({role:'Người làm chứng', name:(rec.witness||'').split(/[-–(]/)[0].trim()});
+  return `<div class="doc ${opt.pdf?'pdf':''}">
+    ${!approved && !opt.noWatermark ? `<div class="watermark">BẢN NHÁP · CHƯA DUYỆT</div>`:''}
+    ${docStrip('Biên bản chế tài nhà thầu · '+S.name)}
+    ${docHdr(c, rec.no, rec.dateTime)}
+    <h1>BIÊN BẢN GHI NHẬN VI PHẠM</h1>
+    <div class="h1sub">VÀ ÁP DỤNG CHẾ TÀI ${esc(S.full.toUpperCase())}</div>
+    <ul class="basis">${basisList(c).map(x=>`<li>${x}</li>`).join('')}<li>Căn cứ kết quả kiểm tra, ghi nhận thực tế tại hiện trường${rec.source?` (${esc(rec.source)})`:''}.</li></ul>
+    <p>Hôm nay, vào lúc ${tHM(rec.dateTime)||'……'} ${dLong(rec.dateTime)}, tại ${esc(rec.location||'……………')} – Tòa nhà ${esc(b.name)} (${esc(b.addr)}), chúng tôi gồm:</p>
+    <div class="parties">
+      <div class="pb"><div class="pt">Bên A – Bên sử dụng dịch vụ</div><b>${esc(c.partyA.name)}</b><div>Đại diện: <b>${esc(rec.repA||'……………')}</b></div><div>Chức vụ: ${esc(rec.roleA||'')}</div></div>
+      <div class="pb"><div class="pt">Bên B – Nhà thầu dịch vụ</div><b>${esc(c.partyB.name||'……………')}</b><div>Đại diện: <b>${esc(rec.repB||'……………')}</b></div><div>Chức vụ: ${esc(rec.roleB||'')}</div></div>
+      ${rec.violator||rec.witness?`<div class="pb"><div class="pt">Nhân sự vi phạm</div>${esc(rec.violator||'—')}</div><div class="pb"><div class="pt">Người làm chứng</div>${esc(rec.witness||'—')}</div>`:''}
+    </div>
+    <p style="margin-top:8px">Cùng tiến hành lập biên bản ghi nhận vi phạm của Bên B trong quá trình cung cấp ${esc(S.full.toLowerCase())} như sau:</p>
+    <h4>I. Nội dung vi phạm và chế tài áp dụng</h4>
+    <table class="dt"><thead><tr><th style="width:26px">STT</th><th>Hành vi vi phạm (căn cứ)</th><th style="width:34px">Lần</th><th style="width:30px">SL</th><th style="width:150px">Diễn giải tại hiện trường</th><th style="width:130px">Hình thức xử lý theo HĐ</th><th style="width:78px">Số tiền (đ)</th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr><td colspan="6" class="r">TỔNG TIỀN PHẠT VI PHẠM</td><td class="r">${fmt(t.fine)}</td></tr>
+    ${t.comp?`<tr><td colspan="6" class="r">BỒI THƯỜNG THIỆT HẠI</td><td class="r">${fmt(t.comp)}</td></tr><tr><td colspan="6" class="r">TỔNG KHẤU TRỪ</td><td class="r">${fmt(t.fine+t.comp)}</td></tr>`:''}</tfoot></table>
+    <div class="words">Bằng chữ: ${numToWords(t.fine+t.comp)}.</div>
+    <h4>II. Yêu cầu khắc phục</h4>
+    <div class="box">${nl2br(rec.remedy||'')}${rec.remedyDeadline?`<div style="margin-top:4px"><b>Thời hạn hoàn thành:</b> trước ${dDMY(rec.remedyDeadline)}.</div>`:''}</div>
+    ${imgs.length?`<h4>III. Hình ảnh minh chứng</h4><div class="imgs">${imgs.map((s,i)=>`<figure><img src="${s}"><figcaption>Ảnh ${i+1}</figcaption></figure>`).join('')}</div>`:''}
+    <h4>${imgs.length?'IV':'III'}. Ý kiến của các bên</h4>
+    <div style="font-size:10.5px"><b>Ý kiến của Bên B:</b></div><div class="box">${nl2br(rec.opinionB||'')}</div>
+    ${rec.opinionA?`<div style="font-size:10.5px"><b>Ý kiến của Bên A:</b></div><div class="box">${nl2br(rec.opinionA)}</div>`:''}
+    <h4>${imgs.length?'V':'IV'}. Kết luận</h4>
+    <p>${esc(c.clauses&&c.clauses.deduct||'')}</p>
+    <p>Số tiền phạt nêu trên được khấu trừ trực tiếp vào phí dịch vụ tháng ${periodLabel(periodOf(rec.dateTime))} của Bên B. Biên bản được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản; các bên đã đọc lại, thống nhất nội dung và cùng ký tên dưới đây.${rec.witness?' Trường hợp người vi phạm không ký, biên bản có giá trị khi có chữ ký của người làm chứng.':''}</p>
+    ${signBlock(sigs)}
+    ${approved?`<div class="approval">✓ Đã phê duyệt trên hệ thống bởi ${esc(rec.approvedBy||'Quản lý vận hành')} – ${dDMY(rec.approvedAt)} · Mã biên bản: ${esc(rec.no||'')}</div>`:''}
+    <div class="foot">${FOOTER}</div>
+  </div>`;
+}
+
+/* ---------- TỔNG HỢP THÁNG ---------- */
+function renderSummaryDoc(key, period, opt={}){
+  const S=monthSummary(key, period); const c=S.c; const b=BUILDINGS[c.building]; const Sv=SERVICES[c.service];
+  let stt=0;
+  const rows=S.approved.flatMap(r=>(r.lines||[]).map(l=>`<tr><td class="c">${++stt}</td><td>${dDMY(r.dateTime)}</td><td>${esc(r.no||'')}</td><td>${esc(l.title)}</td><td class="c">${l.level||1}</td><td>${esc(l.action||'')}</td><td class="r">${fmt(l.amount)}</td><td class="r">${l.comp?fmt(l.comp):''}</td></tr>`)).join('')
+    || `<tr><td colspan="8" class="c" style="color:#999;padding:14px">Không có biên bản vi phạm đã duyệt trong tháng</td></tr>`;
+  const no=`TH-${period.replace('-','')}/${SERVICES[c.service].code}-${b.short}`;
+  return `<div class="doc ${opt.pdf?'pdf':''} ${opt.breakBefore?'pb-before':''}">
+    ${docStrip('Tổng hợp chế tài tháng '+periodLabel(period))}
+    ${docHdr(c, no, opt.date||new Date().toISOString())}
+    <h1>BẢNG TỔNG HỢP CHẾ TÀI VÀ KHẤU TRỪ PHÍ DỊCH VỤ</h1>
+    <div class="h1sub">${esc(Sv.full.toUpperCase())} · THÁNG ${periodLabel(period)} · TÒA NHÀ ${esc(b.name.toUpperCase())}</div>
+    <table class="dt"><tbody>
+      <tr><td style="width:150px">Nhà thầu (Bên B)</td><td><b>${esc(c.partyB.name||'—')}</b>${c.partyB.tax?` · MST ${esc(c.partyB.tax)}`:''}</td></tr>
+      <tr><td>Hợp đồng</td><td>${esc(c.contractNo||'—')}${c.contractDate?` ký ngày ${dDMY(c.contractDate)}`:''}${c.appendix?`; ${esc(c.appendix)}`:''}</td></tr>
+      <tr><td>Phí dịch vụ chuẩn/tháng</td><td><b>${fmtd(S.fee)}</b> (chưa VAT)${c.feeNote?` – ${esc(c.feeNote)}`:''}</td></tr>
+    </tbody></table>
+    <div class="kpirow"><div><div class="l">Biên bản đã duyệt</div><div class="v">${S.approved.length}</div></div><div><div class="l">Tiền phạt theo BB</div><div class="v">${fmt(S.fines)}</div></div><div><div class="l">Trừ theo chất lượng</div><div class="v">${fmt(S.qualityDeduct)}</div></div><div><div class="l">Tổng khấu trừ</div><div class="v">${fmt(S.total)}</div></div></div>
+    <h4>I. Chi tiết vi phạm đã duyệt</h4>
+    <table class="dt"><thead><tr><th style="width:26px">STT</th><th style="width:62px">Ngày</th><th style="width:110px">Số BB</th><th>Hành vi vi phạm</th><th style="width:30px">Lần</th><th style="width:120px">Chế tài</th><th style="width:70px">Phạt (đ)</th><th style="width:62px">Bồi thường</th></tr></thead><tbody>${rows}</tbody>
+    <tfoot><tr><td colspan="6" class="r">Cộng</td><td class="r">${fmt(S.fines)}</td><td class="r">${S.comp?fmt(S.comp):''}</td></tr></tfoot></table>
+    <h4>II. Đánh giá chất lượng dịch vụ tháng</h4>
+    <table class="dt"><tbody>
+      <tr><td style="width:200px">Điểm đánh giá (tỷ lệ % đạt)</td><td>${S.score!=null?`<b>${S.score}%</b>`:'<i>Chưa nhập</i>'}${S.tier?` → ${esc(S.tier.label)}`:''}</td></tr>
+      <tr><td>Chế tài theo khung điểm</td><td>${S.tier?esc(S.tier.action):(S.gap?'Ngoài khung HĐ – áp dụng mức nhập thủ công':'—')}${S.extraPct?`; cộng thêm ${S.extraPct}% theo điều kiện tái diễn`:''}</td></tr>
+      <tr><td>Số tiền trừ theo chất lượng</td><td><b>${fmtd(S.qualityDeduct)}</b> (${S.qPct+S.extraPct}% × ${fmtd(S.fee)})</td></tr>
+      ${S.audit.note?`<tr><td>Ghi chú</td><td>${nl2br(S.audit.note)}</td></tr>`:''}
+    </tbody></table>
+    <h4>III. Tổng hợp khấu trừ</h4>
+    <table class="dt"><tbody>
+      <tr><td>(1) Tiền phạt theo biên bản vi phạm</td><td class="r" style="width:130px">${fmt(S.fines)}</td></tr>
+      <tr><td>(2) Trừ phí theo đánh giá chất lượng</td><td class="r">${fmt(S.qualityDeduct)}</td></tr>
+      <tr><td>(3) Bồi thường thiệt hại</td><td class="r">${fmt(S.comp)}</td></tr>
+    </tbody><tfoot><tr><td class="r">TỔNG KHẤU TRỪ VÀO PHÍ DỊCH VỤ THÁNG ${periodLabel(period)} (1)+(2)+(3)</td><td class="r">${fmt(S.total)}</td></tr>
+      <tr><td class="r">Tỷ lệ tiền phạt (1)+(2) / phí dịch vụ tháng</td><td class="r">${S.fee?((S.penaltyTotal/S.fee*100).toFixed(2)+'%'):'—'}</td></tr></tfoot></table>
+    <div class="words">Bằng chữ: ${numToWords(S.total)}.</div>
+    ${S.alerts.length?`<h4>IV. Lưu ý – cảnh báo theo hợp đồng</h4>${S.alerts.map(a=>`<div class="alert">${esc(a.t)}</div>`).join('')}`:''}
+    ${signBlock([{role:'Lập bảng', note:'(BQL Tòa nhà)', name:''},{role:'Quản lý vận hành', note:'(Ký duyệt)', name:opt.approver||''},{role:'Xác nhận của Bên B', note:'(Ký, đóng dấu)', name:''}])}
+    <div class="foot">${FOOTER}</div>
+  </div>`;
+}
+function renderOverviewDoc(keys, period, opt={}){
+  const rows=keys.map(k=>{ const S=monthSummary(k,period); const c=S.c; return `<tr><td>${esc(BUILDINGS[c.building].name)}</td><td>${SERVICES[c.service].name}</td><td>${esc(partyBShort(c))}</td><td class="c">${S.approved.length}</td><td class="r">${fmt(S.fines)}</td><td class="c">${S.score!=null?S.score+'%':'—'}</td><td class="r">${fmt(S.qualityDeduct)}</td><td class="r">${fmt(S.comp)}</td><td class="r"><b>${fmt(S.total)}</b></td></tr>`; });
+  const tot=keys.reduce((a,k)=>{const S=monthSummary(k,period); a.f+=S.fines; a.q+=S.qualityDeduct; a.c+=S.comp; a.t+=S.total; a.n+=S.approved.length; return a;},{f:0,q:0,c:0,t:0,n:0});
+  return `<div class="doc ${opt.pdf?'pdf':''}">
+    ${docStrip('Tổng hợp chế tài toàn danh mục')}
+    <h1 style="margin-top:6px">TỔNG HỢP CHẾ TÀI NHÀ THẦU DỊCH VỤ</h1>
+    <div class="h1sub">THÁNG ${periodLabel(period)} · DANH MỤC NON-CBD · ESTA PROPERTY MANAGEMENT</div>
+    <table class="dt"><thead><tr><th>Tòa nhà</th><th>Dịch vụ</th><th>Nhà thầu</th><th>Số BB</th><th>Phạt BB</th><th>Điểm CL</th><th>Trừ CL</th><th>Bồi thường</th><th>Tổng khấu trừ</th></tr></thead>
+    <tbody>${rows.join('')}</tbody><tfoot><tr><td colspan="3" class="r">TỔNG CỘNG</td><td class="c">${tot.n}</td><td class="r">${fmt(tot.f)}</td><td></td><td class="r">${fmt(tot.q)}</td><td class="r">${fmt(tot.c)}</td><td class="r">${fmt(tot.t)}</td></tr></tfoot></table>
+    <div class="words">Tổng khấu trừ bằng chữ: ${numToWords(tot.t)}.</div>
+    <p style="font-size:10px;color:#666">Chỉ tính các biên bản đã được Quản lý vận hành phê duyệt. Chi tiết từng hợp đồng ở các trang tiếp theo.</p>
+    <div class="foot">${FOOTER}</div>
+  </div>`;
+}
+
+/* ---------- THÔNG BÁO NHÀ THẦU ---------- */
+const NOTICE_TYPES = {
+  remind1:{label:'Nhắc nhở lần 1', subject:'Thông báo vi phạm và yêu cầu khắc phục chất lượng dịch vụ (lần 1)'},
+  remind2:{label:'Nhắc nhở lần 2', subject:'Thông báo vi phạm và yêu cầu khắc phục chất lượng dịch vụ (lần 2)'},
+  final:{label:'Cảnh cáo lần cuối', subject:'Cảnh cáo vi phạm – yêu cầu khắc phục lần cuối trước khi xem xét chấm dứt Hợp đồng'},
+  quality:{label:'Nhắc nhở chất lượng tháng', subject:'Nhắc nhở kết quả đánh giá chất lượng dịch vụ tháng'},
+};
+function renderNoticeDoc(n, opt={}){
+  const c=getContract(n.contractKey); const b=BUILDINGS[c.building]; const Sv=SERVICES[c.service]; const T=NOTICE_TYPES[n.type]||NOTICE_TYPES.remind1;
+  const recs=(n.recordIds||[]).map(id=>DB.records.find(r=>r.id===id)).filter(Boolean).sort((a,b)=>(a.dateTime||'').localeCompare(b.dateTime||''));
+  let stt=0, sum=0, needReplace=false;
+  const rows=recs.flatMap(r=>(r.lines||[]).map(l=>{ sum+=Number(l.amount)||0; if(/thay|điều chuyển|sa thải|đổi người/i.test(l.action||'')) needReplace=true;
+    return `<tr><td class="c">${++stt}</td><td>${dDMY(r.dateTime)} ${tHM(r.dateTime)}</td><td>${esc(r.no||'')}</td><td>${esc(l.title)}${r.violator?`<div style="font-size:9.5px;color:#666">Nhân sự: ${esc(r.violator)}</div>`:''}</td><td class="c">${l.level||1}</td><td>${esc(l.action||'')}</td><td class="r">${fmt(l.amount)}</td></tr>`; })).join('');
+  const S = n.period ? monthSummary(n.contractKey, n.period) : null;
+  const reqs=[];
+  reqs.push(`Chấn chỉnh ngay đội ngũ nhân sự tại Tòa nhà ${esc(b.name)}; khắc phục triệt để các vi phạm nêu trên trong vòng <b>${n.deadlineDays||c.remedyDays||3} ngày</b> kể từ ngày nhận Thông báo này.`);
+  if(needReplace) reqs.push(`Thay thế/điều chuyển nhân sự vi phạm theo đúng chế tài của Hợp đồng${c.service==='SECURITY'?' (thời hạn tối đa 24 giờ)':''} và cập nhật danh sách nhân sự cho Ban Quản lý Tòa nhà.`);
+  reqs.push(`Báo cáo bằng văn bản kết quả khắc phục và biện pháp phòng ngừa tái diễn gửi Ban Quản lý Tòa nhà trước thời hạn nêu trên.`);
+  if(sum) reqs.push(`Tổng tiền phạt <b>${fmtd(sum)}</b> (${numToWords(sum).toLowerCase()}) được khấu trừ trực tiếp vào phí dịch vụ tháng ${periodLabel(n.period)} theo biên bản đã ký.`);
+  if(n.type==='quality' && S && S.score!=null) reqs.splice(0,0,`Kết quả đánh giá chất lượng dịch vụ tháng ${periodLabel(n.period)}: <b>${S.score}%</b>${S.tier?` – ${esc(S.tier.label)}; chế tài: ${esc(S.tier.action)}`:''}.`);
+  const warn = n.type==='remind1' ? '' : `<p><b>Lưu ý:</b> ${esc(c.clauses.notice||'')} ${n.type==='final'?esc(c.clauses.termination||''):''}</p>`;
+  const signer=n.signer||stripTitle(c.partyA.rep); const role=n.signerRole||c.partyA.repRole||'Giám đốc';
+  return `<div class="doc ${opt.pdf?'pdf':''}">
+    ${!opt.issued?`<div class="watermark">DỰ THẢO</div>`:''}
+    ${docStrip('Thông báo nhà thầu · '+Sv.name)}
+    ${docHdr(c, n.no, n.date)}
+    <h1>THÔNG BÁO</h1>
+    <div class="h1sub">V/v: ${esc(n.subject||T.subject)}</div>
+    <p style="text-align:center;margin:6px 0 12px"><b>Kính gửi: ${esc(c.partyB.name||'……………')}</b></p>
+    <ul class="basis">${basisList(c).map(x=>`<li>${x}</li>`).join('')}${recs.length?`<li>Căn cứ ${recs.length} biên bản ghi nhận vi phạm đã được các bên ký xác nhận.</li>`:''}</ul>
+    <p>${esc(c.partyA.name)} – Ban Quản lý Tòa nhà ${esc(b.name)} (do ESTA Property Management vận hành) trân trọng thông báo đến Quý Công ty về các vi phạm trong quá trình cung cấp ${esc(Sv.full.toLowerCase())} tại Tòa nhà${n.period?` trong tháng ${periodLabel(n.period)}`:''} như sau:</p>
+    ${rows?`<table class="dt"><thead><tr><th style="width:26px">STT</th><th style="width:78px">Thời điểm</th><th style="width:110px">Số biên bản</th><th>Hành vi vi phạm</th><th style="width:30px">Lần</th><th style="width:120px">Chế tài</th><th style="width:70px">Phạt (đ)</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="6" class="r">TỔNG CỘNG</td><td class="r">${fmt(sum)}</td></tr></tfoot></table>`:''}
+    ${n.body?`<p style="margin-top:8px">${nl2br(n.body)}</p>`:''}
+    <p style="margin-top:8px">Để bảo đảm chất lượng dịch vụ theo cam kết tại Hợp đồng, Ban Quản lý Tòa nhà đề nghị Quý Công ty:</p>
+    <ol style="margin:0 0 8px 18px;padding:0">${reqs.map(x=>`<li style="margin-bottom:4px">${x}</li>`).join('')}</ol>
+    ${warn}
+    <p>Trân trọng thông báo và đề nghị Quý Công ty nghiêm túc thực hiện./.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:14px;font-size:10.5px;page-break-inside:avoid">
+      <div><b><i>Nơi nhận:</i></b><div>– Như trên;</div><div>– BQL Tòa nhà ${esc(b.name)};</div><div>– ESTA – Quản lý vận hành;</div><div>– Lưu VT.</div></div>
+      <div style="text-align:center"><div class="role" style="font-weight:700;text-transform:uppercase">TM. ${esc(c.partyA.name)}</div><div style="font-weight:700;text-transform:uppercase">${esc(role)}</div><div style="height:78px"></div><div style="font-weight:700">${esc(signer)}</div></div>
+    </div>
+    <div class="foot">${FOOTER}</div>
+  </div>`;
+}
+
+/* ---------- XUẤT PDF ----------
+   Tự dàn trang: mỗi .doc bắt đầu trang mới; không cắt ngang dòng bảng, khung ký, ảnh, đoạn văn. */
+const PDF_M={top:12, right:13, bottom:14, left:13};
+const PDF_W=688; // px chiều rộng vùng nội dung (210-26 mm)
+async function exportPDF(html, filename){
+  if(window.NO_DOWNLOAD){ toast('Bản xem thử không tải file được. Nút Xuất PDF hoạt động trên bản chính thức (GitHub Pages).', true); return; }
+  if(typeof html2canvas==='undefined' || !window.jspdf){ toast('Không tải được thư viện xuất PDF. Kiểm tra kết nối mạng rồi thử lại.', true); return; }
+  busy(true,'Đang tạo PDF…');
+  const sx=window.scrollX, sy=window.scrollY; window.scrollTo(0,0);
+  const host=document.createElement('div'); host.style.cssText=`position:absolute;left:0;top:0;width:${PDF_W}px;background:#fff;z-index:-1`;
+  host.innerHTML=html; document.body.appendChild(host);
+  try{
+    await document.fonts.ready;
+    await Promise.all($$('img',host).map(im=>im.complete?1:new Promise(r=>{im.onload=im.onerror=r;})));
+    const wmText=($('.watermark',host)||{}).textContent||'';
+    $$('.watermark',host).forEach(w=>w.remove());
+    const wmImg=wmText?watermarkImage(wmText):null;
+    const pdf=new window.jspdf.jsPDF({unit:'mm', format:'a4', orientation:'portrait', compress:true});
+    const mmPerPx=(210-PDF_M.left-PDF_M.right)/PDF_W;
+    const pageH=Math.floor((297-PDF_M.top-PDF_M.bottom)/mmPerPx);
+    let first=true;
+    for(const doc of $$(':scope > .doc', host)){
+      const breaks=computeBreaks(doc, pageH);
+      const canvas=await html2canvas(doc, {scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false, scrollX:0, scrollY:0, windowWidth:PDF_W});
+      const k=canvas.width/doc.offsetWidth;
+      for(let i=0;i<breaks.length-1;i++){
+        const y0=breaks[i], y1=breaks[i+1]; const hpx=Math.max(1,Math.round((y1-y0)*k));
+        const pc=document.createElement('canvas'); pc.width=canvas.width; pc.height=hpx;
+        const cx=pc.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,pc.width,pc.height);
+        cx.drawImage(canvas, 0, Math.round(y0*k), canvas.width, hpx, 0, 0, canvas.width, hpx);
+        if(!first) pdf.addPage(); first=false;
+        pdf.addImage(pc.toDataURL('image/jpeg',0.92), 'JPEG', PDF_M.left, PDF_M.top, 210-PDF_M.left-PDF_M.right, (y1-y0)*mmPerPx, undefined, 'FAST');
+      }
+    }
+    const n=pdf.internal.getNumberOfPages();
+    for(let i=1;i<=n;i++){
+      pdf.setPage(i);
+      if(wmImg) pdf.addImage(wmImg, 'PNG', 10, 90, 190, 106);
+      pdf.setFontSize(7); pdf.setTextColor(169,149,134); pdf.text(`${i}/${n}`, 210-PDF_M.right, 297-6, {align:'right'});
+    }
+    pdf.save(filename);
+    toast('Đã xuất '+filename);
+  }catch(e){ console.error(e); toast('Xuất PDF lỗi: '+e.message, true); }
+  finally{ host.remove(); busy(false); window.scrollTo(sx,sy); }
+}
+function computeBreaks(doc, pageH){
+  const base=doc.getBoundingClientRect().top; const total=doc.scrollHeight;
+  const iv=[]; // khoảng không được cắt
+  const add=(t,b)=>{ if(b-t>2) iv.push([t,b]); };
+  $$('tr, .sign, .imgs figure, .alert, .box, .parties .pb, .kpirow, .words, p, li, .hdr, .strip, h1, .h1sub, .approval, .foot', doc).forEach(el=>{ const r=el.getBoundingClientRect(); add(r.top-base, r.bottom-base); });
+  $$('h4', doc).forEach(h=>{ const r=h.getBoundingClientRect(); const nx=h.nextElementSibling; let b=r.bottom-base; if(nx){ const q=nx.getBoundingClientRect(); b=Math.min(q.bottom-base, q.top-base+70); } add(r.top-base-2, b); });
+  const forced=$$('.pb-force', doc).map(el=>el.getBoundingClientRect().top-base);
+  const inside=y=>iv.filter(([t,b])=>t<y-0.5 && b>y+0.5);
+  const br=[0]; let start=0, guard=0;
+  while(start < total-4 && guard++<200){
+    let y=Math.min(start+pageH, total);
+    const f=forced.find(v=>v>start+20 && v<y); if(f!=null) y=f;
+    if(y<total){
+      let tries=0, c;
+      while((c=inside(y)).length && tries++<60){ y=Math.min(...c.map(x=>x[0]))-1; }
+      if(y<=start+pageH*0.25) y=Math.min(start+pageH, total); // khối quá lớn → cắt cứng
+    }
+    br.push(y); start=y;
+  }
+  if(br[br.length-1]<total-4) br.push(total);
+  return br;
+}
+function watermarkImage(text){
+  const c=document.createElement('canvas'); c.width=1800; c.height=1000; const x=c.getContext('2d');
+  x.translate(900,500); x.rotate(-24*Math.PI/180); x.font="800 96px Montserrat, sans-serif"; x.textAlign='center'; x.textBaseline='middle';
+  x.fillStyle='rgba(158,59,44,0.11)'; x.fillText(text, 0, 0);
+  return c.toDataURL('image/png');
+}
+const safeName = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+
+/* =====================================================================
+   UI — đăng nhập, khung app, các màn hình
+   ===================================================================== */
+const CUR = {
+  user:null, view:'create', draft:null, draftPhotos:[], prevPhotoCount:0, dirty:false, lineEdit:null,
+  f:{ list:{b:'', s:'', st:'', p:curPeriod(), q:''}, sum:{p:curPeriod(), key:''}, notice:{key:'', p:curPeriod(), sel:[], type:'', subject:'', days:'', body:'', signer:'', role:'', date:new Date().toISOString().slice(0,10), editingId:null}, dash:{p:curPeriod()} },
+};
+const isAdmin = () => CUR.user && CUR.user.role==='admin';
+
+/* ---------------- LOGIN ---------------- */
+function renderLogin(err){
+  const bOpts=Object.entries(BUILDINGS).map(([k,v])=>`<option value="${k}">${esc(v.name)}</option>`).join('');
+  $('#root').innerHTML=`<div id="login">
+    <div class="brandside">
+      <div class="wm"><span class="star">✱</span><div><div class="t1">ESTA</div><div class="t2">PROPERTY MANAGEMENT</div></div></div>
+      <div><h1>Chế tài <b>nhà thầu dịch vụ</b></h1><div class="lede">Ghi nhận vi phạm, lập biên bản theo đúng điều khoản hợp đồng, tổng hợp khấu trừ tháng và thông báo nhà thầu — An ninh &amp; Vệ sinh, danh mục Non-CBD.</div></div>
+      <div class="quote">Asset Value Creator.</div>
+    </div>
+    <div class="formside"><div class="lcard">
+      ${DEMO?`
+        <h2>Đăng nhập (bản demo)</h2><div class="sub">Dữ liệu chỉ lưu trên trình duyệt này.</div>
+        <div class="demo-note">${FIREBASE_READY?'Bản xem thử chưa kết nối Firebase.':'Chưa cấu hình Firebase (firebaseConfig trong index.html) — đang chạy chế độ demo.'}</div>
+        <div class="row"><label class="f">Vai trò</label><select id="dmRole"><option value="admin">Quản lý vận hành (duyệt – toàn danh mục)</option><option value="bql">Ban quản lý tòa nhà (lập biên bản)</option></select></div>
+        <div class="row" id="dmBRow" style="display:none"><label class="f">Tòa nhà</label><select id="dmB">${bOpts}</select></div>
+        <div class="row"><label class="f">Họ tên</label><input id="dmName" value="Phạm Bill"></div>
+        <button class="btn btn-p" style="width:100%;padding:11px" id="dmGo">Vào hệ thống</button>`
+      :`
+        <h2>Đăng nhập</h2><div class="sub">Tài khoản do Quản lý vận hành cấp cho từng BQL tòa nhà.</div>
+        ${err?`<div class="err">${esc(err)}</div>`:''}
+        <div class="row"><label class="f">Email</label><input id="lgEmail" type="email" autocomplete="username" placeholder="ten@estavn.com"></div>
+        <div class="row"><label class="f">Mật khẩu</label><input id="lgPass" type="password" autocomplete="current-password"></div>
+        <button class="btn btn-p" style="width:100%;padding:11px" id="lgGo">Đăng nhập</button>
+        <div style="text-align:center;margin-top:12px"><button class="btn btn-g btn-sm" id="lgForgot">Quên mật khẩu?</button></div>`}
+    </div></div></div>`;
+  if(DEMO){
+    $('#dmRole').onchange=e=>{ $('#dmBRow').style.display=e.target.value==='bql'?'block':'none'; $('#dmName').value=e.target.value==='bql'?'Nguyễn Văn BQL':'Phạm Bill'; };
+    $('#dmGo').onclick=()=>{ const r=$('#dmRole').value; startApp({uid:'demo-'+r, name:$('#dmName').value.trim()||'Người dùng', role:r==='admin'?'admin':'bql', building:r==='admin'?'':$('#dmB').value, email:''}); };
+  } else {
+    const go=()=>{ const e=$('#lgEmail').value.trim(), p=$('#lgPass').value; if(!e||!p) return renderLogin('Nhập đủ email và mật khẩu.');
+      busy(true,'Đang đăng nhập…'); firebase.auth().signInWithEmailAndPassword(e,p).catch(er=>{ busy(false); renderLogin(['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-login-credentials'].includes(er.code)?'Sai email hoặc mật khẩu.':er.message); }); };
+    $('#lgGo').onclick=go; $('#lgPass').onkeydown=e=>{ if(e.key==='Enter') go(); };
+    $('#lgForgot').onclick=async()=>{ const e=$('#lgEmail').value.trim(); if(!e) return toast('Nhập email trước rồi bấm "Quên mật khẩu".', true);
+      try{ await firebase.auth().sendPasswordResetEmail(e); toast('Đã gửi email đặt lại mật khẩu tới '+e); }catch(er){ toast(er.message,true); } };
+  }
+}
+
+async function startApp(user){
+  CUR.user=user;
+  STORE = DEMO ? LocalStore : FireStore;
+  CUR.draft=newDraft();
+  renderShell();
+  busy(true,'Đang tải dữ liệu…');
+  await STORE.init(user, (what)=>{ busy(false); onData(what); });
+  setTimeout(()=>busy(false), 4000);
+}
+function onData(what){
+  updateBadges();
+  if(CUR.view==='create'){ if(what==='contracts'||what==='all') renderView(); else { refreshLineSuggest(); refreshPreview(); } return; }
+  if(document.querySelector('.modal-bg')) return; // không vẽ lại khi đang mở hộp thoại
+  renderView();
+}
+
+/* ---------------- SHELL ---------------- */
+const VIEWS=[
+  {id:'create', label:'Lập biên bản', icon:'plus'},
+  {id:'list', label:'Biên bản', icon:'list', badge:true},
+  {id:'summary', label:'Tổng hợp tháng', icon:'sum'},
+  {id:'notice', label:'Thông báo', icon:'mail'},
+  {id:'dash', label:'Dashboard', icon:'chart'},
+  {id:'contracts', label:'Hợp đồng', icon:'gear'},
+];
+function renderShell(){
+  const u=CUR.user; const ini=(u.name||'?').trim().split(/\s+/).slice(-1)[0].charAt(0).toUpperCase();
+  $('#root').innerHTML=`
+    <header class="top"><div class="topin">
+      <div class="wm"><span class="star">✱</span><div><div class="t1">ESTA</div><div class="t2">PROPERTY MANAGEMENT</div></div></div>
+      <div class="apptitle">Đánh giá CLDV &amp; chế tài nhà thầu</div>
+      <nav class="tabs">${VIEWS.map(v=>`<button data-v="${v.id}" class="${CUR.view===v.id?'on':''}">${ic(v.icon)}${v.label}${v.badge?`<span class="badge hidden" id="bdg-${v.id}"></span>`:''}</button>`).join('')}</nav>
+      <div class="userchip"><div class="av">${esc(ini)}</div><div class="who"><div style="font-weight:600">${esc(u.name)}</div><div class="rl">${u.role==='admin'?'Quản lý vận hành':'BQL · '+esc(BUILDINGS[u.building]?BUILDINGS[u.building].name:u.building)}</div></div><button id="btnOut" title="Đăng xuất">${ic('out')}</button></div>
+    </div></header>
+    ${DEMO?`<div class="demo-bar">Bản demo — dữ liệu mẫu, lưu trên trình duyệt này. <a href="#" id="dmReset" style="color:#fff;text-decoration:underline">Xóa dữ liệu demo</a></div>`:''}
+    <main id="view"></main>`;
+  $$('nav.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+  $('#btnOut').onclick=async()=>{ if(CUR.dirty && !(await confirmBox('Đăng xuất','Biên bản đang soạn chưa lưu. Vẫn đăng xuất?','Đăng xuất',true))) return; CUR.dirty=false; if(DEMO){ CUR.user=null; renderLogin(); } else firebase.auth().signOut(); };
+  if(DEMO) $('#dmReset').onclick=e=>{ e.preventDefault(); LocalStore.resetDemo(); };
+  renderView();
+}
+async function go(v){
+  if(CUR.view==='create' && v!=='create' && CUR.dirty){ if(!(await confirmBox('Rời màn hình','Biên bản đang soạn chưa lưu. Rời màn hình và bỏ thay đổi?','Rời đi',true))) return; CUR.dirty=false; CUR.draft=newDraft(); CUR.draftPhotos=[]; }
+  CUR.view=v; $$('nav.tabs button').forEach(b=>b.classList.toggle('on', b.dataset.v===v)); renderView(); window.scrollTo(0,0);
+}
+function updateBadges(){
+  const el=$('#bdg-list'); if(!el) return;
+  const n=DB.records.filter(r=>r.status==='pending').length + (isAdmin()?0:DB.records.filter(r=>r.status==='returned').length);
+  el.textContent=n; el.classList.toggle('hidden', !n);
+  el.title=isAdmin()?'Biên bản chờ duyệt':'Chờ duyệt / bị trả lại';
+}
+function renderView(){
+  const v=$('#view'); if(!v) return;
+  ({create:viewCreate, list:viewList, summary:viewSummary, notice:viewNotice, dash:viewDash, contracts:viewContracts})[CUR.view](v);
+  updateBadges();
+}
+function pageHead(kicker, title, desc, tools=''){
+  return `<div class="pagehead"><div><div class="kicker">${kicker}</div><h2>${title}</h2>${desc?`<div class="desc">${desc}</div>`:''}</div><div class="toolbar">${tools}</div></div>`;
+}
+
+/* =====================================================================
+   1. LẬP BIÊN BẢN
+   ===================================================================== */
+function defaultRoleB(s){ return s==='SECURITY'?'Chỉ huy trưởng mục tiêu':'Tổ trưởng / Giám sát vệ sinh'; }
+function newDraft(){
+  const u=CUR.user||{}; const b=u.building||'lmak68'; const s='SECURITY';
+  return {id:uid(), no:'', building:b, service:s, contractKey:ckey(b,s), dateTime:nowLocal(), location:'', source:'Tuần tra trực tiếp',
+    repA:u.name||'', roleA:'Giám sát chất lượng dịch vụ – BQL Tòa nhà', repB:'', roleB:defaultRoleB(s), violator:'', witness:'',
+    lines:[], remedy:'', remedyDeadline:'', opinionB:'', opinionA:'', status:'draft', photoCount:0, createdBy:{uid:u.uid, name:u.name}};
+}
+function canEdit(r){
+  if(isAdmin()) return r.status!=='approved';
+  return r.building===CUR.user.building && ['draft','pending','returned'].includes(r.status);
+}
+function emptyLine(){ return {code:'', level:1, qty:1, amount:0, action:'', detail:'', comp:0, assetValue:0, pctUsed:null, _auto:true, _autoAction:true}; }
+
+function viewCreate(v){
+  const d=CUR.draft; const c=getContract(d.contractKey); const ed=canEdit(d);
+  const isNew=!DB.records.find(r=>r.id===d.id);
+  const bSegs=Object.entries(BUILDINGS).map(([k,b])=>`<button class="seg ${d.building===k?'on':''}" data-b="${k}" ${(!isAdmin()&&CUR.user.building!==k)||!ed?'disabled':''}>${esc(b.name)}</button>`).join('');
+  const sSegs=Object.entries(SERVICES).map(([k,s])=>{ const cc=getContract(ckey(d.building,k)); return `<button class="seg ${d.service===k?'on':''}" data-s="${k}" ${!ed?'disabled':''}>${s.full}<small>${esc(cc.missing?'Chưa có HĐ':partyBShort(cc))}</small></button>`; }).join('');
+  const flags=[];
+  if(c.missing) flags.push(`<div class="flag bad">${ic('alert')}<div>Chưa có hợp đồng ${SERVICES[d.service].name} cho ${esc(BUILDINGS[d.building].name)} trên hệ thống. ${isAdmin()?'Vào <b>Hợp đồng & mức phạt</b> để nhập.':'Liên hệ Quản lý vận hành để cập nhật.'}</div></div>`);
+  else if(contractExpired(c)) flags.push(`<div class="flag">${ic('alert')}<div>Hợp đồng theo hồ sơ đã hết hạn ngày ${dDMY(c.termTo)}. Mức phạt đang áp dụng theo HĐ/phụ lục gần nhất — đề nghị cập nhật phụ lục gia hạn.</div></div>`);
+  if(d.status==='returned' && d.returnNote) flags.push(`<div class="flag bad">${ic('undo')}<div><b>Bị trả lại:</b> ${esc(d.returnNote)}</div></div>`);
+  if(d.status==='approved') flags.push(`<div class="flag ok">${ic('check')}<div>Biên bản đã duyệt bởi ${esc(d.approvedBy||'')} ngày ${dDMY(d.approvedAt)}. ${isAdmin()?'Bấm “Hủy duyệt” để chỉnh sửa.':'Chỉ Quản lý vận hành mới chỉnh sửa được.'}</div></div>`);
+
+  v.innerHTML = pageHead('Biên bản vi phạm', isNew?'Lập biên bản mới':'Biên bản '+esc(d.no||'(nháp)'), 'Chọn tòa nhà & dịch vụ → nhập thông tin → chọn lỗi theo phụ lục hợp đồng → đính kèm ảnh. Mức phạt tự tính theo lần tái phạm trong tháng.',
+    `${!isNew?`<button class="btn btn-o" id="btnNew">${ic('plus')}Lập biên bản mới</button>`:''}`) + `
+  <div class="ws">
+    <div class="ws-left">
+      <div class="card"><div class="card-h"><h3><span class="step">1</span>Dự án &amp; nhà thầu</h3><span class="pill s-${d.status}">${STATUS[d.status]}</span></div><div class="card-b">
+        <label class="f">Tòa nhà <span class="req">*</span></label><div class="segs">${bSegs}</div>
+        <label class="f" style="margin-top:12px">Loại dịch vụ <span class="req">*</span></label><div class="segs two">${sSegs}</div>
+        ${c.missing?'':`<dl class="kv"><dt>Bên A</dt><dd>${esc(c.partyA.name)}</dd><dt>Nhà thầu (Bên B)</dt><dd>${esc(c.partyB.name)}</dd><dt>Hợp đồng</dt><dd>${esc(c.contractNo)}${c.appendix?' + PL':''}</dd><dt>Phí dịch vụ/tháng</dt><dd>${fmtd(c.monthlyFee)}</dd></dl>`}
+        ${flags.join('')}
+      </div></div>
+
+      <div class="card"><div class="card-h"><h3><span class="step">2</span>Thông tin biên bản &amp; nhân sự</h3></div><div class="card-b"><div class="grid2">
+        <div><label class="f">Số biên bản</label><input value="${esc(d.no||'')}" placeholder="Tự cấp khi lưu" disabled></div>
+        <div><label class="f">Thời điểm ghi nhận <span class="req">*</span></label><input type="datetime-local" data-k="dateTime" value="${esc(d.dateTime)}"></div>
+        <div><label class="f">Vị trí / khu vực <span class="req">*</span></label><input data-k="location" value="${esc(d.location)}" placeholder="VD: Sảnh tầng G, hầm B1, chốt cổng…"></div>
+        <div><label class="f">Nguồn ghi nhận</label><select data-k="source">${['Tuần tra trực tiếp','Trích xuất camera','Khách thuê phản ánh','Kiểm tra định kỳ','Kiểm tra đột xuất'].map(x=>`<option ${d.source===x?'selected':''}>${x}</option>`).join('')}</select></div>
+        <div><label class="f">Đại diện Bên A (BQL) <span class="req">*</span></label><input data-k="repA" value="${esc(d.repA)}"></div>
+        <div><label class="f">Chức vụ</label><input data-k="roleA" value="${esc(d.roleA)}"></div>
+        <div><label class="f">Đại diện Bên B (nhà thầu)</label><input data-k="repB" value="${esc(d.repB)}" placeholder="Họ tên chỉ huy / tổ trưởng"></div>
+        <div><label class="f">Chức vụ</label><input data-k="roleB" value="${esc(d.roleB)}"></div>
+        <div><label class="f">Nhân sự vi phạm</label><input data-k="violator" value="${esc(d.violator)}" placeholder="VD: Nguyễn Văn A – ca ngày"></div>
+        <div><label class="f">Người làm chứng</label><input data-k="witness" value="${esc(d.witness)}" placeholder="Khi người vi phạm không ký"></div>
+      </div></div></div>
+
+      <div class="card"><div class="card-h"><h3><span class="step">3</span>Lỗi vi phạm &amp; chế tài</h3>${c.items&&c.items.length?`<span class="hint" style="margin:0">${c.items.length} hạng mục theo ${esc((c.penaltyRef||'').split('(')[0])}</span>`:''}</div><div class="card-b" id="lineBox"></div></div>
+
+      <div class="card"><div class="card-h"><h3><span class="step">4</span>Khắc phục, hình ảnh &amp; ý kiến</h3></div><div class="card-b">
+        <div class="grid2">
+          <div class="span2"><label class="f">Yêu cầu khắc phục</label><textarea data-k="remedy" rows="3" placeholder="Tự gợi ý theo chế tài — có thể sửa">${esc(d.remedy)}</textarea><button class="btn btn-g btn-sm" id="btnRemedy" style="margin-top:4px">${ic('copy')}Gợi ý theo hợp đồng</button></div>
+          <div><label class="f">Thời hạn khắc phục</label><input type="date" data-k="remedyDeadline" value="${esc(d.remedyDeadline)}"></div><div></div>
+        </div>
+        <label class="f" style="margin-top:12px">Hình ảnh minh chứng (tối đa 6 ảnh, tự nén)</label>
+        <div class="drop" id="drop">${ic('img')} Bấm để chọn ảnh hoặc kéo thả vào đây</div><input type="file" id="fileIn" accept="image/*" multiple hidden>
+        <div class="photos" id="photos"></div>
+        <div class="grid2" style="margin-top:12px">
+          <div><label class="f">Ý kiến của Bên B</label><textarea data-k="opinionB" rows="3">${esc(d.opinionB)}</textarea></div>
+          <div><label class="f">Ý kiến của Bên A (nếu có)</label><textarea data-k="opinionA" rows="3">${esc(d.opinionA)}</textarea></div>
+        </div>
+      </div></div>
+
+      <div class="actionbar" id="actbar"></div>
+    </div>
+    <div class="ws-right"><div class="pv-wrap" id="pvWrap"><div class="pv-head"><span>Xem trước biên bản (A4)</span><span id="pvTotal"></span></div><div id="pvBox"></div></div></div>
+  </div>`;
+
+  $$('[data-b]',v).forEach(b=>b.onclick=()=>switchContract(b.dataset.b, d.service));
+  $$('[data-s]',v).forEach(b=>b.onclick=()=>switchContract(d.building, b.dataset.s));
+  $$('[data-k]',v).forEach(inp=>{
+    inp.disabled = !ed;
+    inp.addEventListener('input', ()=>{ d[inp.dataset.k]=inp.value; CUR.dirty=true; if(inp.dataset.k==='dateTime'){ refreshLineSuggest(); } schedulePreview(); });
+  });
+  $('#btnRemedy').disabled=!ed;
+  $('#btnRemedy').onclick=()=>{ d.remedy=suggestRemedy(d); $('[data-k=remedy]').value=d.remedy; if(!d.remedyDeadline){ d.remedyDeadline=addDays(d.dateTime, c.remedyDays||3); $('[data-k=remedyDeadline]').value=d.remedyDeadline; } CUR.dirty=true; refreshPreview(); };
+  if($('#btnNew')) $('#btnNew').onclick=async()=>{ if(CUR.dirty && !(await confirmBox('Lập biên bản mới','Bỏ các thay đổi chưa lưu?','Bỏ thay đổi',true))) return; CUR.dirty=false; CUR.draft=newDraft(); CUR.draftPhotos=[]; CUR.prevPhotoCount=0; renderView(); };
+  // photos
+  const fi=$('#fileIn'), drop=$('#drop');
+  drop.onclick=()=>{ if(ed) fi.click(); };
+  drop.ondragover=e=>{e.preventDefault();}; drop.ondrop=e=>{ e.preventDefault(); if(ed) addPhotos(e.dataTransfer.files); };
+  fi.onchange=()=>{ addPhotos(fi.files); fi.value=''; };
+  renderPhotos(); renderLineBox(); renderActionBar(); refreshPreview();
+  window.onresize=()=>scalePreview();
+}
+function addDays(dt, n){ const d=new Date((dt||nowLocal()).slice(0,10)+'T00:00:00'); d.setDate(d.getDate()+Number(n||0)); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function suggestRemedy(d){
+  const acts=[]; (d.lines||[]).forEach(l=>{ if(l.action && !acts.includes(l.action)) acts.push(l.action); });
+  const c=getContract(d.contractKey);
+  let s='Bên B chấn chỉnh ngay nhân sự vi phạm, nhắc nhở toàn đội tuân thủ nội quy tòa nhà và quy trình làm việc.';
+  if(acts.some(a=>/thay|điều chuyển|sa thải|đổi người/i.test(a))) s+=' Thay thế/điều chuyển nhân sự vi phạm theo chế tài hợp đồng'+(d.service==='SECURITY'?' trong vòng 24 giờ':'')+' và cập nhật danh sách nhân sự cho BQL.';
+  if(acts.some(a=>/bổ sung/i.test(a))) s+=' Bổ sung đầy đủ công cụ/nhân sự theo hợp đồng trong thời hạn quy định.';
+  if((d.lines||[]).some(l=>l.comp)) s+=' Bồi thường thiệt hại theo giá trị đã xác định trong biên bản.';
+  s+=` Báo cáo kết quả khắc phục bằng văn bản cho BQL trong vòng ${c.remedyDays||3} ngày.`;
+  return s;
+}
+async function switchContract(b, s){
+  const d=CUR.draft;
+  if(d.lines.length && (b!==d.building || s!==d.service)){
+    if(!(await confirmBox('Đổi hợp đồng','Biên bản đang có lỗi theo hợp đồng hiện tại. Đổi tòa nhà/dịch vụ sẽ xóa danh sách lỗi đã chọn. Tiếp tục?','Đổi và xóa lỗi',true))) return;
+    d.lines=[];
+  }
+  if(s!==d.service && d.roleB===defaultRoleB(d.service)) d.roleB=defaultRoleB(s);
+  d.building=b; d.service=s; d.contractKey=ckey(b,s); CUR.lineEdit=null; CUR.dirty=true; renderView();
+}
+
+/* ---- line editor ---- */
+function renderLineBox(){
+  const d=CUR.draft; const c=getContract(d.contractKey); const ed=canEdit(d); const box=$('#lineBox'); if(!box) return;
+  if(!CUR.lineEdit) CUR.lineEdit={idx:-1, line:emptyLine()};
+  const L=CUR.lineEdit.line; const item=(c.items||[]).find(i=>i.code===L.code);
+  const opts=(c.items||[]).map(i=>`<option value="${esc(i.code)}" ${L.code===i.code?'selected':''}>${esc(i.code)} – ${esc(i.title.length>110?i.title.slice(0,108)+'…':i.title)}</option>`).join('');
+  let editor='';
+  if(ed && (c.items||[]).length){
+    const lvls=item?item.levels:[];
+    const lvl=item?levelOf(item,L.level):null;
+    const rng=item?amountRange(c,item,L):null;
+    const needAsset = lvl && lvl.base==='asset';
+    const pctAdj = lvl && lvl.pct!=null && lvl.pctMax!=null;
+    editor=`
+      <input id="lnSearch" placeholder="Tìm nhanh lỗi: ngủ, hút thuốc, đồng phục, camera, thiếu nhân sự…" style="margin-bottom:8px">
+      <label class="f">Hạng mục vi phạm theo hợp đồng <span class="req">*</span></label>
+      <select id="lnItem"><option value="">— Chọn lỗi vi phạm —</option>${opts}</select>
+      ${item?`
+      <div class="hint">${esc(item.ref||'')}</div>
+      <div style="margin-top:12px"><label class="f">Lần vi phạm</label><div class="levelpills">${lvls.map((x,i)=>`<span class="lp ${L.level===i+1?'on':''}" data-lv="${i+1}" title="${esc(x.t)}">Lần ${i+1}${i===lvls.length-1&&lvls.length>1?'+':''}</span>`).join('')}${lvls.length===1?`<span class="hint" style="margin:3px 0 0 4px">Mức phạt cố định mọi lần</span>`:''}</div><div class="suggest" id="lnSuggest"></div></div>
+      <div class="grid3" style="margin-top:12px">
+        <div><label class="f">${esc(item.qtyLabel||'Số lượng')}</label><input type="number" id="lnQty" min="1" value="${L.qty||1}"></div>
+        ${needAsset?`<div><label class="f">Giá trị tài sản (đ)</label><input type="number" id="lnAsset" value="${L.assetValue||''}"></div>`:''}
+        ${pctAdj?`<div><label class="f">Tỷ lệ áp dụng (%)</label><input type="number" step="0.1" id="lnPct" value="${L.pctUsed!=null?L.pctUsed:lvl.pct}"><div class="hint">Khung HĐ: ${lvl.pct}% – ${lvl.pctMax}%</div></div>`:''}
+        <div><label class="f">Số tiền phạt (đ)</label><input type="number" id="lnAmt" value="${L.amount||0}" style="font-weight:700;color:var(--aub)"><div class="hint" id="lnAmtHint"></div></div>
+        <div><label class="f">Bồi thường (đ)</label><input type="number" id="lnComp" value="${L.comp||''}" placeholder="${item.comp?'Nếu có thiệt hại':'Nếu có'}"></div>
+      </div>
+      <div style="margin-top:12px"><label class="f">Hình thức xử lý (theo HĐ, có thể sửa)</label><input id="lnAct" value="${esc(L.action||'')}"></div>
+      <div style="margin-top:12px"><label class="f">Diễn giải hành vi tại hiện trường</label><textarea id="lnDet" rows="2" placeholder="Thời gian, ca trực, hiện trạng ghi nhận qua tuần tra/camera…">${esc(L.detail||'')}</textarea></div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-p" id="lnAdd" style="flex:1">${ic(CUR.lineEdit.idx>=0?'check':'plus')}${CUR.lineEdit.idx>=0?'Cập nhật lỗi này':'Đưa lỗi này vào biên bản'}</button>${CUR.lineEdit.idx>=0?`<button class="btn btn-o" id="lnCancel">Hủy sửa</button>`:''}</div>`:''}`;
+  } else if(!(c.items||[]).length){
+    editor=`<div class="flag bad">${ic('alert')}<div>Hợp đồng này chưa có danh mục lỗi.</div></div>`;
+  }
+  const t=recTotals(d);
+  const list = d.lines.length ? `<div class="line-list">${d.lines.map((l,i)=>`<div class="lineitem"><div><div class="t">${esc(l.code)} · ${esc(l.title)}</div><div class="m">Lần ${l.level} · SL ${l.qty} · ${esc(l.action)}${l.detail?' — '+esc(l.detail.slice(0,90)):''}</div></div><div><div class="amt">${fmtd(l.amount)}</div>${l.comp?`<div class="m" style="text-align:right">+ BT ${fmtd(l.comp)}</div>`:''}</div>${ed?`<div class="acts"><button class="btn btn-g btn-sm" data-ed="${i}" title="Sửa">${ic('edit')}</button><button class="btn btn-g btn-sm" data-rm="${i}" title="Xóa">${ic('trash')}</button></div>`:''}</div>`).join('')}</div>
+    <div class="totalbar"><span>${d.lines.length} lỗi · Tổng phạt${t.comp?' + bồi thường':''}</span><b>${fmtd(t.fine+t.comp)}</b></div>` : `<div class="hint" style="margin-top:10px">Chưa có lỗi nào trong biên bản.</div>`;
+  box.innerHTML=editor+list;
+
+  if(!ed) return;
+  const sel=$('#lnItem');
+  if($('#lnSearch')) $('#lnSearch').oninput=e=>{ const q=e.target.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); $$('option',sel).forEach(o=>{ if(!o.value) return; const tx=o.textContent.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); o.hidden = q && !tx.includes(q); }); const first=$$('option',sel).find(o=>o.value&&!o.hidden); if(q&&first&&!L.code){ /* no auto-pick */ } };
+  if(sel) sel.onchange=()=>{ const nl=emptyLine(); nl.code=sel.value; if(nl.code){ const it=c.items.find(i=>i.code===nl.code); nl.title=it.title; nl.ref=it.ref; nl.level=Math.min(priorCount(d,nl.code, CUR.lineEdit.idx>=0?CUR.lineEdit.idx:d.lines.length)+1, it.levels.length); recalcLine(nl); } nl.detail=L.detail; CUR.lineEdit.line=nl; renderLineBox(); };
+  if(!item) return;
+  $$('.lp',box).forEach(p=>p.onclick=()=>{ L.level=+p.dataset.lv; L._auto=true; L._autoAction=true; recalcLine(L); renderLineBox(); });
+  const bind=(id,k,num,after)=>{ const el=$('#'+id); if(el) el.oninput=()=>{ L[k]=num?(el.value===''?null:Number(el.value)):el.value; if(after) after(); }; };
+  bind('lnQty','qty',true,()=>{ L._auto=true; recalcLine(L); $('#lnAmt').value=L.amount; amtHint(); });
+  bind('lnAsset','assetValue',true,()=>{ L._auto=true; recalcLine(L); $('#lnAmt').value=L.amount; amtHint(); });
+  bind('lnPct','pctUsed',true,()=>{ L._auto=true; recalcLine(L); $('#lnAmt').value=L.amount; amtHint(); });
+  bind('lnAmt','amount',true,()=>{ L._auto=false; amtHint(); });
+  bind('lnComp','comp',true);
+  bind('lnAct','action',false,()=>{ L._autoAction=false; });
+  bind('lnDet','detail',false);
+  function amtHint(){ const h=$('#lnAmtHint'); if(!h) return; const std=contractAmount(c,item,L); const r=amountRange(c,item,L);
+    if(r){ h.textContent=`Khung HĐ: ${fmt(r[0])}${r[1]!=null?' – '+fmt(r[1]):' trở lên'}`; h.style.color=(L.amount<r[0]||(r[1]!=null&&L.amount>r[1]))?'var(--bad)':''; }
+    else if(Number(L.amount)!==std){ h.textContent=`Đã điều chỉnh (HĐ: ${fmt(std)})`; h.style.color='var(--bad)'; } else { h.textContent='Theo đúng hợp đồng'; h.style.color='var(--ok)'; } }
+  amtHint(); refreshLineSuggest();
+  $('#lnAdd').onclick=()=>{
+    if(!L.code) return toast('Chọn lỗi vi phạm.', true);
+    if(!(L.qty>=1)) L.qty=1;
+    if(L.amount==null||isNaN(L.amount)) L.amount=0;
+    const clean={code:L.code, title:item.title, ref:item.ref||'', level:L.level, qty:L.qty, amount:Number(L.amount)||0, stdAmount:contractAmount(c,item,L), action:L.action||'', detail:L.detail||'', comp:Number(L.comp)||0, assetValue:Number(L.assetValue)||0, pctUsed:L.pctUsed};
+    if(CUR.lineEdit.idx>=0) d.lines[CUR.lineEdit.idx]=clean; else d.lines.push(clean);
+    CUR.lineEdit=null; CUR.dirty=true;
+    if(!d.remedy) { d.remedy=suggestRemedy(d); const rt=$('[data-k=remedy]'); if(rt) rt.value=d.remedy; }
+    if(!d.remedyDeadline){ d.remedyDeadline=addDays(d.dateTime, c.remedyDays||3); const rd=$('[data-k=remedyDeadline]'); if(rd) rd.value=d.remedyDeadline; }
+    renderLineBox(); refreshPreview();
+  };
+  if($('#lnCancel')) $('#lnCancel').onclick=()=>{ CUR.lineEdit=null; renderLineBox(); };
+  $$('[data-rm]',box).forEach(b=>b.onclick=()=>{ d.lines.splice(+b.dataset.rm,1); CUR.lineEdit=null; CUR.dirty=true; renderLineBox(); refreshPreview(); });
+  $$('[data-ed]',box).forEach(b=>b.onclick=()=>{ const i=+b.dataset.ed; CUR.lineEdit={idx:i, line:{...d.lines[i], _auto:d.lines[i].amount===d.lines[i].stdAmount, _autoAction:false}}; renderLineBox(); $('#lineBox').scrollIntoView({behavior:'smooth', block:'start'}); });
+}
+function recalcLine(L){
+  const d=CUR.draft; const c=getContract(d.contractKey); const item=(c.items||[]).find(i=>i.code===L.code); if(!item) return;
+  const lvl=levelOf(item,L.level);
+  if(L._auto!==false) L.amount=contractAmount(c,item,L);
+  if(L._autoAction!==false) L.action=lvl.t||'';
+}
+function refreshLineSuggest(){
+  const el=$('#lnSuggest'); if(!el||!CUR.lineEdit) return; const L=CUR.lineEdit.line; const d=CUR.draft; if(!L.code){ el.textContent=''; return; }
+  const n=priorCount(d, L.code, CUR.lineEdit.idx>=0?CUR.lineEdit.idx:d.lines.length);
+  const c=getContract(d.contractKey); const it=c.items.find(i=>i.code===L.code);
+  el.textContent = n ? `Đã có ${n} lần vi phạm lỗi này ${c.offensePeriod==='term'?'trong thời hạn HĐ':'trong tháng '+periodLabel(periodOf(d.dateTime))} → gợi ý: Lần ${Math.min(n+1,it.levels.length)}${n+1>it.levels.length?'+':''}` : `Lần đầu vi phạm lỗi này ${c.offensePeriod==='term'?'trong thời hạn HĐ':'trong tháng'}.`;
+}
+
+/* ---- photos ---- */
+async function addPhotos(files){
+  const room=6-CUR.draftPhotos.length; const arr=[...files].filter(f=>/^image\//.test(f.type)).slice(0,room);
+  if(!arr.length){ if(room<=0) toast('Tối đa 6 ảnh.', true); return; }
+  busy(true,'Đang nén ảnh…');
+  try{ for(const f of arr) CUR.draftPhotos.push(await compressImage(f)); CUR.dirty=true; }
+  catch(e){ toast('Không đọc được ảnh: '+e.message, true); }
+  busy(false); renderPhotos(); refreshPreview();
+}
+function renderPhotos(){
+  const el=$('#photos'); if(!el) return; const ed=canEdit(CUR.draft);
+  el.innerHTML=CUR.draftPhotos.map((s,i)=>`<div class="ph"><img src="${s}">${ed?`<button class="x" data-px="${i}" title="Xóa ảnh">×</button>`:''}</div>`).join('');
+  $$('[data-px]',el).forEach(b=>b.onclick=()=>{ CUR.draftPhotos.splice(+b.dataset.px,1); CUR.dirty=true; renderPhotos(); refreshPreview(); });
+}
+
+/* ---- preview ---- */
+let pvTimer=null;
+function schedulePreview(){ clearTimeout(pvTimer); pvTimer=setTimeout(refreshPreview, 250); }
+function refreshPreview(){
+  const box=$('#pvBox'); if(!box) return;
+  box.innerHTML=`<div class="pv-scale">${renderRecordDoc(CUR.draft, CUR.draftPhotos)}</div>`;
+  const t=recTotals(CUR.draft); $('#pvTotal').textContent=`Tổng: ${fmtd(t.fine+t.comp)}`;
+  scalePreview(); renderActionBar();
+}
+function scalePreview(){
+  const w=$('#pvWrap'), s=$('.pv-scale'); if(!w||!s) return; const k=Math.min(1,(w.clientWidth-36)/794);
+  s.style.transform=`scale(${k})`; s.style.width='794px'; s.style.height=(s.firstElementChild.offsetHeight*k)+'px';
+}
+
+/* ---- action bar ---- */
+function renderActionBar(){
+  const bar=$('#actbar'); if(!bar) return; const d=CUR.draft; const ed=canEdit(d); const exists=!!DB.records.find(r=>r.id===d.id);
+  const b=[];
+  if(ed) b.push(`<button class="btn btn-o" id="abSave">${ic('save')}Lưu nháp</button>`);
+  if(ed && !isAdmin()) b.push(`<button class="btn btn-c" id="abSubmit">${ic('send')}Gửi duyệt</button>`);
+  if(isAdmin() && d.status!=='approved') b.push(`<button class="btn btn-p" id="abApprove">${ic('check')}${d.status==='pending'?'Duyệt':'Lưu & duyệt'}</button>`);
+  if(isAdmin() && d.status==='pending') b.push(`<button class="btn btn-bad" id="abReturn">${ic('undo')}Trả lại</button>`);
+  if(isAdmin() && d.status==='approved') b.push(`<button class="btn btn-bad" id="abUnapprove">${ic('undo')}Hủy duyệt</button>`);
+  b.push(`<button class="btn btn-o" id="abPdf">${ic('pdf')}Xuất PDF</button>`);
+  if(exists && (isAdmin() || (d.status==='draft' && d.building===CUR.user.building))) b.push(`<button class="btn btn-g" id="abDel" title="Xóa biên bản">${ic('trash')}</button>`);
+  bar.innerHTML=`<div class="st">${CUR.dirty?'● Có thay đổi chưa lưu':exists?'Đã lưu '+(d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN'):''):'Chưa lưu'}</div>`+b.join('');
+  const on=(id,f)=>{ const e=$('#'+id); if(e) e.onclick=f; };
+  on('abSave', ()=>saveDraft(d.status==='returned'?'draft':d.status==='pending'?'pending':'draft'));
+  on('abSubmit', ()=>saveDraft('pending'));
+  on('abApprove', ()=>saveDraft('approved'));
+  on('abReturn', async()=>{ const note=await promptBox('Trả lại biên bản','Lý do trả lại / nội dung cần sửa'); if(note==null) return; d.returnNote=note; await saveDraft('returned'); });
+  on('abUnapprove', async()=>{ if(!(await confirmBox('Hủy duyệt','Đưa biên bản về trạng thái chờ duyệt để chỉnh sửa? Tổng hợp tháng sẽ không tính biên bản này cho đến khi duyệt lại.','Hủy duyệt',true))) return; d.status='pending'; d.approvedBy=''; d.approvedAt=''; await STORE.saveRecord({...d}); toast('Đã hủy duyệt.'); renderView(); });
+  on('abPdf', ()=>exportPDF(renderRecordDoc(d, CUR.draftPhotos, {pdf:true}), `Bien-ban_${safeName(d.no||'nhap')}_${BUILDINGS[d.building].short}.pdf`));
+  on('abDel', async()=>{ if(!(await confirmBox('Xóa biên bản','Xóa vĩnh viễn biên bản '+(d.no||'nháp')+'?','Xóa',true))) return; busy(true); try{ await STORE.deleteRecord(d.id); toast('Đã xóa.'); CUR.dirty=false; CUR.draft=newDraft(); CUR.draftPhotos=[]; renderView(); }catch(e){ toast('Lỗi: '+e.message,true);} busy(false); });
+}
+function validateDraft(d, strict){
+  const c=getContract(d.contractKey); const errs=[];
+  if(c.missing) errs.push('Hợp đồng chưa có trên hệ thống.');
+  if(!d.dateTime) errs.push('Thiếu thời điểm ghi nhận.');
+  if(strict){ if(!d.location.trim()) errs.push('Thiếu vị trí/khu vực.'); if(!d.repA.trim()) errs.push('Thiếu đại diện Bên A.'); if(!d.lines.length) errs.push('Chưa có lỗi vi phạm nào.'); }
+  return errs;
+}
+async function saveDraft(status){
+  const d=CUR.draft; const strict = status!=='draft';
+  const errs=validateDraft(d, strict); if(errs.length) return toast(errs.join(' '), true);
+  if(status==='approved'){
+    const over=d.lines.filter(l=>Number(l.amount)!==Number(l.stdAmount));
+    const msg = over.length ? `Có ${over.length} lỗi có số tiền khác mức hợp đồng. Vẫn duyệt?` : `Duyệt biên bản với tổng ${fmtd(recTotals(d).fine+recTotals(d).comp)}? Sau khi duyệt, BQL không chỉnh sửa được.`;
+    if(!(await confirmBox('Duyệt biên bản', msg, 'Duyệt'))) return;
+  }
+  busy(true,'Đang lưu…');
+  try{
+    if(!d.no) d.no=nextRecordNo(d);
+    const t=recTotals(d); d.totalFine=t.fine; d.totalComp=t.comp;
+    d.status=status; d.photoCount=CUR.draftPhotos.length;
+    if(!d.createdAt) d.createdAt=new Date().toISOString();
+    if(status==='pending') d.submittedAt=new Date().toISOString();
+    if(status==='approved'){ d.approvedBy=CUR.user.name; d.approvedAt=new Date().toISOString(); d.returnNote=''; }
+    if(status==='returned'){ d.returnedAt=new Date().toISOString(); }
+    await STORE.savePhotos(d.id, d.building, CUR.draftPhotos, CUR.prevPhotoCount);
+    CUR.prevPhotoCount=CUR.draftPhotos.length;
+    await STORE.saveRecord(JSON.parse(JSON.stringify(d)));
+    CUR.dirty=false;
+    toast({draft:'Đã lưu nháp ',pending:'Đã gửi duyệt ',approved:'Đã duyệt ',returned:'Đã trả lại '}[status]+d.no);
+  }catch(e){ console.error(e); toast('Lưu thất bại: '+(e.code||e.message)+'. Dữ liệu vẫn còn trên màn hình — thử lại.', true); }
+  busy(false); renderView();
+}
+async function openRecord(id){
+  const r=DB.records.find(x=>x.id===id); if(!r) return;
+  if(CUR.view==='create' && CUR.dirty && CUR.draft.id!==id && !(await confirmBox('Mở biên bản','Bỏ thay đổi chưa lưu ở biên bản đang soạn?','Bỏ thay đổi',true))) return;
+  busy(true,'Đang mở biên bản…');
+  CUR.draft=JSON.parse(JSON.stringify(r)); CUR.lineEdit=null; CUR.dirty=false;
+  try{ CUR.draftPhotos=await STORE.loadPhotos(id); }catch(e){ CUR.draftPhotos=[]; }
+  CUR.prevPhotoCount=CUR.draftPhotos.length;
+  busy(false); CUR.view='create'; $$('nav.tabs button').forEach(b=>b.classList.toggle('on', b.dataset.v==='create')); renderView(); window.scrollTo(0,0);
+}
+async function pdfRecord(id){ const r=DB.records.find(x=>x.id===id); if(!r) return; busy(true,'Đang tải ảnh…'); let ph=[]; try{ ph=await STORE.loadPhotos(id);}catch(e){} busy(false); exportPDF(renderRecordDoc(r, ph, {pdf:true}), `Bien-ban_${safeName(r.no)}_${BUILDINGS[r.building].short}.pdf`); }
+
+/* =====================================================================
+   2. DANH SÁCH
+   ===================================================================== */
+function bldOptions(sel, all=true){
+  const keys=isAdmin()?Object.keys(BUILDINGS):[CUR.user.building];
+  return (all&&isAdmin()?`<option value="">Tất cả tòa nhà</option>`:'')+keys.map(k=>`<option value="${k}" ${sel===k?'selected':''}>${esc(BUILDINGS[k].name)}</option>`).join('');
+}
+function viewList(v){
+  const F=CUR.f.list;
+  const pendingAll=DB.records.filter(r=>r.status==='pending').length;
+  v.innerHTML=pageHead('Quản lý biên bản','Danh sách biên bản', isAdmin()?`${pendingAll} biên bản đang chờ anh duyệt.`:'Biên bản do BQL tòa nhà lập. Biên bản đã duyệt mới được tính vào tổng hợp tháng.',
+    `${isAdmin()?`<select id="fB">${bldOptions(F.b)}</select>`:''}
+     <select id="fS"><option value="">Tất cả dịch vụ</option>${Object.entries(SERVICES).map(([k,s])=>`<option value="${k}" ${F.s===k?'selected':''}>${s.name}</option>`).join('')}</select>
+     <input type="month" id="fP" value="${F.p}" title="Để trống = mọi tháng">
+     <select id="fSt"><option value="">Mọi trạng thái</option>${Object.entries(STATUS).map(([k,s])=>`<option value="${k}" ${F.st===k?'selected':''}>${s}</option>`).join('')}</select>
+     <input id="fQ" placeholder="Tìm số BB, nhân sự, vị trí…" value="${esc(F.q)}" style="min-width:200px">`)+
+    `<div class="card"><div class="tbl-wrap" id="listTbl"></div></div>`;
+  const upd=()=>{ F.b=$('#fB')?$('#fB').value:''; F.s=$('#fS').value; F.p=$('#fP').value; F.st=$('#fSt').value; F.q=$('#fQ').value; drawList(); };
+  ['fB','fS','fP','fSt'].forEach(id=>{ const e=$('#'+id); if(e) e.onchange=upd; }); $('#fQ').oninput=upd;
+  drawList();
+}
+function drawList(){
+  const F=CUR.f.list; const q=F.q.trim().toLowerCase();
+  let rows=DB.records.filter(r=>(!F.b||r.building===F.b)&&(!F.s||r.service===F.s)&&(!F.p||periodOf(r.dateTime)===F.p)&&(!F.st||r.status===F.st)
+    &&(!q||[r.no,r.violator,r.location,r.repA,r.repB,...(r.lines||[]).map(l=>l.title)].join(' ').toLowerCase().includes(q)));
+  rows.sort((a,b)=>{ const pa=a.status==='pending'?0:1, pb=b.status==='pending'?0:1; return pa-pb || (b.dateTime||'').localeCompare(a.dateTime||''); });
+  const pend=rows.filter(r=>r.status==='pending');
+  const el=$('#listTbl'); if(!el) return;
+  if(!rows.length){ el.innerHTML=`<div class="empty">Không có biên bản phù hợp bộ lọc.${F.p?' Thử xóa bộ lọc tháng.':''}</div>`; return; }
+  el.innerHTML=`${isAdmin()&&pend.length>1?`<div style="padding:10px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center"><span class="hint" style="margin:0">${pend.length} biên bản chờ duyệt trong danh sách đang lọc</span><button class="btn btn-p btn-sm" id="bulkAp">${ic('check')}Duyệt tất cả ${pend.length} biên bản</button></div>`:''}
+  <table class="t"><thead><tr><th>Số biên bản</th><th>Thời điểm</th><th>Tòa nhà · Dịch vụ</th><th>Lỗi vi phạm</th><th class="num">Phạt + BT</th><th>Người lập</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+  ${rows.map(r=>{ const t=recTotals(r); return `<tr>
+    <td><b>${esc(r.no||'(nháp)')}</b>${r.photoCount?`<div class="muted">${r.photoCount} ảnh</div>`:''}</td>
+    <td>${dDMY(r.dateTime)}<div class="muted">${tHM(r.dateTime)} · ${esc(r.location||'')}</div></td>
+    <td>${esc(BUILDINGS[r.building].name)}<div class="muted">${SERVICES[r.service].name} · ${esc(partyBShort(getContract(r.contractKey)))}</div></td>
+    <td>${(r.lines||[]).slice(0,2).map(l=>`<div>${esc(l.code)} · ${esc(l.title.length>60?l.title.slice(0,58)+'…':l.title)} <span class="muted">(lần ${l.level})</span></div>`).join('')}${(r.lines||[]).length>2?`<div class="muted">+${r.lines.length-2} lỗi khác</div>`:''}${r.violator?`<div class="muted">NS: ${esc(r.violator)}</div>`:''}</td>
+    <td class="num"><b>${fmt(t.fine+t.comp)}</b></td>
+    <td>${esc(r.createdBy&&r.createdBy.name||'')}<div class="muted">${r.approvedBy?'Duyệt: '+esc(r.approvedBy):''}</div></td>
+    <td>${statusPill(r.status)}${r.status==='returned'&&r.returnNote?`<div class="muted" style="max-width:180px">${esc(r.returnNote)}</div>`:''}</td>
+    <td style="white-space:nowrap"><button class="btn btn-g btn-sm" data-open="${r.id}" title="Mở">${ic('edit')}</button><button class="btn btn-g btn-sm" data-pdf="${r.id}" title="Xuất PDF">${ic('pdf')}</button>${isAdmin()&&r.status==='pending'?`<button class="btn btn-g btn-sm" data-ap="${r.id}" title="Duyệt" style="color:var(--ok)">${ic('check')}</button><button class="btn btn-g btn-sm" data-rt="${r.id}" title="Trả lại" style="color:var(--bad)">${ic('undo')}</button>`:''}</td></tr>`; }).join('')}
+  </tbody></table>`;
+  $$('[data-open]',el).forEach(b=>b.onclick=()=>openRecord(b.dataset.open));
+  $$('[data-pdf]',el).forEach(b=>b.onclick=()=>pdfRecord(b.dataset.pdf));
+  $$('[data-ap]',el).forEach(b=>b.onclick=()=>quickStatus(b.dataset.ap,'approved'));
+  $$('[data-rt]',el).forEach(b=>b.onclick=()=>quickStatus(b.dataset.rt,'returned'));
+  if($('#bulkAp')) $('#bulkAp').onclick=async()=>{ if(!(await confirmBox('Duyệt hàng loạt',`Duyệt ${pend.length} biên bản đang chờ (tổng ${fmtd(pend.reduce((s,r)=>s+recTotals(r).fine+recTotals(r).comp,0))})?`,'Duyệt tất cả'))) return;
+    busy(true); try{ for(const r of pend){ await STORE.saveRecord({...r, status:'approved', approvedBy:CUR.user.name, approvedAt:new Date().toISOString(), returnNote:''}); } toast(`Đã duyệt ${pend.length} biên bản.`);}catch(e){toast('Lỗi: '+e.message,true);} busy(false); };
+}
+async function quickStatus(id, st){
+  const r=DB.records.find(x=>x.id===id); if(!r) return;
+  if(st==='approved'){ if(!(await confirmBox('Duyệt biên bản',`Duyệt ${r.no} (${fmtd(recTotals(r).fine+recTotals(r).comp)})?`,'Duyệt'))) return; await STORE.saveRecord({...r, status:'approved', approvedBy:CUR.user.name, approvedAt:new Date().toISOString(), returnNote:''}); toast('Đã duyệt '+r.no); }
+  else { const note=await promptBox('Trả lại '+r.no,'Lý do trả lại / nội dung cần sửa'); if(note==null) return; await STORE.saveRecord({...r, status:'returned', returnNote:note, returnedAt:new Date().toISOString()}); toast('Đã trả lại '+r.no); }
+}
+
+/* =====================================================================
+   3. TỔNG HỢP THÁNG
+   ===================================================================== */
+function viewSummary(v){
+  const F=CUR.f.sum; const keys=contractKeysFor(CUR.user).filter(k=>!getContract(k).missing);
+  if(!F.key || !keys.includes(F.key)) F.key=keys[0]||'';
+  v.innerHTML=pageHead('Khấu trừ phí dịch vụ','Tổng hợp chế tài tháng','Chỉ tính biên bản đã duyệt. Nhập điểm đánh giá chất lượng tháng để tính mức trừ theo khung điểm của từng hợp đồng.',
+    `<input type="month" id="sP" value="${F.p}">${isAdmin()?`<button class="btn btn-p" id="sAll">${ic('pdf')}PDF tổng hợp toàn danh mục</button>`:''}`)+
+    `<div class="card" style="margin-bottom:18px"><div class="tbl-wrap" id="sOver"></div></div>
+     <div class="sumgrid"><div id="sDetail"></div><div class="pv-wrap" id="pvWrap"><div class="pv-head"><span>Xem trước bảng tổng hợp</span><button class="btn btn-o btn-sm" id="sPdf">${ic('pdf')}Xuất PDF hợp đồng này</button></div><div id="pvBox"></div></div></div>`;
+  $('#sP').onchange=e=>{ F.p=e.target.value||curPeriod(); viewSummary(v); };
+  if($('#sAll')) $('#sAll').onclick=()=>{ const html=renderOverviewDoc(keys,F.p,{pdf:true})+keys.map(k=>renderSummaryDoc(k,F.p,{pdf:true, breakBefore:true, approver:CUR.user.name})).join(''); exportPDF(html, `Tong-hop-che-tai_${F.p}_NonCBD.pdf`); };
+  $('#sPdf').onclick=()=>{ if(!F.key) return; const c=getContract(F.key); exportPDF(renderSummaryDoc(F.key,F.p,{pdf:true, approver:isAdmin()?CUR.user.name:''}), `Tong-hop_${F.p}_${SERVICES[c.service].code}_${BUILDINGS[c.building].short}.pdf`); };
+  // overview
+  $('#sOver').innerHTML = keys.length?`<table class="t"><thead><tr><th>Tòa nhà · Dịch vụ</th><th>Nhà thầu</th><th class="num">Phí DV/tháng</th><th class="num">BB duyệt</th><th class="num">Chờ duyệt</th><th class="num">Phạt BB</th><th class="num">Điểm CL</th><th class="num">Trừ CL</th><th class="num">Tổng khấu trừ</th><th class="num">% phí</th><th></th></tr></thead><tbody>
+    ${keys.map(k=>{ const S=monthSummary(k,F.p); const bad=S.alerts.some(a=>a.lv==='bad'); return `<tr data-k="${k}" style="cursor:pointer;${k===F.key?'background:var(--cream-l)':''}"><td><b>${esc(BUILDINGS[S.c.building].name)}</b><div class="muted">${SERVICES[S.c.service].name}</div></td><td>${esc(partyBShort(S.c))}</td><td class="num">${fmt(S.fee)}</td><td class="num">${S.approved.length}</td><td class="num">${S.notApproved.length||''}</td><td class="num">${fmt(S.fines)}</td><td class="num">${S.score!=null?S.score+'%':'<span class="muted">—</span>'}</td><td class="num">${fmt(S.qualityDeduct)}</td><td class="num"><b>${fmt(S.total)}</b></td><td class="num">${S.fee?(S.penaltyTotal/S.fee*100).toFixed(1)+'%':''}</td><td>${S.alerts.length?`<span title="${esc(S.alerts.map(a=>a.t).join('\n'))}" style="color:${bad?'var(--bad)':'var(--copper)'}">${ic('alert')}</span>`:''}</td></tr>`; }).join('')}
+    </tbody></table>`:`<div class="empty">Chưa có hợp đồng nào.</div>`;
+  $$('#sOver tr[data-k]').forEach(tr=>tr.onclick=()=>{ F.key=tr.dataset.k; viewSummary(v); });
+  if(F.key) drawSummaryDetail();
+}
+function drawSummaryDetail(){
+  const F=CUR.f.sum; const S=monthSummary(F.key,F.p); const c=S.c; const akey=`${F.key}_${F.p}`; const a=S.audit;
+  const canAudit = isAdmin() || CUR.user.building===c.building;
+  $('#sDetail').innerHTML=`<div class="card"><div class="card-h"><h3>${esc(contractLabel(F.key))} · ${periodLabel(F.p)}</h3></div><div class="card-b">
+    <label class="f">Điểm đánh giá chất lượng dịch vụ tháng (% đạt)</label>
+    <div class="grid3"><div><input type="number" step="0.1" id="aScore" value="${a.score!=null?a.score:''}" placeholder="VD: 86" ${canAudit?'':'disabled'}></div>
+      <div><input type="number" step="0.1" id="aManual" value="${a.manualPct!=null?a.manualPct:''}" placeholder="% trừ thủ công" title="Chỉ dùng khi điểm nằm ngoài khung HĐ hoặc cần điều chỉnh" ${isAdmin()?'':'disabled'}></div>
+      <div><button class="btn btn-p" id="aSave" style="width:100%" ${canAudit?'':'disabled'}>${ic('save')}Lưu điểm</button></div></div>
+    <textarea id="aNote" rows="2" style="margin-top:8px" placeholder="Ghi chú đánh giá (tiêu chí chưa đạt, đề xuất…)" ${canAudit?'':'disabled'}>${esc(a.note||'')}</textarea>
+    ${(c.tiers||[]).length?`<table class="t" style="margin-top:10px"><thead><tr><th>Khung điểm theo HĐ</th><th>Chế tài</th><th class="num">% trừ</th></tr></thead><tbody>${c.tiers.map(t=>`<tr style="${S.tier===t?'background:var(--copper-l)':''}"><td>${esc(t.label)}</td><td>${esc(t.action)}</td><td class="num">${t.pct}%</td></tr>`).join('')}</tbody></table>`:`<div class="flag">${ic('info')}<div>Hợp đồng không quy định % trừ phí theo điểm đánh giá — điểm chỉ dùng để theo dõi.</div></div>`}
+    <h4 style="margin:16px 0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aub)">Tính khấu trừ</h4>
+    <div class="calc">
+      <div class="k">Phí dịch vụ chuẩn/tháng</div><div class="v">${fmtd(S.fee)}</div>
+      <div class="k">(1) Phạt theo ${S.approved.length} biên bản đã duyệt</div><div class="v">${fmtd(S.fines)}</div>
+      <div class="k">(2) Trừ theo chất lượng (${S.qPct+S.extraPct}%)</div><div class="v">${fmtd(S.qualityDeduct)}</div>
+      <div class="k">(3) Bồi thường thiệt hại</div><div class="v">${fmtd(S.comp)}</div>
+      <div class="k tot">Tổng khấu trừ</div><div class="v tot">${fmtd(S.total)}</div>
+      <div class="k">Trần phạt ${c.capPct||8}% phí tháng</div><div class="v" style="color:${S.penaltyTotal>S.capAmt?'var(--bad)':'var(--ok)'}">${fmtd(S.capAmt)}</div>
+    </div>
+    ${S.alerts.map(x=>`<div class="flag ${x.lv==='bad'?'bad':''}">${ic('alert')}<div>${esc(x.t)}</div></div>`).join('')}
+  </div></div>`;
+  $('#aSave').onclick=async()=>{ const sc=$('#aScore').value, mp=$('#aManual').value; if(sc!=='' && (sc<0||sc>100)) return toast('Điểm phải từ 0 đến 100.', true);
+    try{ await STORE.saveAudit(akey, {building:c.building, service:c.service, contractKey:F.key, period:F.p, score:sc===''?null:Number(sc), manualPct:mp===''?null:Number(mp), note:$('#aNote').value, by:CUR.user.name, at:new Date().toISOString()}); toast('Đã lưu điểm đánh giá.'); }catch(e){ toast('Lỗi: '+e.message,true); } };
+  $('#pvBox').innerHTML=`<div class="pv-scale">${renderSummaryDoc(F.key,F.p,{approver:isAdmin()?CUR.user.name:''})}</div>`; scalePreview();
+}
+
+/* =====================================================================
+   4. THÔNG BÁO NHÀ THẦU
+   ===================================================================== */
+function viewNotice(v){
+  const F=CUR.f.notice; const keys=contractKeysFor(CUR.user).filter(k=>!getContract(k).missing);
+  if(!F.key||!keys.includes(F.key)) F.key=keys[0]||'';
+  const c=F.key?getContract(F.key):null;
+  const recs=DB.records.filter(r=>r.contractKey===F.key && periodOf(r.dateTime)===F.p && r.status==='approved').sort((a,b)=>(a.dateTime||'').localeCompare(b.dateTime||''));
+  if(!F._init || F._initFor!==F.key+F.p){ F.sel=recs.map(r=>r.id); F._init=true; F._initFor=F.key+F.p;
+    const prev=DB.notices.filter(n=>n.contractKey===F.key && n.issued && (n.period||'')>=addMonths(F.p,-5)).length;
+    F.type=prev>=2?'final':prev===1?'remind2':'remind1'; F.subject=''; F.days=c?String(c.remedyDays||3):'3'; F.signer=''; F.role=''; F.body=''; F.editingId=null; }
+  const prevN=DB.notices.filter(n=>n.contractKey===F.key).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  v.innerHTML=pageHead('Công văn gửi nhà thầu','Thông báo vi phạm & yêu cầu khắc phục','Chọn biên bản đã duyệt để đưa vào thông báo. Cấp thông báo được gợi ý theo số thông báo đã phát hành trong 6 tháng gần nhất.',
+    `<select id="nK">${keys.map(k=>`<option value="${k}" ${F.key===k?'selected':''}>${esc(contractLabel(k))}</option>`).join('')}</select><input type="month" id="nP" value="${F.p}">`)+
+  `<div class="sumgrid"><div style="display:flex;flex-direction:column;gap:16px">
+    <div class="card"><div class="card-h"><h3><span class="step">1</span>Biên bản đưa vào thông báo</h3><span class="hint" style="margin:0">${recs.length} BB đã duyệt</span></div><div class="card-b" style="padding:0">
+      ${recs.length?`<table class="t"><tbody>${recs.map(r=>`<tr><td style="width:30px"><input type="checkbox" data-sel="${r.id}" ${F.sel.includes(r.id)?'checked':''} style="width:auto"></td><td><b>${esc(r.no)}</b><div class="muted">${dDMY(r.dateTime)} · ${esc(r.violator||'')}</div></td><td>${(r.lines||[]).map(l=>esc(l.title.slice(0,70))).join('<br>')}</td><td class="num">${fmt(recTotals(r).fine)}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">Không có biên bản đã duyệt của hợp đồng này trong tháng ${periodLabel(F.p)}.</div>`}
+    </div></div>
+    <div class="card"><div class="card-h"><h3><span class="step">2</span>Nội dung thông báo</h3></div><div class="card-b"><div class="grid2">
+      <div><label class="f">Cấp thông báo</label><select id="nType">${Object.entries(NOTICE_TYPES).map(([k,t])=>`<option value="${k}" ${F.type===k?'selected':''}>${t.label}</option>`).join('')}</select><div class="hint">Đã phát hành ${prevN.filter(n=>n.issued).length} thông báo cho HĐ này.</div></div>
+      <div><label class="f">Thời hạn khắc phục (ngày)</label><input type="number" id="nDays" value="${esc(F.days)}"></div>
+      <div class="span2"><label class="f">Trích yếu (V/v)</label><input id="nSubj" value="${esc(F.subject)}" placeholder="${esc(NOTICE_TYPES[F.type].subject)}"></div>
+      <div class="span2"><label class="f">Nội dung bổ sung</label><textarea id="nBody" rows="3" placeholder="Nhận định thêm của BQL, yêu cầu riêng…">${esc(F.body)}</textarea></div>
+      <div><label class="f">Người ký</label><input id="nSigner" value="${esc(F.signer)}" placeholder="${esc(c?stripTitle(c.partyA.rep):'')}"></div>
+      <div><label class="f">Chức vụ</label><input id="nRole" value="${esc(F.role)}" placeholder="${esc(c?c.partyA.repRole:'')}"></div>
+      <div><label class="f">Ngày thông báo</label><input type="date" id="nDate" value="${esc(F.date)}"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-o" id="nPdf">${ic('pdf')}Xuất PDF dự thảo</button>
+      ${isAdmin()?`<button class="btn btn-p" id="nIssue">${ic('send')}Phát hành & xuất PDF</button>`:`<span class="hint">Chỉ Quản lý vận hành phát hành thông báo chính thức (có số).</span>`}
+    </div></div></div>
+    <div class="card"><div class="card-h"><h3>Thông báo đã phát hành</h3></div><div class="card-b" style="padding:0">${prevN.filter(n=>n.issued).length?`<table class="t"><tbody>${prevN.filter(n=>n.issued).map(n=>`<tr><td><b>${esc(n.no)}</b><div class="muted">${dDMY(n.date)} · ${esc(NOTICE_TYPES[n.type]?NOTICE_TYPES[n.type].label:'')}</div></td><td>${(n.recordIds||[]).length} BB · tháng ${periodLabel(n.period)}</td><td style="text-align:right;white-space:nowrap"><button class="btn btn-g btn-sm" data-np="${n.id}">${ic('pdf')}PDF</button>${isAdmin()?`<button class="btn btn-g btn-sm" data-nd="${n.id}" title="Xóa">${ic('trash')}</button>`:''}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">Chưa có.</div>`}</div></div>
+  </div>
+  <div class="pv-wrap" id="pvWrap"><div class="pv-head"><span>Xem trước thông báo</span></div><div id="pvBox"></div></div></div>`;
+  const cur=()=>({id:F.editingId||uid(), contractKey:F.key, building:c.building, service:c.service, period:F.p, type:F.type, subject:F.subject, deadlineDays:Number(F.days)||c.remedyDays||3, body:F.body, signer:F.signer, signerRole:F.role, date:F.date, recordIds:F.sel.slice(), no:''});
+  const pv=()=>{ if(!c) return; $('#pvBox').innerHTML=`<div class="pv-scale">${renderNoticeDoc(cur())}</div>`; scalePreview(); };
+  $('#nK').onchange=e=>{ F.key=e.target.value; viewNotice(v); };
+  $('#nP').onchange=e=>{ F.p=e.target.value||curPeriod(); viewNotice(v); };
+  $$('[data-sel]').forEach(cb=>cb.onchange=()=>{ F.sel = $$('[data-sel]').filter(x=>x.checked).map(x=>x.dataset.sel); pv(); });
+  const b=(id,k)=>{ const e=$('#'+id); e.oninput=e.onchange=()=>{ F[k]=e.value; if(id==='nType') $('#nSubj').placeholder=NOTICE_TYPES[F.type].subject; pv(); }; };
+  b('nType','type'); b('nDays','days'); b('nSubj','subject'); b('nBody','body'); b('nSigner','signer'); b('nRole','role'); b('nDate','date');
+  $('#nPdf').onclick=()=>exportPDF(renderNoticeDoc(cur(),{pdf:true}), `Thong-bao_du-thao_${BUILDINGS[c.building].short}_${F.p}.pdf`);
+  if($('#nIssue')) $('#nIssue').onclick=async()=>{
+    if(!F.sel.length && F.type!=='quality') return toast('Chọn ít nhất 1 biên bản.', true);
+    if(!(await confirmBox('Phát hành thông báo','Cấp số và lưu thông báo chính thức gửi '+partyBShort(c)+'?','Phát hành'))) return;
+    const n=cur(); n.no=nextNoticeNo(n); n.issued=true; n.issuedBy=CUR.user.name; n.createdAt=new Date().toISOString();
+    try{ await STORE.saveNotice(n); toast('Đã phát hành '+n.no); exportPDF(renderNoticeDoc(n,{pdf:true, issued:true}), `Thong-bao_${safeName(n.no)}.pdf`); F._init=false; }catch(e){ toast('Lỗi: '+e.message,true); }
+  };
+  $$('[data-np]').forEach(x=>x.onclick=()=>{ const n=DB.notices.find(y=>y.id===x.dataset.np); exportPDF(renderNoticeDoc(n,{pdf:true, issued:true}), `Thong-bao_${safeName(n.no)}.pdf`); });
+  $$('[data-nd]').forEach(x=>x.onclick=async()=>{ if(!(await confirmBox('Xóa thông báo','Xóa thông báo đã phát hành khỏi hệ thống?','Xóa',true))) return; await STORE.deleteNotice(x.dataset.nd); toast('Đã xóa.'); });
+  pv();
+}
+
+/* =====================================================================
+   5. DASHBOARD
+   ===================================================================== */
+function viewDash(v){
+  const F=CUR.f.dash; const P=F.p; const keys=contractKeysFor(CUR.user).filter(k=>!getContract(k).missing);
+  const recsM=DB.records.filter(r=>periodOf(r.dateTime)===P && keys.includes(r.contractKey));
+  const appr=recsM.filter(r=>r.status==='approved');
+  const sums=keys.map(k=>monthSummary(k,P));
+  const totalDeduct=sums.reduce((s,x)=>s+x.total,0);
+  const pending=DB.records.filter(r=>r.status==='pending' && keys.includes(r.contractKey));
+  const warnC=sums.filter(s=>s.alerts.some(a=>a.lv==='bad')).length;
+  const months=[...Array(6)].map((_,i)=>addMonths(P,i-5));
+  const trend=months.map(m=>({m, v:keys.reduce((s,k)=>s+monthSummary(k,m).fines,0), n:DB.records.filter(r=>r.status==='approved'&&periodOf(r.dateTime)===m&&keys.includes(r.contractKey)).length}));
+  const mx=Math.max(1,...trend.map(t=>t.v));
+  const byC=sums.map(s=>({k:s.c.building+'_'+s.c.service, name:`${BUILDINGS[s.c.building].name} · ${SERVICES[s.c.service].name}`, v:s.total, n:s.approved.length})).sort((a,b)=>b.v-a.v);
+  const mxC=Math.max(1,...byC.map(x=>x.v));
+  // tái phạm
+  const rep={}; recsM.filter(r=>r.status!=='returned').forEach(r=>(r.lines||[]).forEach(l=>{ const k=r.contractKey+'|'+l.code; rep[k]=rep[k]||{k:r.contractKey, code:l.code, title:l.title, n:0, maxLv:0, amt:0}; rep[k].n++; rep[k].maxLv=Math.max(rep[k].maxLv,l.level||1); rep[k].amt+=Number(l.amount)||0; }));
+  const repeats=Object.values(rep).filter(x=>x.n>=2).sort((a,b)=>b.n-a.n);
+  // top lỗi 6 tháng
+  const top={}; DB.records.filter(r=>r.status==='approved'&&months.includes(periodOf(r.dateTime))&&keys.includes(r.contractKey)).forEach(r=>(r.lines||[]).forEach(l=>{ const k=r.service+'|'+l.title; top[k]=top[k]||{s:r.service,title:l.title,n:0,amt:0}; top[k].n++; top[k].amt+=Number(l.amount)||0; }));
+  const tops=Object.values(top).sort((a,b)=>b.n-a.n).slice(0,8);
+  const expired=keys.map(getContract).filter(c=>contractExpired(c));
+  v.innerHTML=pageHead('Theo dõi tái phạm','Dashboard chế tài', isAdmin()?'Toàn danh mục Non-CBD':'Tòa nhà '+esc(BUILDINGS[CUR.user.building].name), `<input type="month" id="dP" value="${P}">`)+`
+  <div class="kpis">
+    <div class="card kpi"><div class="l">Biên bản đã duyệt</div><div class="v">${appr.length}</div><div class="s">${recsM.length} biên bản lập trong tháng ${periodLabel(P)}</div></div>
+    <div class="card kpi"><div class="l">Tổng khấu trừ tháng</div><div class="v">${fmt(totalDeduct)}</div><div class="s">đồng · phạt BB + chất lượng + bồi thường</div></div>
+    <div class="card kpi"><div class="l">Chờ duyệt</div><div class="v" style="color:${pending.length?'var(--copper)':''}">${pending.length}</div><div class="s">biên bản (mọi tháng)</div></div>
+    <div class="card kpi"><div class="l">Hợp đồng chạm ngưỡng</div><div class="v" style="color:${warnC?'var(--bad)':''}">${warnC}</div><div class="s">có cảnh báo chấm dứt / vượt mức</div></div>
+  </div>
+  <div class="dgrid">
+    <div class="card"><div class="card-h"><h3>Tiền phạt theo biên bản · 6 tháng</h3></div><div class="card-b">
+      <div class="vbars">${trend.map(t=>`<div class="col"><div class="cap">${t.v?fmt(t.v/1000)+'k':''}</div><div class="bar ${t.m===P?'cur':''}" style="height:${t.v/mx*100}%" data-tip="Tháng ${periodLabel(t.m)}: ${fmtd(t.v)} · ${t.n} BB"></div></div>`).join('')}</div>
+      <div class="vlabels">${trend.map(t=>`<div>${periodLabel(t.m)}</div>`).join('')}</div>
+      <div class="hint">Đơn vị trên cột: nghìn đồng. Tháng đang xem tô màu đồng.</div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>Tổng khấu trừ theo hợp đồng · ${periodLabel(P)}</h3></div><div class="card-b">
+      ${byC.map(x=>`<div class="hbar"><div class="nm" title="${esc(x.name)}">${esc(x.name)}</div><div class="trk"><div class="fill" style="width:${x.v/mxC*100}%" data-tip="${esc(x.name)}: ${fmtd(x.v)} · ${x.n} BB"></div></div><div class="val">${fmt(x.v)}</div></div>`).join('')||'<div class="empty">Không có dữ liệu</div>'}
+    </div></div>
+    <div class="card"><div class="card-h"><h3>Tái phạm trong tháng (≥ 2 lần)</h3></div><div class="tbl-wrap">
+      ${repeats.length?`<table class="t"><thead><tr><th>Hợp đồng</th><th>Lỗi</th><th class="num">Số lần</th><th class="num">Lần cao nhất</th><th class="num">Tiền phạt</th></tr></thead><tbody>${repeats.map(x=>`<tr><td>${esc(contractLabel(x.k))}</td><td>${esc(x.code)} · ${esc(x.title.slice(0,70))}</td><td class="num"><b>${x.n}</b></td><td class="num">${x.maxLv}</td><td class="num">${fmt(x.amt)}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">Không có lỗi tái phạm trong tháng ${periodLabel(P)}.</div>`}
+    </div></div>
+    <div class="card"><div class="card-h"><h3>Lỗi phổ biến · 6 tháng</h3></div><div class="tbl-wrap">
+      ${tops.length?`<table class="t"><thead><tr><th>Dịch vụ</th><th>Lỗi</th><th class="num">Số lần</th><th class="num">Tiền phạt</th></tr></thead><tbody>${tops.map(x=>`<tr><td>${SERVICES[x.s].name}</td><td>${esc(x.title.slice(0,80))}</td><td class="num"><b>${x.n}</b></td><td class="num">${fmt(x.amt)}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">Chưa có dữ liệu.</div>`}
+    </div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="card-h"><h3>Cảnh báo theo hợp đồng</h3></div><div class="card-b">
+    ${sums.flatMap(s=>s.alerts.filter(a=>a.lv==='bad').map(a=>`<div class="flag bad">${ic('alert')}<div><b>${esc(contractLabel(s.c.building+'_'+s.c.service))}:</b> ${esc(a.t)}</div></div>`)).join('')}
+    ${expired.map(c=>`<div class="flag">${ic('alert')}<div><b>${esc(contractLabel(c.building+'_'+c.service))}:</b> hợp đồng theo hồ sơ hết hạn ${dDMY(c.termTo)} — cần cập nhật phụ lục gia hạn.</div></div>`).join('')}
+    ${keys.length<contractKeysFor(CUR.user).length?`<div class="flag">${ic('info')}<div>Chưa có HĐ trên hệ thống: ${contractKeysFor(CUR.user).filter(k=>getContract(k).missing).map(k=>esc(contractLabel(k))).join(', ')}.</div></div>`:''}
+    ${!sums.some(s=>s.alerts.some(a=>a.lv==='bad'))&&!expired.length?'<div class="hint">Không có cảnh báo.</div>':''}
+  </div></div>`;
+  $('#dP').onchange=e=>{ F.p=e.target.value||curPeriod(); viewDash(v); };
+  // tooltip
+  let tip=null;
+  $$('[data-tip]',v).forEach(el=>{ el.onmouseenter=e=>{ tip=document.createElement('div'); tip.className='tip'; tip.textContent=el.dataset.tip; document.body.appendChild(tip); }; el.onmousemove=e=>{ if(tip){ tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY-30)+'px'; } }; el.onmouseleave=()=>{ if(tip) tip.remove(); tip=null; }; });
+}
+
+/* =====================================================================
+   6. HỢP ĐỒNG & MỨC PHẠT
+   ===================================================================== */
+function viewContracts(v){
+  const keys=contractKeysFor(CUR.user);
+  v.innerHTML=pageHead('Cấu hình','Hợp đồng & danh mục mức phạt', isAdmin()?'Dữ liệu trích từ bản scan hợp đồng. Anh có thể chỉnh sửa, thêm lỗi, cập nhật phụ lục mới — bản sửa áp dụng cho các biên bản lập sau đó.':'Danh mục lỗi và mức phạt đang áp dụng (chỉ xem).')+
+  `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px">${keys.map(k=>{ const c=getContract(k);
+    return `<div class="card"><div class="card-h"><h3>${esc(contractLabel(k))}</h3>${c.missing?'<span class="pill s-returned">Chưa có HĐ</span>':contractExpired(c)?'<span class="pill s-pending">Hết hạn theo hồ sơ</span>':'<span class="pill s-approved">Đang áp dụng</span>'}</div><div class="card-b">
+      ${c.missing?`<div class="hint">Chưa có hợp đồng trên hệ thống.</div>`:`<dl class="kv" style="margin-top:0"><dt>Nhà thầu</dt><dd>${esc(partyBShort(c))}</dd><dt>Số HĐ</dt><dd>${esc(c.contractNo)}</dd><dt>Thời hạn</dt><dd>${dDMY(c.termFrom)} – ${c.termTo?dDMY(c.termTo):'…'}</dd><dt>Phí DV/tháng</dt><dd>${fmtd(c.monthlyFee)}</dd><dt>Danh mục lỗi</dt><dd>${(c.items||[]).length} hạng mục</dd></dl>`}
+      ${(c.flags||[]).map(f=>`<div class="flag">${ic('info')}<div>${esc(f)}</div></div>`).join('')}
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn ${isAdmin()?'btn-p':'btn-o'} btn-sm" data-ce="${k}">${ic(isAdmin()?'edit':'list')}${isAdmin()?'Chỉnh sửa':'Xem chi tiết'}</button>${c._edited&&isAdmin()&&CONTRACT_SEED[k]&&!CONTRACT_SEED[k].missing?`<button class="btn btn-g btn-sm" data-cr="${k}">${ic('undo')}Khôi phục theo bản scan HĐ</button>`:''}${c._edited?'<span class="hint" style="margin:6px 0 0">Đã chỉnh sửa trên web</span>':''}</div>
+    </div></div>`; }).join('')}</div>`;
+  $$('[data-ce]',v).forEach(b=>b.onclick=()=>contractEditor(b.dataset.ce));
+  $$('[data-cr]',v).forEach(b=>b.onclick=async()=>{ if(!(await confirmBox('Khôi phục','Bỏ các chỉnh sửa trên web và dùng lại dữ liệu trích từ bản scan hợp đồng?','Khôi phục',true))) return; await STORE.resetContract(b.dataset.cr); toast('Đã khôi phục.'); });
+}
+function levelSummary(L){ return L.map((l,i)=>`L${i+1}: ${l.pct!=null?(l.pct+(l.pctMax!=null?'–'+l.pctMax:'')+'% '+({fee:'phí tháng',contract:'giá trị HĐ',asset:'giá trị TS'}[l.base]||'')):l.min!=null?(fmt(l.min)+(l.max!=null?'–'+fmt(l.max):'+')):fmt(l.a)}`).join(' · '); }
+function contractEditor(key){
+  const c=JSON.parse(JSON.stringify(getContract(key))); delete c._edited; const ro=!isAdmin();
+  const f=(lbl,path,type='text',span)=>{ const val=path.split('.').reduce((o,k)=>o&&o[k],c); return `<div class="${span?'span2':''}"><label class="f">${lbl}</label>${type==='area'?`<textarea data-p="${path}" rows="2" ${ro?'disabled':''}>${esc(val||'')}</textarea>`:`<input type="${type}" data-p="${path}" value="${esc(val==null?'':val)}" ${ro?'disabled':''}>`}</div>`; };
+  const body=`
+    <h4 style="margin:0 0 8px;color:var(--aub);font-size:12px;text-transform:uppercase;letter-spacing:.08em">Bên A – Bên sử dụng dịch vụ</h4>
+    <div class="grid2">${f('Tên pháp nhân','partyA.name')}${f('MST','partyA.tax')}${f('Địa chỉ','partyA.addr','text',true)}${f('Người đại diện','partyA.rep')}${f('Chức vụ','partyA.repRole')}</div>
+    <h4 style="margin:16px 0 8px;color:var(--aub);font-size:12px;text-transform:uppercase;letter-spacing:.08em">Bên B – Nhà thầu</h4>
+    <div class="grid2">${f('Tên pháp nhân','partyB.name')}${f('MST','partyB.tax')}${f('Địa chỉ','partyB.addr','text',true)}${f('Người đại diện','partyB.rep')}${f('Chức vụ','partyB.repRole')}</div>
+    <h4 style="margin:16px 0 8px;color:var(--aub);font-size:12px;text-transform:uppercase;letter-spacing:.08em">Hợp đồng</h4>
+    <div class="grid2">${f('Số hợp đồng','contractNo')}${f('Ngày ký','contractDate','date')}${f('Phụ lục đang áp dụng','appendix','text',true)}${f('Căn cứ phạt (phụ lục)','penaltyRef','text',true)}${f('Hiệu lực từ','termFrom','date')}${f('Hiệu lực đến','termTo','date')}${f('Phí dịch vụ chuẩn/tháng (chưa VAT)','monthlyFee','number')}${f('Giá trị hợp đồng (dùng cho lỗi tính % giá trị HĐ)','contractValue','number')}${f('Diễn giải phí','feeNote','text',true)}${f('Trần phạt (% phí tháng)','capPct','number')}${f('Thời hạn khắc phục mặc định (ngày)','remedyDays','number')}
+    <div><label class="f">Đếm lần tái phạm</label><select data-p="offensePeriod" ${ro?'disabled':''}><option value="month" ${c.offensePeriod!=='term'?'selected':''}>Trong cùng tháng</option><option value="term" ${c.offensePeriod==='term'?'selected':''}>Trong suốt thời hạn HĐ</option></select></div></div>
+    <h4 style="margin:16px 0 8px;color:var(--aub);font-size:12px;text-transform:uppercase;letter-spacing:.08em">Điều khoản trích dẫn trên văn bản</h4>
+    <div class="grid2">${f('Quyền khấu trừ (in trên biên bản)','clauses.deduct','area',true)}${f('Điều khoản nhắc nhở / khắc phục (in trên thông báo)','clauses.notice','area',true)}${f('Điều khoản chấm dứt HĐ','clauses.termination','area',true)}${f('Điều khoản bồi thường','clauses.compensation','area',true)}</div>
+    <h4 style="margin:16px 0 8px;color:var(--aub);font-size:12px;text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between;align-items:center">Danh mục lỗi & mức phạt ${ro?'':`<button class="btn btn-o btn-sm" id="itAdd">${ic('plus')}Thêm lỗi</button>`}</h4>
+    <div id="itTbl"></div>
+    <h4 style="margin:16px 0 8px;color:var(--aub);font-size:12px;text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between;align-items:center">Khung điểm chất lượng tháng ${ro?'':`<button class="btn btn-o btn-sm" id="tiAdd">${ic('plus')}Thêm khung</button>`}</h4>
+    <div id="tiTbl"></div>`;
+  modal({title:(ro?'Hợp đồng · ':'Chỉnh sửa hợp đồng · ')+contractLabel(key), body, wide:true,
+    foot: ro?`<button class="btn btn-o" data-x>Đóng</button>`:`<button class="btn btn-o" data-x>Hủy</button><button class="btn btn-p" id="ceSave">${ic('save')}Lưu hợp đồng</button>`,
+    onMount:(el,close)=>{
+      const drawItems=()=>{ $('#itTbl',el).innerHTML=`<table class="t"><thead><tr><th style="width:50px">Mã</th><th>Hành vi vi phạm</th><th>Mức phạt theo lần</th>${ro?'':'<th></th>'}</tr></thead><tbody>${(c.items||[]).map((it,i)=>`<tr><td><b>${esc(it.code)}</b></td><td>${esc(it.title)}<div class="muted">${esc(it.ref||'')}</div></td><td><div class="muted">${esc(levelSummary(it.levels||[]))}</div>${(it.levels||[]).map((l,j)=>`<div style="font-size:11px">Lần ${j+1}${j===it.levels.length-1&&it.levels.length>1?'+':''}: ${esc(l.t)}</div>`).join('')}</td>${ro?'':`<td style="white-space:nowrap"><button class="btn btn-g btn-sm" data-ie="${i}">${ic('edit')}</button><button class="btn btn-g btn-sm" data-id="${i}">${ic('trash')}</button></td>`}</tr>`).join('')||'<tr><td colspan="4" class="empty">Chưa có lỗi nào</td></tr>'}</tbody></table>`;
+        $$('[data-ie]',el).forEach(b=>b.onclick=()=>itemEditor(c.items[+b.dataset.ie], it=>{ c.items[+b.dataset.ie]=it; drawItems(); }));
+        $$('[data-id]',el).forEach(b=>b.onclick=()=>{ c.items.splice(+b.dataset.id,1); drawItems(); }); };
+      const drawTiers=()=>{ $('#tiTbl',el).innerHTML=(c.tiers||[]).length||!ro?`<table class="t"><thead><tr><th style="width:80px">Từ (%)</th><th style="width:80px">Đến (%)</th><th style="width:80px">% trừ phí</th><th>Tên mức</th><th>Chế tài</th>${ro?'':'<th></th>'}</tr></thead><tbody>${(c.tiers||[]).map((t,i)=>`<tr>${['min','max','pct','label','action'].map(k=>`<td><input data-t="${i}.${k}" value="${esc(t[k])}" ${ro?'disabled':''} ${['min','max','pct'].includes(k)?'type="number" step="0.01"':''}></td>`).join('')}${ro?'':`<td><button class="btn btn-g btn-sm" data-td="${i}">${ic('trash')}</button></td>`}</tr>`).join('')}</tbody></table>`:'<div class="hint">Không quy định.</div>';
+        $$('[data-t]',el).forEach(inp=>inp.oninput=()=>{ const [i,k]=inp.dataset.t.split('.'); c.tiers[+i][k]=['min','max','pct'].includes(k)?Number(inp.value):inp.value; });
+        $$('[data-td]',el).forEach(b=>b.onclick=()=>{ c.tiers.splice(+b.dataset.td,1); drawTiers(); }); };
+      drawItems(); drawTiers();
+      if(ro) return;
+      $('#itAdd',el).onclick=()=>itemEditor({code:'', title:'', ref:'', levels:[{a:0,t:''}]}, it=>{ c.items=c.items||[]; c.items.push(it); drawItems(); });
+      $('#tiAdd',el).onclick=()=>{ c.tiers=c.tiers||[]; c.tiers.push({min:0,max:0,pct:0,label:'',action:''}); drawTiers(); };
+      $('#ceSave',el).onclick=async()=>{
+        $$('[data-p]',el).forEach(inp=>{ const ps=inp.dataset.p.split('.'); let o=c; for(let i=0;i<ps.length-1;i++){ o[ps[i]]=o[ps[i]]||{}; o=o[ps[i]]; } o[ps[ps.length-1]]=inp.type==='number'?Number(inp.value):inp.value; });
+        if(c.partyB.name && (c.items||[]).length) c.missing=false;
+        c.flags=(c.flags||[]).filter(x=>!/^Chưa có hợp đồng/.test(x));
+        try{ await STORE.saveContract(key, c); toast('Đã lưu hợp đồng.'); close(); }catch(e){ toast('Lỗi: '+e.message,true); }
+      };
+    }});
+}
+function itemEditor(item, onSave){
+  const it=JSON.parse(JSON.stringify(item));
+  const kindOf=l=>l.pct!=null?('pct_'+(l.base||'fee')):l.min!=null?'range':'fixed';
+  const draw=(el)=>{ $('#lvBox',el).innerHTML=it.levels.map((l,i)=>{ const k=kindOf(l); return `<div class="card" style="padding:10px 12px;margin-bottom:8px;box-shadow:none"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="font-size:12px;color:var(--aub)">Lần ${i+1}${i===it.levels.length-1?' (và các lần sau)':''}</b><button class="btn btn-g btn-sm" data-lr="${i}">${ic('trash')}</button></div>
+    <div class="grid3"><div><label class="f">Cách tính</label><select data-lk="${i}"><option value="fixed" ${k==='fixed'?'selected':''}>Số tiền cố định</option><option value="range" ${k==='range'?'selected':''}>Khung tiền (từ – đến)</option><option value="pct_fee" ${k==='pct_fee'?'selected':''}>% phí dịch vụ tháng</option><option value="pct_contract" ${k==='pct_contract'?'selected':''}>% giá trị hợp đồng</option><option value="pct_asset" ${k==='pct_asset'?'selected':''}>% giá trị tài sản</option></select></div>
+    ${k==='fixed'?`<div><label class="f">Số tiền (đ)</label><input type="number" data-lv="${i}.a" value="${l.a||0}"></div><div></div>`:k==='range'?`<div><label class="f">Từ (đ)</label><input type="number" data-lv="${i}.min" value="${l.min||0}"></div><div><label class="f">Đến (đ, trống = không giới hạn)</label><input type="number" data-lv="${i}.max" value="${l.max==null?'':l.max}"></div>`:`<div><label class="f">Tỷ lệ (%)</label><input type="number" step="0.01" data-lv="${i}.pct" value="${l.pct||0}"></div><div><label class="f">Tỷ lệ tối đa (%, nếu là khung)</label><input type="number" step="0.01" data-lv="${i}.pctMax" value="${l.pctMax==null?'':l.pctMax}"></div>`}
+    <div class="span2" style="grid-column:1/-1"><label class="f">Hình thức xử lý (in trên biên bản)</label><input data-lv="${i}.t" value="${esc(l.t||'')}"></div></div></div>`; }).join('');
+    $$('[data-lk]',el).forEach(s=>s.onchange=()=>{ const i=+s.dataset.lk; const t=it.levels[i].t; const v=s.value; it.levels[i]= v==='fixed'?{a:0,t}:v==='range'?{min:0,max:null,t}:{pct:0,base:v.split('_')[1],t}; draw(el); });
+    $$('[data-lv]',el).forEach(inp=>inp.oninput=()=>{ const [i,k]=inp.dataset.lv.split('.'); it.levels[+i][k]= k==='t'?inp.value:(inp.value===''?null:Number(inp.value)); });
+    $$('[data-lr]',el).forEach(b=>b.onclick=()=>{ if(it.levels.length<=1) return toast('Cần ít nhất 1 mức.',true); it.levels.splice(+b.dataset.lr,1); draw(el); });
+  };
+  modal({title:'Lỗi vi phạm', body:`<div class="grid2"><div><label class="f">Mã / STT</label><input id="iCode" value="${esc(it.code)}"></div><div><label class="f">Căn cứ (điều khoản)</label><input id="iRef" value="${esc(it.ref||'')}"></div><div class="span2"><label class="f">Hành vi vi phạm</label><textarea id="iTitle" rows="2">${esc(it.title)}</textarea></div><div><label class="f">Nhãn số lượng</label><input id="iQty" value="${esc(it.qtyLabel||'')}" placeholder="Số lượng"></div><div><label class="f" style="margin-top:22px"><input type="checkbox" id="iComp" ${it.comp?'checked':''} style="width:auto"> Có bồi thường thiệt hại</label></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px"><label class="f" style="margin:0">Mức phạt theo lần vi phạm</label><button class="btn btn-o btn-sm" id="lvAdd">${ic('plus')}Thêm lần</button></div><div id="lvBox"></div>`,
+    foot:`<button class="btn btn-o" data-x>Hủy</button><button class="btn btn-p" id="iSave">Lưu lỗi</button>`,
+    onMount:(el,close)=>{ draw(el);
+      $('#lvAdd',el).onclick=()=>{ it.levels.push({a:0,t:''}); draw(el); };
+      $('#iSave',el).onclick=()=>{ it.code=$('#iCode',el).value.trim(); it.title=$('#iTitle',el).value.trim(); it.ref=$('#iRef',el).value.trim(); it.qtyLabel=$('#iQty',el).value.trim(); it.comp=$('#iComp',el).checked;
+        if(!it.code||!it.title) return toast('Nhập mã và hành vi vi phạm.',true); onSave(it); close(); };
+    }});
+}
+
+/* =====================================================================
+   DEMO DATA
+   ===================================================================== */
+function seedDemo(){
+  const P=curPeriod(), P1=addMonths(P,-1), P2=addMonths(P,-2);
+  const mk=(key, dt, loc, violator, lines, status, extra={})=>{ const c=getContract(key); const r={id:uid(), building:c.building, service:c.service, contractKey:key, dateTime:dt, location:loc, source:'Tuần tra trực tiếp', repA:'Nguyễn Văn BQL', roleA:'Giám sát chất lượng dịch vụ – BQL Tòa nhà', repB:c.service==='SECURITY'?'Trần Văn Chỉ Huy':'Lê Thị Tổ Trưởng', roleB:defaultRoleB(c.service), violator, witness:'', lines:[], remedy:'', remedyDeadline:addDays(dt,c.remedyDays||3), opinionB:'Đã nhận thông tin, cam kết chấn chỉnh.', opinionA:'', status, photoCount:0, createdBy:{uid:'demo', name:'Nguyễn Văn BQL'}, createdAt:dt, ...extra};
+    lines.forEach(([code,level,detail,qty])=>{ const it=c.items.find(i=>i.code===code); const L={code, title:it.title, ref:it.ref, level, qty:qty||1, detail, comp:0, assetValue:0, pctUsed:null}; L.amount=contractAmount(c,it,L); L.stdAmount=L.amount; L.action=levelOf(it,level).t; r.lines.push(L); });
+    r.remedy=suggestRemedy(r); r.no=nextRecordNo(r); const t=recTotals(r); r.totalFine=t.fine; r.totalComp=t.comp;
+    if(status==='approved'){ r.approvedBy='Phạm Bill'; r.approvedAt=dt; }
+    DB.records.push(r); };
+  mk('lmak68_SECURITY', P2+'-08T02:15', 'Chốt sảnh tầng G', 'Võ Văn Long – ca đêm', [['05',1,'Ngủ tại bàn trực lúc 02h15, ghi nhận qua camera sảnh G']], 'approved');
+  mk('lmak68_SECURITY', P1+'-12T14:30', 'Hầm B1', 'Phan Minh Tâm – ca ngày', [['02',1,'Không đội mũ, áo không bỏ thùng']], 'approved');
+  mk('lmak68_SECURITY', P+'-03T01:40', 'Chốt cổng chính', 'Võ Văn Long – ca đêm', [['05',1,'Ngủ gật tại chốt cổng, tuần tra BQL phát hiện']], 'approved');
+  mk('lmak68_SECURITY', P+'-05T23:10', 'Chốt cổng chính', 'Võ Văn Long – ca đêm', [['05',2,'Tái phạm ngủ trong ca trực'],['06',2,'Xem phim trên điện thoại']], 'approved');
+  mk('lmak68_SECURITY', P+'-06T09:20', 'Quầy lễ tân LiteSpace', 'Đỗ Thị Mai – ca ngày', [['LS',1,'Bóc nhầm thư của khách hàng LiteSpace tầng 5']], 'pending');
+  mk('lmak68_CLEANING', P+'-04T10:00', 'WC nam tầng 7', 'Nguyễn Thị Hoa', [['10',1,'Khách thuê phản ánh WC hết giấy, sàn ướt']], 'approved');
+  mk('lmak68_CLEANING', P+'-05T15:30', 'Khu vực ngoại cảnh', 'Trần Thị Lan', [['02',1,'Hút thuốc phía sau tòa nhà trong giờ làm việc']], 'pending');
+  mk('hh130_CLEANING', P+'-02T07:10', 'Sảnh tầng 1', 'Lý Thị Thu', [['07',1,'Đến trễ 40 phút, sảnh chưa vệ sinh đầu giờ']], 'approved');
+  mk('hh130_CLEANING', P+'-04T11:00', 'WC tầng 3', 'Lý Thị Thu', [['02',1,'Còn rác, có mùi']], 'approved');
+  mk('hh130_CLEANING', P1+'-20T16:00', 'Hành lang tầng 4', 'Lý Thị Thu', [['06',1,'Không mặc đồng phục, không đeo thẻ']], 'approved');
+  mk('hh127_SECURITY', P+'-01T20:00', 'Bãi xe', 'Bảo vệ ca tối', [['05',1,'Thiếu 01 vị trí tuần tra bãi xe ca tối',1]], 'approved');
+  mk('hh127_SECURITY', P+'-05T13:00', 'Cổng kiểm soát bãi xe', 'Nguyễn Văn Bình', [['35',1,'Giữ xe khách vãng lai không xuất vé']], 'draft');
+  DB.audits[`lmak68_SECURITY_${P2}`]={score:82, contractKey:'lmak68_SECURITY', building:'lmak68', service:'SECURITY', period:P2};
+  DB.audits[`lmak68_SECURITY_${P1}`]={score:80, contractKey:'lmak68_SECURITY', building:'lmak68', service:'SECURITY', period:P1};
+  DB.audits[`lmak68_SECURITY_${P}`]={score:78, contractKey:'lmak68_SECURITY', building:'lmak68', service:'SECURITY', period:P, note:'Tiêu chí trực ca & vị trí chưa đạt.'};
+  DB.audits[`lmak68_CLEANING_${P}`]={score:86, contractKey:'lmak68_CLEANING', building:'lmak68', service:'CLEANING', period:P};
+  DB.audits[`hh130_CLEANING_${P}`]={score:72, contractKey:'hh130_CLEANING', building:'hh130', service:'CLEANING', period:P};
+}
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+window.addEventListener('beforeunload', e=>{ if(CUR.dirty){ e.preventDefault(); e.returnValue=''; } });
+(function boot(){
+  if(DEMO){ renderLogin(); return; }
+  firebase.initializeApp(firebaseConfig);
+  firebase.auth().onAuthStateChanged(async u=>{
+    busy(false);
+    if(!u){ CUR.user=null; renderLogin(); return; }
+    try{
+      const acc=ACCOUNTS[(u.email||'').toLowerCase()];
+      if(!acc){ await firebase.auth().signOut(); renderLogin('Email '+u.email+' chưa được phân quyền trên web này. Liên hệ Quản lý vận hành.'); return; }
+      startApp({uid:u.uid, email:u.email, name:acc.name, role:acc.role, building:acc.building||''});
+    }catch(e){ renderLogin('Không đọc được hồ sơ người dùng: '+e.message); }
+  });
+})();
+
+</script>
+</body>
+</html>
