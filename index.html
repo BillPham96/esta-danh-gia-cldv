@@ -10,9 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Cormorant+Garamond:ital,wght@1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
 <style>
 :root{
   --aub:#411437; --aub-d:#2B1526; --aub-08:rgba(65,20,55,.08); --aub-15:rgba(65,20,55,.15);
@@ -83,9 +81,11 @@ nav.tabs .badge{background:var(--copper);color:#fff;border-radius:9px;font-size:
 .userchip{display:flex;align-items:center;gap:10px;font-size:11.5px}
 .userchip .av{width:30px;height:30px;border-radius:50%;background:var(--copper);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
 .userchip .rl{opacity:.7;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
-.userchip button{background:none;border:1px solid rgba(243,222,191,.3);color:var(--cream-l);border-radius:4px;padding:5px 9px;cursor:pointer;font-size:11px}
+.userchip button{background:none;border:1px solid rgba(243,222,191,.3);color:var(--cream-l);border-radius:4px;padding:6px 9px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.userchip button:hover{border-color:var(--copper)}
 .userchip .who{white-space:nowrap}
-@media (max-width:1380px){.topin .apptitle{display:none}}
+@media (max-width:1640px){.topin .apptitle{display:none}}
+@media (max-width:1280px){.userchip #btnData .who{display:none}}
 @media (max-width:1100px){.userchip .who{display:none}}
 @media (max-width:900px){.topin{flex-wrap:wrap;gap:8px;padding:8px 12px}nav.tabs{order:3;width:100%;margin-left:0;overflow-x:auto;flex-wrap:nowrap}nav.tabs button{padding:10px 9px}.userchip{margin-left:auto}}
 .demo-bar{background:var(--copper);color:#fff;font-size:11.5px;text-align:center;padding:5px 12px}
@@ -503,8 +503,62 @@ const CONTRACT_SEED = {
 
   /* ---------------- CHƯA CÓ HỢP ĐỒNG ---------------- */
   hh130_SECURITY: {building:'hh130', service:'SECURITY', missing:true},
-  venture_SECURITY: {building:'venture', service:'SECURITY', missing:true},
-  venture_CLEANING: {building:'venture', service:'CLEANING', missing:true},
+};
+
+/* ---------------- LITE THE VENTURE (62 Trần Huy Liệu) ---------------- */
+const PARTY_A_VENTURE = {name:"CÔNG TY CỔ PHẦN ĐẦU TƯ LITE BY L'MAK", tax:'0315745006', addr:'147-147Bis Hai Bà Trưng, Phường Xuân Hòa, TP. Hồ Chí Minh', rep:'Ông NGUYỄN HOÀNG NAM', repRole:'Tổng Giám đốc'};
+// An ninh: Becamex — Phụ lục 1 phạt vi phạm giống hệt HĐ 127 Hồng Hà (đã đối chiếu bản scan)
+CONTRACT_SEED.venture_SECURITY = Object.assign(JSON.parse(JSON.stringify(CONTRACT_SEED.hh127_SECURITY)), {
+  building:'venture', service:'SECURITY',
+  partyA: PARTY_A_VENTURE,
+  partyB:{name:'CÔNG TY TNHH DỊCH VỤ BẢO VỆ TẬP ĐOÀN BECAMEX', tax:'0317813861', addr:'101 Lê Thị Hồng, Phường Gò Vấp, TP. Hồ Chí Minh', rep:'Bà NGUYỄN THỊ TRANG', repRole:'Giám đốc'},
+  contractNo:'062502/HDAN/BCM-THEVENTURE', contractDate:'2025-07-01',
+  appendix:'Phụ lục số 005 ký ngày 15/08/2026 (tăng 01 vị trí 12/24h từ 15/08/2026)',
+  penaltyRef:'Phụ lục 1 – Phạt vi phạm (đính kèm HĐ 062502/HDAN/BCM-THEVENTURE)',
+  termFrom:'2025-06-24', termTo:'', termNote:'HĐ gốc 24/06/2025 – 23/06/2026; đang thực hiện theo Phụ lục 004 (15/05/2026) và 005 (15/08/2026)',
+  monthlyFee:27000000, feeNote:'01 vị trí 24/24h × 18.000.000 + 01 vị trí 12/24h × 9.000.000 (chưa VAT) – theo PL005',
+  contractValue:324000000,
+  remedyDays:2,
+  flags:['Phụ lục 1 giống hệt HĐ Becamex tại 127 Hồng Hà; bản scan không có STT 11 (đánh số nhảy 10 → 12).','HĐ gốc hết hạn 23/06/2026 — đang áp dụng theo Phụ lục 004/005; nếu có phụ lục gia hạn mới, cập nhật thời hạn.'],
+});
+CONTRACT_SEED.venture_SECURITY.items = CONTRACT_SEED.venture_SECURITY.items.map(x=>({...x, ref:'PL1 – STT '+x.code}));
+// Vệ sinh: Nhà Sạch — Phụ lục 2 phạt vi phạm riêng (khác HĐ 130 Hồng Hà)
+CONTRACT_SEED.venture_CLEANING = {
+  building:'venture', service:'CLEANING',
+  partyA: PARTY_A_VENTURE,
+  partyB:{name:'CÔNG TY TNHH ĐẦU TƯ THƯƠNG MẠI VÀ DỊCH VỤ NHÀ SẠCH', tax:'0317802531', addr:'Số 227/1/68 Nguyễn Tư Giản, Phường An Hội Tây, TP. Hồ Chí Minh', rep:'Ông NGUYỄN VĂN HOÀI', repRole:'Giám đốc Điều hành'},
+  contractNo:"010926/HĐDV/NS-L'MAK", contractDate:'2026-09-01',
+  appendix:'', penaltyRef:"Phụ lục 2 – Phạt vi phạm hợp đồng (HĐ 010926/HĐDV/NS-L'MAK)",
+  termFrom:'2026-09-14', termTo:'2027-09-13', termNote:'Gia hạn khi có sự đồng ý bằng văn bản của Bên A',
+  monthlyFee:17000000, feeNote:'02 vị trí vệ sinh ca 06h30–16h00 × 8.500.000 (chưa VAT 8%)',
+  contractValue:204000000, capPct:8, offensePeriod:'month',
+  clauses:{
+    deduct:'Bên A được quyền trừ thẳng vào phí dịch vụ chưa thanh toán cho Bên B kèm biên bản ghi nhận hành vi vi phạm có chữ ký của người vi phạm, nhân viên Bên B hoặc chữ ký người làm chứng (trường hợp người vi phạm không ký), hình ảnh liên quan (Mục VII.1.2 Phụ lục 2).',
+    notice:'Bên A có quyền yêu cầu Bên B khắc phục ngay hoặc thay thế nhân sự trong thời hạn do Bên A quy định; nếu Bên B không khắc phục/không thay thế, Bên A có quyền đơn phương chấm dứt Hợp đồng và yêu cầu bồi thường thiệt hại thực tế.',
+    termination:'Phụ lục 2: không cung cấp đủ nhân sự (lần 3), để nhân sự thay đổi thường xuyên (lần 3), khách hàng phản ánh chất lượng (lần 3) → Bên A xem xét thanh lý Hợp đồng.',
+    compensation:'Bên B bồi thường toàn bộ thiệt hại thực tế phát sinh do lỗi nhân sự Bên B.',
+  },
+  remedyDays:1,
+  items:[
+    {code:'01', title:'Nhân viên ăn mặc không đúng quy định, sử dụng từ ngữ thiếu văn hóa (chửi thề…), làm việc riêng trong giờ làm việc', levels:[nh('Cảnh cáo bằng văn bản'), lv(200000,'Phạt 200.000đ/trường hợp'), lv(0,'Điều chuyển nhân sự khỏi Tòa nhà; Bên B phải bổ sung nhân sự phù hợp')]},
+    {code:'02', title:'Nhân viên tụ tập nói chuyện trong giờ làm việc', levels:[nh('Cảnh cáo bằng văn bản'), lv(200000,'Phạt 200.000đ/trường hợp'), lv(0,'Điều chuyển nhân sự khỏi Tòa nhà; Bên B phải bổ sung nhân sự phù hợp')]},
+    {code:'03', title:'Nhân viên hút thuốc lá trong Tòa nhà hoặc nơi "cấm hút thuốc"', levels:[lv(200000,'Phạt 200.000đ/trường hợp'), lv(500000,'Phạt 500.000đ/trường hợp'), lv(0,'Điều chuyển nhân sự khỏi Tòa nhà; Bên B phải bổ sung nhân sự phù hợp')]},
+    {code:'04', title:'Nhân viên mất lịch sự với khách hàng/cư dân hoặc nhân viên của Bên A', levels:[nh('Cảnh cáo bằng văn bản'), lv(300000,'Phạt 300.000đ/trường hợp và buộc sa thải')]},
+    {code:'05', title:'Nhân viên tự ý rời bỏ vị trí, trốn việc, ngủ trong giờ làm việc', levels:[nh('Cảnh cáo bằng văn bản'), lv(400000,'Phạt 400.000đ/trường hợp'), lv(0,'Lập biên bản và buộc sa thải; Bên B phải bổ sung nhân sự phù hợp')]},
+    {code:'06', title:'Nhân viên gây mất an ninh trật tự: đánh nhau, gây gổ…', levels:[lv(1000000,'Phạt 1.000.000đ/trường hợp và buộc sa thải; Bên B bổ sung nhân sự phù hợp')]},
+    {code:'07', title:'Trộm cắp, sử dụng chất gây nghiện (ma túy…)', levels:[lv(1000000,'Phạt 1.000.000đ/trường hợp và buộc sa thải; Bên B bổ sung nhân sự phù hợp')], comp:true},
+    {code:'08', title:'Không cung cấp đủ số nhân sự trong 01 ca làm việc (thiếu nhân sự) quá 02 trường hợp trong tháng hoặc thiếu từ 01 nhân sự/ca trở lên so với số lượng cam kết (trừ khi được Bên A đồng ý)', levels:[nh('Cảnh cáo bằng văn bản/trường hợp và không được tính công ngày thiếu'), {pct:5, base:'contract', t:'Phạt 5% giá trị Hợp đồng'}, lv(0,'Xem xét việc thanh lý Hợp đồng')], qtyLabel:'Số trường hợp'},
+    {code:'09', title:'Bên B bố trí nhân sự làm việc quá 12 tiếng/nhân sự/ngày (trừ trường hợp được Bên A đồng ý)', levels:[nh('Cảnh cáo bằng văn bản'), lv(500000,'Phạt 500.000đ/trường hợp'), lv(300000,'Phạt 300.000đ/trường hợp (không được quá 03 lần)')]},
+    {code:'10', title:'Bên B để tình trạng thay đổi nhân sự thường xuyên (không xuất phát từ nhu cầu Bên A) quá 03 lần/tháng', levels:[nh('Cảnh cáo bằng văn bản'), lv(500000,'Phạt 500.000đ/lần'), lv(0,'Xem xét việc thanh lý Hợp đồng')]},
+    {code:'11', title:'Có hành vi không hợp tác, bị cư dân phản ánh (kèm minh chứng) hoặc bị đại diện Bên A phát hiện', levels:[nh('Cảnh cáo bằng văn bản'), lv(500000,'Phạt 500.000đ/lần'), lv(0,'Điều chuyển nhân sự khỏi Tòa nhà; Bên B phải bổ sung nhân sự phù hợp')]},
+    {code:'12', title:'Khách hàng phản ánh về chất lượng dịch vụ như không sạch, thiếu giấy… hoặc bị đại diện Bên A phát hiện', levels:[nh('Cảnh cáo bằng văn bản'), lv(500000,'Phạt 500.000đ/trường hợp'), {pct:5, base:'contract', t:'Phạt 5% giá trị Hợp đồng; xem xét thanh lý Hợp đồng'}]},
+  ].map(x=>({...x, ref:'PL2 mục VII.2 – STT '+x.code})),
+  tiers:[
+    {min:80, max:100, pct:0, label:'Mức A – Tốt', action:'Không áp dụng trừ phí'},
+    {min:51.0001, max:79.9999, pct:5, label:'Mức B – Khá', action:'Trừ 5% phí dịch vụ tháng'},
+    {min:0, max:49.9999, pct:8, label:'Mức C – Không đạt', action:'Trừ 8% phí dịch vụ tháng, gửi công văn nhắc nhở'},
+  ], tierRules:{},
+  flags:['Khung điểm HĐ bỏ trống 50% – 51%: khi rơi vào khoảng này, nhập mức trừ thủ công.','Lỗi STT 08 (lần 2) và STT 12 (lần 3) phạt "5% giá trị Hợp đồng": web tính trên giá trị 12 tháng (204.000.000đ) — kiểm tra lại trước khi chốt.'],
 };
 
 function blankContract(b, s){
@@ -526,28 +580,21 @@ Object.keys(CONTRACT_SEED).forEach(k=>{
 </script>
 <script>
 /* =====================================================================
-   CORE — cấu hình Firebase, tiện ích, lớp dữ liệu (Firebase / Demo)
+   CORE — tài khoản, tiện ích, lưu trữ trên máy (IndexedDB), nghiệp vụ
+   Web chạy độc lập trên GitHub Pages, không cần máy chủ / Firebase.
    ===================================================================== */
-// Project Firebase RIÊNG cho web Đánh giá CLDV & Chế tài (tách khỏi app Báo cáo vận hành).
-// >>> Dán cấu hình web app của project mới vào đây (Firebase Console → Project settings → Your apps).
-const firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_PROJECT_ID.firebasestorage.app",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
-};
-const FIREBASE_READY = firebaseConfig.apiKey.indexOf('PASTE_')!==0;
-// Phân quyền theo email đăng nhập (khớp với firestore.rules). Đổi email ở cả 2 nơi nếu cần.
+// Tài khoản đăng nhập (chỉ để phân vai trò & tòa nhà — không phải bảo mật thật).
+// Đổi ID / mật khẩu: sửa trực tiếp danh sách dưới đây.
 const ACCOUNTS = {
-  'qlvh@esta-cldv.vn':        {role:'admin', name:'Quản lý vận hành Non-CBD'},
-  'bql.lmak68@esta-cldv.vn':  {role:'bql', building:'lmak68',  name:"BQL L'MAK 68"},
-  'bql.venture@esta-cldv.vn': {role:'bql', building:'venture', name:'BQL Lite The Venture'},
-  'bql.127hh@esta-cldv.vn':   {role:'bql', building:'hh127',   name:'BQL 127 Hồng Hà'},
-  'bql.130hh@esta-cldv.vn':   {role:'bql', building:'hh130',   name:'BQL 130 Hồng Hà'},
+  'admin':   {pass:'esta2026', role:'admin', name:'Quản lý vận hành Non-CBD'},
+  'lmak68':  {pass:'6868', role:'bql', building:'lmak68',  name:"BQL L'MAK 68"},
+  'venture': {pass:'6262', role:'bql', building:'venture', name:'BQL Lite The Venture'},
+  '127hh':   {pass:'1270', role:'bql', building:'hh127',   name:'BQL 127 Hồng Hà'},
+  '130hh':   {pass:'1300', role:'bql', building:'hh130',   name:'BQL 130 Hồng Hà'},
 };
-const DEMO = !!window.FORCE_DEMO || !FIREBASE_READY || typeof firebase === 'undefined' || /[?&]demo=1/.test(location.search);
+const DEMO = false;
+const lsGet = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
+const lsSet = (k,v) => { try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){} };
 
 /* ---------- utils ---------- */
 const $ = (s, el=document) => el.querySelector(s);
@@ -568,7 +615,7 @@ const dLong = iso => { if(!iso) return 'ngày … tháng … năm …'; const d=
 const tHM = iso => iso && iso.length>=16 ? iso.slice(11,16).replace(':','h') : '';
 const stripTitle = s => String(s||'').replace(/^(Ông|Bà|Mr\.?|Ms\.?)\s+/i,'');
 const ckey = (b,s) => `${b}_${s}`;
-const STATUS = {draft:'Nháp', pending:'Chờ duyệt', approved:'Đã duyệt', returned:'Trả lại'};
+const STATUS = {draft:'Nháp', approved:'Chính thức', pending:'Nháp', returned:'Nháp'};
 const statusPill = s => `<span class="pill s-${s}">${STATUS[s]||s}</span>`;
 const ICON = {
   plus:'<path d="M12 5v14M5 12h14"/>', file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>',
@@ -661,73 +708,82 @@ function compressImage(file, maxDim=1280, q=0.72){
 const DB = { records:[], contracts:{}, audits:{}, notices:[] };
 let STORE = null;
 
-/* ---------- Demo (lưu trong trình duyệt) ---------- */
-const LocalStore = (()=>{
-  const KEY='esta_chetai_demo_v1';
-  const photos={};
-  let listeners=null;
-  function load(){
-    try{ const raw=localStorage.getItem(KEY); if(raw){ const o=JSON.parse(raw); Object.assign(DB, {records:o.records||[], contracts:o.contracts||{}, audits:o.audits||{}, notices:o.notices||[]}); Object.assign(photos, o.photos||{}); return true; } }catch(e){}
-    return false;
+/* ---------- Lưu trữ trên máy: IndexedDB (dung lượng lớn, đủ chứa ảnh) ---------- */
+const KV = (()=>{
+  let dbp=null; const mem={};
+  function open(){
+    if(dbp) return dbp;
+    dbp=new Promise((res)=>{
+      try{
+        const rq=indexedDB.open('esta_cldv', 1);
+        rq.onupgradeneeded=()=>rq.result.createObjectStore('kv');
+        rq.onsuccess=()=>res(rq.result); rq.onerror=()=>res(null); rq.onblocked=()=>res(null);
+      }catch(e){ res(null); }
+    });
+    return dbp;
   }
-  function persist(){
-    try{ localStorage.setItem(KEY, JSON.stringify({records:DB.records, contracts:DB.contracts, audits:DB.audits, notices:DB.notices, photos})); }
-    catch(e){ try{ localStorage.setItem(KEY, JSON.stringify({records:DB.records, contracts:DB.contracts, audits:DB.audits, notices:DB.notices})); }catch(_){} }
+  async function tx(mode, fn){
+    const db=await open(); if(!db) return fn(null);
+    return new Promise((res,rej)=>{ const t=db.transaction('kv',mode); const st=t.objectStore('kv'); let out; const r=fn(st); if(r) r.onsuccess=()=>{out=r.result;}; t.oncomplete=()=>res(out); t.onerror=()=>rej(t.error); t.onabort=()=>rej(t.error||new Error('Bộ nhớ trình duyệt đầy hoặc bị chặn')); });
   }
   return {
-    async init(user, onChange){ listeners=onChange; if(!load()){ seedDemo(); persist(); } onChange('all'); },
-    async saveRecord(r){ r.updatedAt=new Date().toISOString(); const i=DB.records.findIndex(x=>x.id===r.id); if(i>=0) DB.records[i]=r; else DB.records.push(r); persist(); listeners('records'); return r.id; },
-    async deleteRecord(id){ DB.records=DB.records.filter(x=>x.id!==id); delete photos[id]; persist(); listeners('records'); },
-    async savePhotos(id, b, arr){ photos[id]=arr.slice(); persist(); },
-    async loadPhotos(id){ return (photos[id]||[]).slice(); },
-    async saveContract(k, c){ DB.contracts[k]=c; persist(); listeners('contracts'); },
-    async resetContract(k){ delete DB.contracts[k]; persist(); listeners('contracts'); },
-    async saveAudit(k, a){ DB.audits[k]=a; persist(); listeners('audits'); },
-    async saveNotice(n){ const i=DB.notices.findIndex(x=>x.id===n.id); if(i>=0) DB.notices[i]=n; else DB.notices.push(n); persist(); listeners('notices'); },
-    async deleteNotice(id){ DB.notices=DB.notices.filter(x=>x.id!==id); persist(); listeners('notices'); },
-    resetDemo(){ try{localStorage.removeItem(KEY);}catch(e){} location.reload(); },
+    async get(k){ const db=await open(); if(!db) return mem[k]; return tx('readonly', st=>st.get(k)); },
+    async set(k,v){ const db=await open(); if(!db){ mem[k]=v; return; } return tx('readwrite', st=>st.put(v,k)); },
+    async del(k){ const db=await open(); if(!db){ delete mem[k]; return; } return tx('readwrite', st=>st.delete(k)); },
+    async ok(){ return !!(await open()); },
   };
 })();
 
-/* ---------- Firebase Firestore ---------- */
-const FireStore = (()=>{
-  let db, unsub=[];
-  const clean = o => JSON.parse(JSON.stringify(o));
+const LocalStore = (()=>{
+  let listeners=()=>{};
+  const save=async(k)=>{ try{ await KV.set(k, JSON.parse(JSON.stringify(DB[k]))); }catch(e){ toast('Không lưu được vào bộ nhớ trình duyệt: '+e.message+'. Hãy Xuất file sao lưu ngay.', true); throw e; } };
   return {
     async init(user, onChange){
-      db=firebase.firestore();
-      unsub.forEach(u=>u()); unsub=[];
-      const scoped = (col) => user.role==='admin' ? db.collection(col) : db.collection(col).where('building','==',user.building);
-      const err = (what)=> e=>{ console.error(what, e); toast('Không tải được '+what+': '+(e.code||e.message)+'. Kiểm tra Firestore Rules (xem hướng dẫn).', true); };
-      unsub.push(db.collection('ct_contracts').onSnapshot(s=>{ DB.contracts={}; s.forEach(d=>DB.contracts[d.id]=d.data()); onChange('contracts'); }, err('hợp đồng')));
-      unsub.push(scoped('ct_records').onSnapshot(s=>{ DB.records=[]; s.forEach(d=>DB.records.push({...d.data(), id:d.id})); onChange('records'); }, err('biên bản')));
-      unsub.push(scoped('ct_audits').onSnapshot(s=>{ DB.audits={}; s.forEach(d=>DB.audits[d.id]=d.data()); onChange('audits'); }, err('điểm đánh giá')));
-      unsub.push(scoped('ct_notices').onSnapshot(s=>{ DB.notices=[]; s.forEach(d=>DB.notices.push({...d.data(), id:d.id})); onChange('notices'); }, err('thông báo')));
+      listeners=onChange;
+      if(!(await KV.ok())) toast('Trình duyệt đang chặn bộ nhớ (chế độ ẩn danh?) — dữ liệu sẽ mất khi đóng trang. Hãy dùng cửa sổ thường.', true);
+      DB.records=(await KV.get('records'))||[]; DB.contracts=(await KV.get('contracts'))||{}; DB.audits=(await KV.get('audits'))||{}; DB.notices=(await KV.get('notices'))||[];
+      // biên bản cũ ở trạng thái chờ duyệt/trả lại -> nháp (đã bỏ bước duyệt)
+      DB.records.forEach(r=>{ if(r.status==='pending'||r.status==='returned') r.status='draft'; });
+      onChange('all');
     },
-    async saveRecord(r){ r.updatedAt=new Date().toISOString(); await db.collection('ct_records').doc(r.id).set(clean(r)); return r.id; },
-    async deleteRecord(id){
-      const rec=DB.records.find(r=>r.id===id); const n=rec?(rec.photoCount||0):8;
-      for(let i=0;i<n;i++) await db.collection('ct_photos').doc(`${id}_${i}`).delete().catch(()=>{});
-      await db.collection('ct_records').doc(id).delete();
+    async saveRecord(r){ r.updatedAt=new Date().toISOString(); const i=DB.records.findIndex(x=>x.id===r.id); if(i>=0) DB.records[i]=r; else DB.records.push(r); await save('records'); listeners('records'); return r.id; },
+    async deleteRecord(id){ DB.records=DB.records.filter(x=>x.id!==id); await KV.del('ph_'+id); await save('records'); listeners('records'); },
+    async savePhotos(id, b, arr){ await KV.set('ph_'+id, arr.slice()); },
+    async loadPhotos(id){ return ((await KV.get('ph_'+id))||[]).slice(); },
+    async saveContract(k, c){ DB.contracts[k]=c; await save('contracts'); listeners('contracts'); },
+    async resetContract(k){ delete DB.contracts[k]; await save('contracts'); listeners('contracts'); },
+    async saveAudit(k, a){ DB.audits[k]=a; await save('audits'); listeners('audits'); },
+    async saveNotice(n){ const i=DB.notices.findIndex(x=>x.id===n.id); if(i>=0) DB.notices[i]=n; else DB.notices.push(n); await save('notices'); listeners('notices'); },
+    async deleteNotice(id){ DB.notices=DB.notices.filter(x=>x.id!==id); await save('notices'); listeners('notices'); },
+    // ---- Sao lưu / khôi phục ----
+    async exportData(user){
+      const inScope = x => user.role==='admin' || x.building===user.building;
+      const records=DB.records.filter(inScope); const photos={};
+      for(const r of records){ const p=await KV.get('ph_'+r.id); if(p&&p.length) photos[r.id]=p; }
+      const audits={}; Object.entries(DB.audits).forEach(([k,v])=>{ if(inScope(v)) audits[k]=v; });
+      return {app:'esta-danh-gia-cldv', version:1, exportedAt:new Date().toISOString(), exportedBy:user.id, scope:user.role==='admin'?'all':user.building,
+        records, photos, audits, notices:DB.notices.filter(inScope), contracts:user.role==='admin'?DB.contracts:{}};
     },
-    async savePhotos(id, b, arr, prevCount=0){
-      const col=db.collection('ct_photos');
-      for(let i=0;i<Math.max(arr.length, prevCount);i++){
-        const ref=col.doc(`${id}_${i}`);
-        if(i<arr.length) await ref.set({recordId:id, building:b, idx:i, data:arr[i]});
-        else await ref.delete().catch(()=>{});
+    async importData(data, user, withContracts){
+      if(!data || data.app!=='esta-danh-gia-cldv') throw new Error('File không đúng định dạng sao lưu của web này.');
+      const inScope = x => user.role==='admin' || x.building===user.building;
+      let add=0, upd=0, skip=0;
+      for(const r of (data.records||[])){
+        if(!inScope(r)){ skip++; continue; }
+        if(r.status==='pending'||r.status==='returned') r.status='draft';
+        const i=DB.records.findIndex(x=>x.id===r.id);
+        if(i<0){ DB.records.push(r); add++; }
+        else if((r.updatedAt||'')>(DB.records[i].updatedAt||'')){ DB.records[i]=r; upd++; } else { skip++; continue; }
+        if(data.photos && data.photos[r.id]) await KV.set('ph_'+r.id, data.photos[r.id]);
       }
+      Object.entries(data.audits||{}).forEach(([k,v])=>{ if(!inScope(v)) return; const cur=DB.audits[k]; if(!cur || (v.at||'')>(cur.at||'')) DB.audits[k]=v; });
+      (data.notices||[]).forEach(n=>{ if(!inScope(n)) return; const i=DB.notices.findIndex(x=>x.id===n.id); if(i<0) DB.notices.push(n); else if((n.createdAt||'')>(DB.notices[i].createdAt||'')) DB.notices[i]=n; });
+      const ctCount=Object.keys(data.contracts||{}).length;
+      if(withContracts && ctCount) Object.assign(DB.contracts, data.contracts);
+      await save('records'); await save('audits'); await save('notices'); if(withContracts) await save('contracts');
+      listeners('all');
+      return {add, upd, skip, ct: withContracts?ctCount:0};
     },
-    async loadPhotos(id){
-      const rec=DB.records.find(r=>r.id===id); const n=rec?(rec.photoCount||0):0; const out=[];
-      for(let i=0;i<n;i++){ const s=await db.collection('ct_photos').doc(`${id}_${i}`).get().catch(()=>null); if(s&&s.exists) out.push(s.data().data); }
-      return out;
-    },
-    async saveContract(k, c){ await db.collection('ct_contracts').doc(k).set(clean(c)); },
-    async resetContract(k){ await db.collection('ct_contracts').doc(k).delete(); },
-    async saveAudit(k, a){ await db.collection('ct_audits').doc(k).set(clean(a)); },
-    async saveNotice(n){ await db.collection('ct_notices').doc(n.id).set(clean(n)); },
-    async deleteNotice(id){ await db.collection('ct_notices').doc(id).delete(); },
   };
 })();
 
@@ -773,7 +829,7 @@ function priorCount(rec, code, uptoLineIdx){
   const c=getContract(rec.contractKey); const per = c && c.offensePeriod==='term' ? null : periodOf(rec.dateTime);
   let n=0;
   DB.records.forEach(r=>{
-    if(r.id===rec.id || r.contractKey!==rec.contractKey || r.status==='returned') return;
+    if(r.id===rec.id || r.contractKey!==rec.contractKey) return;
     if(per && periodOf(r.dateTime)!==per) return;
     if((r.dateTime||'') > (rec.dateTime||'')) return;
     (r.lines||[]).forEach(l=>{ if(l.code===code) n++; });
@@ -800,7 +856,7 @@ function monthSummary(key, period){
   const c=getContract(key);
   const recs=DB.records.filter(r=>r.contractKey===key && periodOf(r.dateTime)===period).sort((a,b)=>(a.dateTime||'').localeCompare(b.dateTime||''));
   const approved=recs.filter(r=>r.status==='approved');
-  const notApproved=recs.filter(r=>r.status==='pending'||r.status==='draft');
+  const notApproved=recs.filter(r=>r.status!=='approved');
   let fines=0, comp=0, lines=0; approved.forEach(r=>{ const t=recTotals(r); fines+=t.fine; comp+=t.comp; lines+=(r.lines||[]).length; });
   const fee=Number(c.monthlyFee)||0;
   const audit=DB.audits[`${key}_${period}`]||{};
@@ -826,7 +882,7 @@ function monthSummary(key, period){
   const capAmt=Math.round(fee*(Number(c.capPct)||8)/100);
   if(fee>0 && penaltyTotal>capAmt) alerts.push({lv:'warn', t:`Tổng tiền phạt ${fmtd(penaltyTotal)} vượt ${c.capPct||8}% phí dịch vụ tháng (${fmtd(capAmt)}). Điều 301 Luật Thương mại 2005: mức phạt vi phạm không quá 8% giá trị phần nghĩa vụ bị vi phạm — Quản lý vận hành cân nhắc trước khi chốt.`});
   // ngưỡng số lần vi phạm
-  if(c.countRule && c.countRule.perMonth && lines>=c.countRule.perMonth) alerts.push({lv:'bad', t:`${lines} lỗi vi phạm đã duyệt trong tháng. ${c.countRule.text}`});
+  if(c.countRule && c.countRule.perMonth && lines>=c.countRule.perMonth) alerts.push({lv:'bad', t:`${lines} lỗi vi phạm trong tháng. ${c.countRule.text}`});
   (c.items||[]).forEach(it=>{
     if(!it.countRule) return;
     const m=approved.reduce((s,r)=>s+(r.lines||[]).filter(l=>l.code===it.code).length,0);
@@ -835,7 +891,7 @@ function monthSummary(key, period){
     else if(it.countRule.cumulative && all>=it.countRule.cumulative) alerts.push({lv:'bad', t:`Lỗi "${it.title}": ${all} biên bản cộng dồn (ngưỡng ${it.countRule.cumulative}) → Bên A có quyền chấm dứt HĐ (${it.ref}).`});
   });
   approved.forEach(r=>(r.lines||[]).forEach(l=>{ if(/chấm dứt|dừng/i.test(l.action||'')) alerts.push({lv:'bad', t:`BB ${r.no}: lỗi "${l.title}" có chế tài "${l.action}".`}); }));
-  if(notApproved.length) alerts.push({lv:'warn', t:`Còn ${notApproved.length} biên bản chưa duyệt trong tháng — chưa được tính vào tổng hợp.`});
+  if(notApproved.length) alerts.push({lv:'warn', t:`Còn ${notApproved.length} biên bản nháp trong tháng — chưa được tính vào tổng hợp.`});
   return {c, recs, approved, notApproved, fines, comp, fee, audit, score, tier, gap, qPct, extraPct, qualityDeduct, penaltyTotal, capAmt, total:penaltyTotal+comp, alerts, lines};
 }
 
@@ -886,7 +942,7 @@ function renderRecordDoc(rec, photos, opt={}){
   if(rec.violator) sigs.push({role:'Người vi phạm', name:(rec.violator||'').split(/[-–(]/)[0].trim()});
   if(rec.witness) sigs.push({role:'Người làm chứng', name:(rec.witness||'').split(/[-–(]/)[0].trim()});
   return `<div class="doc ${opt.pdf?'pdf':''}">
-    ${!approved && !opt.noWatermark ? `<div class="watermark">BẢN NHÁP · CHƯA DUYỆT</div>`:''}
+    ${!approved && !opt.noWatermark ? `<div class="watermark">BẢN NHÁP</div>`:''}
     ${docStrip('Biên bản chế tài nhà thầu · '+S.name)}
     ${docHdr(c, rec.no, rec.dateTime)}
     <h1>BIÊN BẢN GHI NHẬN VI PHẠM</h1>
@@ -915,7 +971,7 @@ function renderRecordDoc(rec, photos, opt={}){
     <p>${esc(c.clauses&&c.clauses.deduct||'')}</p>
     <p>Số tiền phạt nêu trên được khấu trừ trực tiếp vào phí dịch vụ tháng ${periodLabel(periodOf(rec.dateTime))} của Bên B. Biên bản được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản; các bên đã đọc lại, thống nhất nội dung và cùng ký tên dưới đây.${rec.witness?' Trường hợp người vi phạm không ký, biên bản có giá trị khi có chữ ký của người làm chứng.':''}</p>
     ${signBlock(sigs)}
-    ${approved?`<div class="approval">✓ Đã phê duyệt trên hệ thống bởi ${esc(rec.approvedBy||'Quản lý vận hành')} – ${dDMY(rec.approvedAt)} · Mã biên bản: ${esc(rec.no||'')}</div>`:''}
+    ${approved?`<div class="approval">Mã biên bản: ${esc(rec.no||'')} · Lập trên hệ thống ESTA bởi ${esc(rec.createdBy&&rec.createdBy.name||'')} – ${dDMY(rec.approvedAt||rec.createdAt)}</div>`:''}
     <div class="foot">${FOOTER}</div>
   </div>`;
 }
@@ -925,7 +981,7 @@ function renderSummaryDoc(key, period, opt={}){
   const S=monthSummary(key, period); const c=S.c; const b=BUILDINGS[c.building]; const Sv=SERVICES[c.service];
   let stt=0;
   const rows=S.approved.flatMap(r=>(r.lines||[]).map(l=>`<tr><td class="c">${++stt}</td><td>${dDMY(r.dateTime)}</td><td>${esc(r.no||'')}</td><td>${esc(l.title)}</td><td class="c">${l.level||1}</td><td>${esc(l.action||'')}</td><td class="r">${fmt(l.amount)}</td><td class="r">${l.comp?fmt(l.comp):''}</td></tr>`)).join('')
-    || `<tr><td colspan="8" class="c" style="color:#999;padding:14px">Không có biên bản vi phạm đã duyệt trong tháng</td></tr>`;
+    || `<tr><td colspan="8" class="c" style="color:#999;padding:14px">Không có biên bản vi phạm trong tháng</td></tr>`;
   const no=`TH-${period.replace('-','')}/${SERVICES[c.service].code}-${b.short}`;
   return `<div class="doc ${opt.pdf?'pdf':''} ${opt.breakBefore?'pb-before':''}">
     ${docStrip('Tổng hợp chế tài tháng '+periodLabel(period))}
@@ -937,8 +993,8 @@ function renderSummaryDoc(key, period, opt={}){
       <tr><td>Hợp đồng</td><td>${esc(c.contractNo||'—')}${c.contractDate?` ký ngày ${dDMY(c.contractDate)}`:''}${c.appendix?`; ${esc(c.appendix)}`:''}</td></tr>
       <tr><td>Phí dịch vụ chuẩn/tháng</td><td><b>${fmtd(S.fee)}</b> (chưa VAT)${c.feeNote?` – ${esc(c.feeNote)}`:''}</td></tr>
     </tbody></table>
-    <div class="kpirow"><div><div class="l">Biên bản đã duyệt</div><div class="v">${S.approved.length}</div></div><div><div class="l">Tiền phạt theo BB</div><div class="v">${fmt(S.fines)}</div></div><div><div class="l">Trừ theo chất lượng</div><div class="v">${fmt(S.qualityDeduct)}</div></div><div><div class="l">Tổng khấu trừ</div><div class="v">${fmt(S.total)}</div></div></div>
-    <h4>I. Chi tiết vi phạm đã duyệt</h4>
+    <div class="kpirow"><div><div class="l">Số biên bản</div><div class="v">${S.approved.length}</div></div><div><div class="l">Tiền phạt theo BB</div><div class="v">${fmt(S.fines)}</div></div><div><div class="l">Trừ theo chất lượng</div><div class="v">${fmt(S.qualityDeduct)}</div></div><div><div class="l">Tổng khấu trừ</div><div class="v">${fmt(S.total)}</div></div></div>
+    <h4>I. Chi tiết vi phạm trong tháng</h4>
     <table class="dt"><thead><tr><th style="width:26px">STT</th><th style="width:62px">Ngày</th><th style="width:110px">Số BB</th><th>Hành vi vi phạm</th><th style="width:30px">Lần</th><th style="width:120px">Chế tài</th><th style="width:70px">Phạt (đ)</th><th style="width:62px">Bồi thường</th></tr></thead><tbody>${rows}</tbody>
     <tfoot><tr><td colspan="6" class="r">Cộng</td><td class="r">${fmt(S.fines)}</td><td class="r">${S.comp?fmt(S.comp):''}</td></tr></tfoot></table>
     <h4>II. Đánh giá chất lượng dịch vụ tháng</h4>
@@ -971,7 +1027,7 @@ function renderOverviewDoc(keys, period, opt={}){
     <table class="dt"><thead><tr><th>Tòa nhà</th><th>Dịch vụ</th><th>Nhà thầu</th><th>Số BB</th><th>Phạt BB</th><th>Điểm CL</th><th>Trừ CL</th><th>Bồi thường</th><th>Tổng khấu trừ</th></tr></thead>
     <tbody>${rows.join('')}</tbody><tfoot><tr><td colspan="3" class="r">TỔNG CỘNG</td><td class="c">${tot.n}</td><td class="r">${fmt(tot.f)}</td><td></td><td class="r">${fmt(tot.q)}</td><td class="r">${fmt(tot.c)}</td><td class="r">${fmt(tot.t)}</td></tr></tfoot></table>
     <div class="words">Tổng khấu trừ bằng chữ: ${numToWords(tot.t)}.</div>
-    <p style="font-size:10px;color:#666">Chỉ tính các biên bản đã được Quản lý vận hành phê duyệt. Chi tiết từng hợp đồng ở các trang tiếp theo.</p>
+    <p style="font-size:10px;color:#666">Chỉ tính các biên bản chính thức (không tính bản nháp). Chi tiết từng hợp đồng ở các trang tiếp theo.</p>
     <div class="foot">${FOOTER}</div>
   </div>`;
 }
@@ -1107,49 +1163,45 @@ const isAdmin = () => CUR.user && CUR.user.role==='admin';
 
 /* ---------------- LOGIN ---------------- */
 function renderLogin(err){
-  const bOpts=Object.entries(BUILDINGS).map(([k,v])=>`<option value="${k}">${esc(v.name)}</option>`).join('');
+  const lastId=lsGet('esta_cldv_lastid')||'';
   $('#root').innerHTML=`<div id="login">
     <div class="brandside">
       <div class="wm"><span class="star">✱</span><div><div class="t1">ESTA</div><div class="t2">PROPERTY MANAGEMENT</div></div></div>
-      <div><h1>Chế tài <b>nhà thầu dịch vụ</b></h1><div class="lede">Ghi nhận vi phạm, lập biên bản theo đúng điều khoản hợp đồng, tổng hợp khấu trừ tháng và thông báo nhà thầu — An ninh &amp; Vệ sinh, danh mục Non-CBD.</div></div>
+      <div><h1>Đánh giá CLDV &amp; <b>chế tài nhà thầu</b></h1><div class="lede">Ghi nhận vi phạm, lập biên bản theo đúng điều khoản hợp đồng, tổng hợp khấu trừ tháng và thông báo nhà thầu — An ninh &amp; Vệ sinh, danh mục Non-CBD.</div></div>
       <div class="quote">Asset Value Creator.</div>
     </div>
     <div class="formside"><div class="lcard">
-      ${DEMO?`
-        <h2>Đăng nhập (bản demo)</h2><div class="sub">Dữ liệu chỉ lưu trên trình duyệt này.</div>
-        <div class="demo-note">${FIREBASE_READY?'Bản xem thử chưa kết nối Firebase.':'Chưa cấu hình Firebase (firebaseConfig trong index.html) — đang chạy chế độ demo.'}</div>
-        <div class="row"><label class="f">Vai trò</label><select id="dmRole"><option value="admin">Quản lý vận hành (duyệt – toàn danh mục)</option><option value="bql">Ban quản lý tòa nhà (lập biên bản)</option></select></div>
-        <div class="row" id="dmBRow" style="display:none"><label class="f">Tòa nhà</label><select id="dmB">${bOpts}</select></div>
-        <div class="row"><label class="f">Họ tên</label><input id="dmName" value="Phạm Bill"></div>
-        <button class="btn btn-p" style="width:100%;padding:11px" id="dmGo">Vào hệ thống</button>`
-      :`
-        <h2>Đăng nhập</h2><div class="sub">Tài khoản do Quản lý vận hành cấp cho từng BQL tòa nhà.</div>
-        ${err?`<div class="err">${esc(err)}</div>`:''}
-        <div class="row"><label class="f">Email</label><input id="lgEmail" type="email" autocomplete="username" placeholder="ten@estavn.com"></div>
-        <div class="row"><label class="f">Mật khẩu</label><input id="lgPass" type="password" autocomplete="current-password"></div>
-        <button class="btn btn-p" style="width:100%;padding:11px" id="lgGo">Đăng nhập</button>
-        <div style="text-align:center;margin-top:12px"><button class="btn btn-g btn-sm" id="lgForgot">Quên mật khẩu?</button></div>`}
+      <h2>Đăng nhập</h2><div class="sub">Dùng ID và mật khẩu Quản lý vận hành cấp cho tòa nhà.</div>
+      ${err?`<div class="err">${esc(err)}</div>`:''}
+      <div class="row"><label class="f" for="lgId">ID</label><input id="lgId" autocomplete="username" autocapitalize="none" placeholder="VD: lmak68" value="${esc(lastId)}"></div>
+      <div class="row"><label class="f" for="lgPass">Mật khẩu</label><input id="lgPass" type="password" autocomplete="current-password" inputmode="text"></div>
+      <div class="row"><label class="f" for="lgName">Họ tên người lập (in trên biên bản)</label><input id="lgName" placeholder="VD: Nguyễn Văn A" value="${esc(lsGet('esta_cldv_name_'+lastId)||'')}"></div>
+      <button class="btn btn-p" style="width:100%;padding:11px" id="lgGo">Đăng nhập</button>
+      <div class="hint" style="margin-top:12px;text-align:center">Dữ liệu lưu trên trình duyệt của máy này. Nhớ sao lưu định kỳ.</div>
     </div></div></div>`;
-  if(DEMO){
-    $('#dmRole').onchange=e=>{ $('#dmBRow').style.display=e.target.value==='bql'?'block':'none'; $('#dmName').value=e.target.value==='bql'?'Nguyễn Văn BQL':'Phạm Bill'; };
-    $('#dmGo').onclick=()=>{ const r=$('#dmRole').value; startApp({uid:'demo-'+r, name:$('#dmName').value.trim()||'Người dùng', role:r==='admin'?'admin':'bql', building:r==='admin'?'':$('#dmB').value, email:''}); };
-  } else {
-    const go=()=>{ const e=$('#lgEmail').value.trim(), p=$('#lgPass').value; if(!e||!p) return renderLogin('Nhập đủ email và mật khẩu.');
-      busy(true,'Đang đăng nhập…'); firebase.auth().signInWithEmailAndPassword(e,p).catch(er=>{ busy(false); renderLogin(['auth/invalid-credential','auth/wrong-password','auth/user-not-found','auth/invalid-login-credentials'].includes(er.code)?'Sai email hoặc mật khẩu.':er.message); }); };
-    $('#lgGo').onclick=go; $('#lgPass').onkeydown=e=>{ if(e.key==='Enter') go(); };
-    $('#lgForgot').onclick=async()=>{ const e=$('#lgEmail').value.trim(); if(!e) return toast('Nhập email trước rồi bấm "Quên mật khẩu".', true);
-      try{ await firebase.auth().sendPasswordResetEmail(e); toast('Đã gửi email đặt lại mật khẩu tới '+e); }catch(er){ toast(er.message,true); } };
-  }
+  $('#lgId').oninput=()=>{ const n=lsGet('esta_cldv_name_'+$('#lgId').value.trim().toLowerCase()); if(n) $('#lgName').value=n; };
+  const go=()=>{
+    const id=$('#lgId').value.trim().toLowerCase(), p=$('#lgPass').value.trim(), nm=$('#lgName').value.trim();
+    const acc=ACCOUNTS[id];
+    if(!id||!p) return renderLogin('Nhập ID và mật khẩu.');
+    if(!acc || acc.pass!==p) return renderLogin('Sai ID hoặc mật khẩu.');
+    lsSet('esta_cldv_lastid', id); if(nm) lsSet('esta_cldv_name_'+id, nm);
+    lsSet('esta_cldv_session', id);
+    startApp({uid:id, id, name:nm||acc.name, account:acc.name, role:acc.role, building:acc.building||''});
+  };
+  $('#lgGo').onclick=go; ['lgPass','lgName','lgId'].forEach(i=>$('#'+i).onkeydown=e=>{ if(e.key==='Enter') go(); });
+  (lastId?$('#lgPass'):$('#lgId')).focus();
 }
 
 async function startApp(user){
   CUR.user=user;
-  STORE = DEMO ? LocalStore : FireStore;
+  STORE = LocalStore;
   CUR.draft=newDraft();
   renderShell();
   busy(true,'Đang tải dữ liệu…');
-  await STORE.init(user, (what)=>{ busy(false); onData(what); });
-  setTimeout(()=>busy(false), 4000);
+  try{ await STORE.init(user, (what)=>{ busy(false); onData(what); }); }
+  catch(e){ busy(false); toast('Không đọc được dữ liệu trên máy: '+e.message, true); }
+  busy(false);
 }
 function onData(what){
   updateBadges();
@@ -1174,13 +1226,13 @@ function renderShell(){
       <div class="wm"><span class="star">✱</span><div><div class="t1">ESTA</div><div class="t2">PROPERTY MANAGEMENT</div></div></div>
       <div class="apptitle">Đánh giá CLDV &amp; chế tài nhà thầu</div>
       <nav class="tabs">${VIEWS.map(v=>`<button data-v="${v.id}" class="${CUR.view===v.id?'on':''}">${ic(v.icon)}${v.label}${v.badge?`<span class="badge hidden" id="bdg-${v.id}"></span>`:''}</button>`).join('')}</nav>
-      <div class="userchip"><div class="av">${esc(ini)}</div><div class="who"><div style="font-weight:600">${esc(u.name)}</div><div class="rl">${u.role==='admin'?'Quản lý vận hành':'BQL · '+esc(BUILDINGS[u.building]?BUILDINGS[u.building].name:u.building)}</div></div><button id="btnOut" title="Đăng xuất">${ic('out')}</button></div>
+      <div class="userchip"><button id="btnData" title="Sao lưu / khôi phục dữ liệu">${ic('save')}<span class="who">Dữ liệu</span></button><div class="av">${esc(ini)}</div><div class="who"><div style="font-weight:600">${esc(u.name)}</div><div class="rl">${u.role==='admin'?'Quản lý vận hành':esc(BUILDINGS[u.building]?BUILDINGS[u.building].name:u.building)} · ID ${esc(u.id)}</div></div><button id="btnOut" title="Đăng xuất">${ic('out')}</button></div>
     </div></header>
-    ${DEMO?`<div class="demo-bar">Bản demo — dữ liệu mẫu, lưu trên trình duyệt này. <a href="#" id="dmReset" style="color:#fff;text-decoration:underline">Xóa dữ liệu demo</a></div>`:''}
+    <div class="demo-bar" id="bkBar" style="display:none"></div>
     <main id="view"></main>`;
   $$('nav.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.v));
-  $('#btnOut').onclick=async()=>{ if(CUR.dirty && !(await confirmBox('Đăng xuất','Biên bản đang soạn chưa lưu. Vẫn đăng xuất?','Đăng xuất',true))) return; CUR.dirty=false; if(DEMO){ CUR.user=null; renderLogin(); } else firebase.auth().signOut(); };
-  if(DEMO) $('#dmReset').onclick=e=>{ e.preventDefault(); LocalStore.resetDemo(); };
+  $('#btnOut').onclick=async()=>{ if(CUR.dirty && !(await confirmBox('Đăng xuất','Biên bản đang soạn chưa lưu. Vẫn đăng xuất?','Đăng xuất',true))) return; CUR.dirty=false; CUR.user=null; lsSet('esta_cldv_session', null); renderLogin(); };
+  $('#btnData').onclick=dataModal;
   renderView();
 }
 async function go(v){
@@ -1189,9 +1241,14 @@ async function go(v){
 }
 function updateBadges(){
   const el=$('#bdg-list'); if(!el) return;
-  const n=DB.records.filter(r=>r.status==='pending').length + (isAdmin()?0:DB.records.filter(r=>r.status==='returned').length);
+  const n=DB.records.filter(r=>r.status!=='approved').length;
   el.textContent=n; el.classList.toggle('hidden', !n);
-  el.title=isAdmin()?'Biên bản chờ duyệt':'Chờ duyệt / bị trả lại';
+  el.title='Biên bản còn ở dạng nháp';
+  const bar=$('#bkBar'); if(bar){ const last=lsGet('esta_cldv_lastbackup_'+CUR.user.id); const days=last?Math.floor((Date.now()-Date.parse(last))/864e5):null;
+    const need=DB.records.length && (days==null || days>=7);
+    bar.style.display=need?'block':'none';
+    bar.innerHTML=need?`${days==null?'Chưa sao lưu dữ liệu lần nào':'Đã '+days+' ngày chưa sao lưu'} — dữ liệu chỉ nằm trên trình duyệt máy này. <a href="#" id="bkNow" style="color:#fff;text-decoration:underline">Sao lưu ngay</a>`:'';
+    const bn=$('#bkNow'); if(bn) bn.onclick=e=>{ e.preventDefault(); doExport(); }; }
 }
 function renderView(){
   const v=$('#view'); if(!v) return;
@@ -1213,8 +1270,8 @@ function newDraft(){
     lines:[], remedy:'', remedyDeadline:'', opinionB:'', opinionA:'', status:'draft', photoCount:0, createdBy:{uid:u.uid, name:u.name}};
 }
 function canEdit(r){
-  if(isAdmin()) return r.status!=='approved';
-  return r.building===CUR.user.building && ['draft','pending','returned'].includes(r.status);
+  if(isAdmin()) return true;
+  return r.building===CUR.user.building;
 }
 function emptyLine(){ return {code:'', level:1, qty:1, amount:0, action:'', detail:'', comp:0, assetValue:0, pctUsed:null, _auto:true, _autoAction:true}; }
 
@@ -1226,8 +1283,7 @@ function viewCreate(v){
   const flags=[];
   if(c.missing) flags.push(`<div class="flag bad">${ic('alert')}<div>Chưa có hợp đồng ${SERVICES[d.service].name} cho ${esc(BUILDINGS[d.building].name)} trên hệ thống. ${isAdmin()?'Vào <b>Hợp đồng & mức phạt</b> để nhập.':'Liên hệ Quản lý vận hành để cập nhật.'}</div></div>`);
   else if(contractExpired(c)) flags.push(`<div class="flag">${ic('alert')}<div>Hợp đồng theo hồ sơ đã hết hạn ngày ${dDMY(c.termTo)}. Mức phạt đang áp dụng theo HĐ/phụ lục gần nhất — đề nghị cập nhật phụ lục gia hạn.</div></div>`);
-  if(d.status==='returned' && d.returnNote) flags.push(`<div class="flag bad">${ic('undo')}<div><b>Bị trả lại:</b> ${esc(d.returnNote)}</div></div>`);
-  if(d.status==='approved') flags.push(`<div class="flag ok">${ic('check')}<div>Biên bản đã duyệt bởi ${esc(d.approvedBy||'')} ngày ${dDMY(d.approvedAt)}. ${isAdmin()?'Bấm “Hủy duyệt” để chỉnh sửa.':'Chỉ Quản lý vận hành mới chỉnh sửa được.'}</div></div>`);
+  if(d.status==='approved') flags.push(`<div class="flag ok">${ic('check')}<div>Biên bản chính thức, lập bởi ${esc(d.createdBy&&d.createdBy.name||'')}${d.approvedAt?' ngày '+dDMY(d.approvedAt):''}. Nếu sửa nội dung sau khi các bên đã ký, cần in lại để ký bản mới.</div></div>`);
 
   v.innerHTML = pageHead('Biên bản vi phạm', isNew?'Lập biên bản mới':'Biên bản '+esc(d.no||'(nháp)'), 'Chọn tòa nhà & dịch vụ → nhập thông tin → chọn lỗi theo phụ lục hợp đồng → đính kèm ảnh. Mức phạt tự tính theo lần tái phạm trong tháng.',
     `${!isNew?`<button class="btn btn-o" id="btnNew">${ic('plus')}Lập biên bản mới</button>`:''}`) + `
@@ -1429,21 +1485,17 @@ function scalePreview(){
 function renderActionBar(){
   const bar=$('#actbar'); if(!bar) return; const d=CUR.draft; const ed=canEdit(d); const exists=!!DB.records.find(r=>r.id===d.id);
   const b=[];
-  if(ed) b.push(`<button class="btn btn-o" id="abSave">${ic('save')}Lưu nháp</button>`);
-  if(ed && !isAdmin()) b.push(`<button class="btn btn-c" id="abSubmit">${ic('send')}Gửi duyệt</button>`);
-  if(isAdmin() && d.status!=='approved') b.push(`<button class="btn btn-p" id="abApprove">${ic('check')}${d.status==='pending'?'Duyệt':'Lưu & duyệt'}</button>`);
-  if(isAdmin() && d.status==='pending') b.push(`<button class="btn btn-bad" id="abReturn">${ic('undo')}Trả lại</button>`);
-  if(isAdmin() && d.status==='approved') b.push(`<button class="btn btn-bad" id="abUnapprove">${ic('undo')}Hủy duyệt</button>`);
-  b.push(`<button class="btn btn-o" id="abPdf">${ic('pdf')}Xuất PDF</button>`);
-  if(exists && (isAdmin() || (d.status==='draft' && d.building===CUR.user.building))) b.push(`<button class="btn btn-g" id="abDel" title="Xóa biên bản">${ic('trash')}</button>`);
+  if(ed && d.status!=='approved') b.push(`<button class="btn btn-o" id="abSave">${ic('save')}Lưu nháp</button>`);
+  if(ed) b.push(`<button class="btn btn-p" id="abApprove">${ic('check')}${d.status==='approved'?'Lưu thay đổi':'Lưu biên bản'}</button>`);
+  b.push(`<button class="btn btn-c" id="abPdf">${ic('pdf')}Xuất PDF</button>`);
+  if(exists) b.push(`<button class="btn btn-o" id="abMail">${ic('mail')}Email</button>`);
+  if(exists && ed) b.push(`<button class="btn btn-g" id="abDel" title="Xóa biên bản">${ic('trash')}</button>`);
   bar.innerHTML=`<div class="st">${CUR.dirty?'● Có thay đổi chưa lưu':exists?'Đã lưu '+(d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN'):''):'Chưa lưu'}</div>`+b.join('');
   const on=(id,f)=>{ const e=$('#'+id); if(e) e.onclick=f; };
-  on('abSave', ()=>saveDraft(d.status==='returned'?'draft':d.status==='pending'?'pending':'draft'));
-  on('abSubmit', ()=>saveDraft('pending'));
+  on('abSave', ()=>saveDraft('draft'));
   on('abApprove', ()=>saveDraft('approved'));
-  on('abReturn', async()=>{ const note=await promptBox('Trả lại biên bản','Lý do trả lại / nội dung cần sửa'); if(note==null) return; d.returnNote=note; await saveDraft('returned'); });
-  on('abUnapprove', async()=>{ if(!(await confirmBox('Hủy duyệt','Đưa biên bản về trạng thái chờ duyệt để chỉnh sửa? Tổng hợp tháng sẽ không tính biên bản này cho đến khi duyệt lại.','Hủy duyệt',true))) return; d.status='pending'; d.approvedBy=''; d.approvedAt=''; await STORE.saveRecord({...d}); toast('Đã hủy duyệt.'); renderView(); });
-  on('abPdf', ()=>exportPDF(renderRecordDoc(d, CUR.draftPhotos, {pdf:true}), `Bien-ban_${safeName(d.no||'nhap')}_${BUILDINGS[d.building].short}.pdf`));
+  on('abMail', ()=>{ if(CUR.dirty) toast('Biên bản có thay đổi chưa lưu — email dùng nội dung đang hiển thị.'); emailForRecord(d); });
+  on('abPdf', ()=>{ if(d.status!=='approved') toast('Biên bản đang là NHÁP: PDF có dấu “Bản nháp”. Bấm “Lưu biên bản” để xuất bản chính thức.'); exportPDF(renderRecordDoc(d, CUR.draftPhotos, {pdf:true}), `Bien-ban_${safeName(d.no||('nhap_'+BUILDINGS[d.building].short))}.pdf`); });
   on('abDel', async()=>{ if(!(await confirmBox('Xóa biên bản','Xóa vĩnh viễn biên bản '+(d.no||'nháp')+'?','Xóa',true))) return; busy(true); try{ await STORE.deleteRecord(d.id); toast('Đã xóa.'); CUR.dirty=false; CUR.draft=newDraft(); CUR.draftPhotos=[]; renderView(); }catch(e){ toast('Lỗi: '+e.message,true);} busy(false); });
 }
 function validateDraft(d, strict){
@@ -1458,8 +1510,7 @@ async function saveDraft(status){
   const errs=validateDraft(d, strict); if(errs.length) return toast(errs.join(' '), true);
   if(status==='approved'){
     const over=d.lines.filter(l=>Number(l.amount)!==Number(l.stdAmount));
-    const msg = over.length ? `Có ${over.length} lỗi có số tiền khác mức hợp đồng. Vẫn duyệt?` : `Duyệt biên bản với tổng ${fmtd(recTotals(d).fine+recTotals(d).comp)}? Sau khi duyệt, BQL không chỉnh sửa được.`;
-    if(!(await confirmBox('Duyệt biên bản', msg, 'Duyệt'))) return;
+    if(over.length && !(await confirmBox('Lưu biên bản', `Có ${over.length} lỗi có số tiền khác mức hợp đồng. Vẫn lưu biên bản chính thức?`, 'Lưu'))) return;
   }
   busy(true,'Đang lưu…');
   try{
@@ -1467,14 +1518,12 @@ async function saveDraft(status){
     const t=recTotals(d); d.totalFine=t.fine; d.totalComp=t.comp;
     d.status=status; d.photoCount=CUR.draftPhotos.length;
     if(!d.createdAt) d.createdAt=new Date().toISOString();
-    if(status==='pending') d.submittedAt=new Date().toISOString();
-    if(status==='approved'){ d.approvedBy=CUR.user.name; d.approvedAt=new Date().toISOString(); d.returnNote=''; }
-    if(status==='returned'){ d.returnedAt=new Date().toISOString(); }
+    if(status==='approved' && !d.approvedAt){ d.approvedBy=CUR.user.name; d.approvedAt=new Date().toISOString(); }
     await STORE.savePhotos(d.id, d.building, CUR.draftPhotos, CUR.prevPhotoCount);
     CUR.prevPhotoCount=CUR.draftPhotos.length;
     await STORE.saveRecord(JSON.parse(JSON.stringify(d)));
     CUR.dirty=false;
-    toast({draft:'Đã lưu nháp ',pending:'Đã gửi duyệt ',approved:'Đã duyệt ',returned:'Đã trả lại '}[status]+d.no);
+    toast((status==='approved'?'Đã lưu biên bản chính thức ':'Đã lưu nháp ')+d.no);
   }catch(e){ console.error(e); toast('Lưu thất bại: '+(e.code||e.message)+'. Dữ liệu vẫn còn trên màn hình — thử lại.', true); }
   busy(false); renderView();
 }
@@ -1487,7 +1536,7 @@ async function openRecord(id){
   CUR.prevPhotoCount=CUR.draftPhotos.length;
   busy(false); CUR.view='create'; $$('nav.tabs button').forEach(b=>b.classList.toggle('on', b.dataset.v==='create')); renderView(); window.scrollTo(0,0);
 }
-async function pdfRecord(id){ const r=DB.records.find(x=>x.id===id); if(!r) return; busy(true,'Đang tải ảnh…'); let ph=[]; try{ ph=await STORE.loadPhotos(id);}catch(e){} busy(false); exportPDF(renderRecordDoc(r, ph, {pdf:true}), `Bien-ban_${safeName(r.no)}_${BUILDINGS[r.building].short}.pdf`); }
+async function pdfRecord(id){ const r=DB.records.find(x=>x.id===id); if(!r) return; busy(true,'Đang tải ảnh…'); let ph=[]; try{ ph=await STORE.loadPhotos(id);}catch(e){} busy(false); exportPDF(renderRecordDoc(r, ph, {pdf:true}), `Bien-ban_${safeName(r.no)}.pdf`); }
 
 /* =====================================================================
    2. DANH SÁCH
@@ -1498,12 +1547,12 @@ function bldOptions(sel, all=true){
 }
 function viewList(v){
   const F=CUR.f.list;
-  const pendingAll=DB.records.filter(r=>r.status==='pending').length;
-  v.innerHTML=pageHead('Quản lý biên bản','Danh sách biên bản', isAdmin()?`${pendingAll} biên bản đang chờ anh duyệt.`:'Biên bản do BQL tòa nhà lập. Biên bản đã duyệt mới được tính vào tổng hợp tháng.',
+  const drafts=DB.records.filter(r=>r.status!=='approved').length;
+  v.innerHTML=pageHead('Quản lý biên bản','Danh sách biên bản', `Biên bản lưu trên máy này. Chỉ biên bản chính thức được tính vào tổng hợp tháng${drafts?` — đang có ${drafts} biên bản nháp`:''}.`,
     `${isAdmin()?`<select id="fB">${bldOptions(F.b)}</select>`:''}
      <select id="fS"><option value="">Tất cả dịch vụ</option>${Object.entries(SERVICES).map(([k,s])=>`<option value="${k}" ${F.s===k?'selected':''}>${s.name}</option>`).join('')}</select>
      <input type="month" id="fP" value="${F.p}" title="Để trống = mọi tháng">
-     <select id="fSt"><option value="">Mọi trạng thái</option>${Object.entries(STATUS).map(([k,s])=>`<option value="${k}" ${F.st===k?'selected':''}>${s}</option>`).join('')}</select>
+     <select id="fSt"><option value="">Mọi trạng thái</option>${['draft','approved'].map(k=>`<option value="${k}" ${F.st===k?'selected':''}>${STATUS[k]}</option>`).join('')}</select>
      <input id="fQ" placeholder="Tìm số BB, nhân sự, vị trí…" value="${esc(F.q)}" style="min-width:200px">`)+
     `<div class="card"><div class="tbl-wrap" id="listTbl"></div></div>`;
   const upd=()=>{ F.b=$('#fB')?$('#fB').value:''; F.s=$('#fS').value; F.p=$('#fP').value; F.st=$('#fSt').value; F.q=$('#fQ').value; drawList(); };
@@ -1514,50 +1563,40 @@ function drawList(){
   const F=CUR.f.list; const q=F.q.trim().toLowerCase();
   let rows=DB.records.filter(r=>(!F.b||r.building===F.b)&&(!F.s||r.service===F.s)&&(!F.p||periodOf(r.dateTime)===F.p)&&(!F.st||r.status===F.st)
     &&(!q||[r.no,r.violator,r.location,r.repA,r.repB,...(r.lines||[]).map(l=>l.title)].join(' ').toLowerCase().includes(q)));
-  rows.sort((a,b)=>{ const pa=a.status==='pending'?0:1, pb=b.status==='pending'?0:1; return pa-pb || (b.dateTime||'').localeCompare(a.dateTime||''); });
-  const pend=rows.filter(r=>r.status==='pending');
+  rows.sort((a,b)=>(b.dateTime||'').localeCompare(a.dateTime||''));
   const el=$('#listTbl'); if(!el) return;
   if(!rows.length){ el.innerHTML=`<div class="empty">Không có biên bản phù hợp bộ lọc.${F.p?' Thử xóa bộ lọc tháng.':''}</div>`; return; }
-  el.innerHTML=`${isAdmin()&&pend.length>1?`<div style="padding:10px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center"><span class="hint" style="margin:0">${pend.length} biên bản chờ duyệt trong danh sách đang lọc</span><button class="btn btn-p btn-sm" id="bulkAp">${ic('check')}Duyệt tất cả ${pend.length} biên bản</button></div>`:''}
-  <table class="t"><thead><tr><th>Số biên bản</th><th>Thời điểm</th><th>Tòa nhà · Dịch vụ</th><th>Lỗi vi phạm</th><th class="num">Phạt + BT</th><th>Người lập</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+  el.innerHTML=`<table class="t"><thead><tr><th>Số biên bản</th><th>Thời điểm</th><th>Tòa nhà · Dịch vụ</th><th>Lỗi vi phạm</th><th class="num">Phạt + BT</th><th>Người lập</th><th>Trạng thái</th><th></th></tr></thead><tbody>
   ${rows.map(r=>{ const t=recTotals(r); return `<tr>
     <td><b>${esc(r.no||'(nháp)')}</b>${r.photoCount?`<div class="muted">${r.photoCount} ảnh</div>`:''}</td>
     <td>${dDMY(r.dateTime)}<div class="muted">${tHM(r.dateTime)} · ${esc(r.location||'')}</div></td>
     <td>${esc(BUILDINGS[r.building].name)}<div class="muted">${SERVICES[r.service].name} · ${esc(partyBShort(getContract(r.contractKey)))}</div></td>
     <td>${(r.lines||[]).slice(0,2).map(l=>`<div>${esc(l.code)} · ${esc(l.title.length>60?l.title.slice(0,58)+'…':l.title)} <span class="muted">(lần ${l.level})</span></div>`).join('')}${(r.lines||[]).length>2?`<div class="muted">+${r.lines.length-2} lỗi khác</div>`:''}${r.violator?`<div class="muted">NS: ${esc(r.violator)}</div>`:''}</td>
     <td class="num"><b>${fmt(t.fine+t.comp)}</b></td>
-    <td>${esc(r.createdBy&&r.createdBy.name||'')}<div class="muted">${r.approvedBy?'Duyệt: '+esc(r.approvedBy):''}</div></td>
-    <td>${statusPill(r.status)}${r.status==='returned'&&r.returnNote?`<div class="muted" style="max-width:180px">${esc(r.returnNote)}</div>`:''}</td>
-    <td style="white-space:nowrap"><button class="btn btn-g btn-sm" data-open="${r.id}" title="Mở">${ic('edit')}</button><button class="btn btn-g btn-sm" data-pdf="${r.id}" title="Xuất PDF">${ic('pdf')}</button>${isAdmin()&&r.status==='pending'?`<button class="btn btn-g btn-sm" data-ap="${r.id}" title="Duyệt" style="color:var(--ok)">${ic('check')}</button><button class="btn btn-g btn-sm" data-rt="${r.id}" title="Trả lại" style="color:var(--bad)">${ic('undo')}</button>`:''}</td></tr>`; }).join('')}
+    <td>${esc(r.createdBy&&r.createdBy.name||'')}</td>
+    <td>${statusPill(r.status)}</td>
+    <td style="white-space:nowrap"><button class="btn btn-g btn-sm" data-open="${r.id}" title="Mở">${ic('edit')}</button><button class="btn btn-g btn-sm" data-pdf="${r.id}" title="Xuất PDF">${ic('pdf')}</button><button class="btn btn-g btn-sm" data-mail="${r.id}" title="Nội dung email">${ic('mail')}</button></td></tr>`; }).join('')}
   </tbody></table>`;
   $$('[data-open]',el).forEach(b=>b.onclick=()=>openRecord(b.dataset.open));
   $$('[data-pdf]',el).forEach(b=>b.onclick=()=>pdfRecord(b.dataset.pdf));
-  $$('[data-ap]',el).forEach(b=>b.onclick=()=>quickStatus(b.dataset.ap,'approved'));
-  $$('[data-rt]',el).forEach(b=>b.onclick=()=>quickStatus(b.dataset.rt,'returned'));
-  if($('#bulkAp')) $('#bulkAp').onclick=async()=>{ if(!(await confirmBox('Duyệt hàng loạt',`Duyệt ${pend.length} biên bản đang chờ (tổng ${fmtd(pend.reduce((s,r)=>s+recTotals(r).fine+recTotals(r).comp,0))})?`,'Duyệt tất cả'))) return;
-    busy(true); try{ for(const r of pend){ await STORE.saveRecord({...r, status:'approved', approvedBy:CUR.user.name, approvedAt:new Date().toISOString(), returnNote:''}); } toast(`Đã duyệt ${pend.length} biên bản.`);}catch(e){toast('Lỗi: '+e.message,true);} busy(false); };
+  $$('[data-mail]',el).forEach(b=>b.onclick=()=>emailForRecord(DB.records.find(r=>r.id===b.dataset.mail)));
 }
-async function quickStatus(id, st){
-  const r=DB.records.find(x=>x.id===id); if(!r) return;
-  if(st==='approved'){ if(!(await confirmBox('Duyệt biên bản',`Duyệt ${r.no} (${fmtd(recTotals(r).fine+recTotals(r).comp)})?`,'Duyệt'))) return; await STORE.saveRecord({...r, status:'approved', approvedBy:CUR.user.name, approvedAt:new Date().toISOString(), returnNote:''}); toast('Đã duyệt '+r.no); }
-  else { const note=await promptBox('Trả lại '+r.no,'Lý do trả lại / nội dung cần sửa'); if(note==null) return; await STORE.saveRecord({...r, status:'returned', returnNote:note, returnedAt:new Date().toISOString()}); toast('Đã trả lại '+r.no); }
-}
-
 /* =====================================================================
    3. TỔNG HỢP THÁNG
    ===================================================================== */
 function viewSummary(v){
   const F=CUR.f.sum; const keys=contractKeysFor(CUR.user).filter(k=>!getContract(k).missing);
   if(!F.key || !keys.includes(F.key)) F.key=keys[0]||'';
-  v.innerHTML=pageHead('Khấu trừ phí dịch vụ','Tổng hợp chế tài tháng','Chỉ tính biên bản đã duyệt. Nhập điểm đánh giá chất lượng tháng để tính mức trừ theo khung điểm của từng hợp đồng.',
+  v.innerHTML=pageHead('Khấu trừ phí dịch vụ','Tổng hợp chế tài tháng','Chỉ tính biên bản chính thức. Nhập điểm đánh giá chất lượng tháng để tính mức trừ theo khung điểm của từng hợp đồng.',
     `<input type="month" id="sP" value="${F.p}">${isAdmin()?`<button class="btn btn-p" id="sAll">${ic('pdf')}PDF tổng hợp toàn danh mục</button>`:''}`)+
     `<div class="card" style="margin-bottom:18px"><div class="tbl-wrap" id="sOver"></div></div>
-     <div class="sumgrid"><div id="sDetail"></div><div class="pv-wrap" id="pvWrap"><div class="pv-head"><span>Xem trước bảng tổng hợp</span><button class="btn btn-o btn-sm" id="sPdf">${ic('pdf')}Xuất PDF hợp đồng này</button></div><div id="pvBox"></div></div></div>`;
+     <div class="sumgrid"><div id="sDetail"></div><div class="pv-wrap" id="pvWrap"><div class="pv-head"><span>Xem trước bảng tổng hợp</span><span style="display:flex;gap:6px"><button class="btn btn-o btn-sm" id="sMail">${ic('mail')}Email</button><button class="btn btn-c btn-sm" id="sPdf">${ic('pdf')}Xuất PDF</button></span></div><div id="pvBox"></div></div></div>`;
   $('#sP').onchange=e=>{ F.p=e.target.value||curPeriod(); viewSummary(v); };
   if($('#sAll')) $('#sAll').onclick=()=>{ const html=renderOverviewDoc(keys,F.p,{pdf:true})+keys.map(k=>renderSummaryDoc(k,F.p,{pdf:true, breakBefore:true, approver:CUR.user.name})).join(''); exportPDF(html, `Tong-hop-che-tai_${F.p}_NonCBD.pdf`); };
+  $('#sMail').onclick=()=>{ if(F.key) emailForSummary(F.key, F.p); };
   $('#sPdf').onclick=()=>{ if(!F.key) return; const c=getContract(F.key); exportPDF(renderSummaryDoc(F.key,F.p,{pdf:true, approver:isAdmin()?CUR.user.name:''}), `Tong-hop_${F.p}_${SERVICES[c.service].code}_${BUILDINGS[c.building].short}.pdf`); };
   // overview
-  $('#sOver').innerHTML = keys.length?`<table class="t"><thead><tr><th>Tòa nhà · Dịch vụ</th><th>Nhà thầu</th><th class="num">Phí DV/tháng</th><th class="num">BB duyệt</th><th class="num">Chờ duyệt</th><th class="num">Phạt BB</th><th class="num">Điểm CL</th><th class="num">Trừ CL</th><th class="num">Tổng khấu trừ</th><th class="num">% phí</th><th></th></tr></thead><tbody>
+  $('#sOver').innerHTML = keys.length?`<table class="t"><thead><tr><th>Tòa nhà · Dịch vụ</th><th>Nhà thầu</th><th class="num">Phí DV/tháng</th><th class="num">BB chính thức</th><th class="num">Nháp</th><th class="num">Phạt BB</th><th class="num">Điểm CL</th><th class="num">Trừ CL</th><th class="num">Tổng khấu trừ</th><th class="num">% phí</th><th></th></tr></thead><tbody>
     ${keys.map(k=>{ const S=monthSummary(k,F.p); const bad=S.alerts.some(a=>a.lv==='bad'); return `<tr data-k="${k}" style="cursor:pointer;${k===F.key?'background:var(--cream-l)':''}"><td><b>${esc(BUILDINGS[S.c.building].name)}</b><div class="muted">${SERVICES[S.c.service].name}</div></td><td>${esc(partyBShort(S.c))}</td><td class="num">${fmt(S.fee)}</td><td class="num">${S.approved.length}</td><td class="num">${S.notApproved.length||''}</td><td class="num">${fmt(S.fines)}</td><td class="num">${S.score!=null?S.score+'%':'<span class="muted">—</span>'}</td><td class="num">${fmt(S.qualityDeduct)}</td><td class="num"><b>${fmt(S.total)}</b></td><td class="num">${S.fee?(S.penaltyTotal/S.fee*100).toFixed(1)+'%':''}</td><td>${S.alerts.length?`<span title="${esc(S.alerts.map(a=>a.t).join('\n'))}" style="color:${bad?'var(--bad)':'var(--copper)'}">${ic('alert')}</span>`:''}</td></tr>`; }).join('')}
     </tbody></table>`:`<div class="empty">Chưa có hợp đồng nào.</div>`;
   $$('#sOver tr[data-k]').forEach(tr=>tr.onclick=()=>{ F.key=tr.dataset.k; viewSummary(v); });
@@ -1569,14 +1608,14 @@ function drawSummaryDetail(){
   $('#sDetail').innerHTML=`<div class="card"><div class="card-h"><h3>${esc(contractLabel(F.key))} · ${periodLabel(F.p)}</h3></div><div class="card-b">
     <label class="f">Điểm đánh giá chất lượng dịch vụ tháng (% đạt)</label>
     <div class="grid3"><div><input type="number" step="0.1" id="aScore" value="${a.score!=null?a.score:''}" placeholder="VD: 86" ${canAudit?'':'disabled'}></div>
-      <div><input type="number" step="0.1" id="aManual" value="${a.manualPct!=null?a.manualPct:''}" placeholder="% trừ thủ công" title="Chỉ dùng khi điểm nằm ngoài khung HĐ hoặc cần điều chỉnh" ${isAdmin()?'':'disabled'}></div>
+      <div><input type="number" step="0.1" id="aManual" value="${a.manualPct!=null?a.manualPct:''}" placeholder="% trừ thủ công" title="Chỉ dùng khi điểm nằm ngoài khung HĐ hoặc cần điều chỉnh" ${canAudit?'':'disabled'}></div>
       <div><button class="btn btn-p" id="aSave" style="width:100%" ${canAudit?'':'disabled'}>${ic('save')}Lưu điểm</button></div></div>
     <textarea id="aNote" rows="2" style="margin-top:8px" placeholder="Ghi chú đánh giá (tiêu chí chưa đạt, đề xuất…)" ${canAudit?'':'disabled'}>${esc(a.note||'')}</textarea>
     ${(c.tiers||[]).length?`<table class="t" style="margin-top:10px"><thead><tr><th>Khung điểm theo HĐ</th><th>Chế tài</th><th class="num">% trừ</th></tr></thead><tbody>${c.tiers.map(t=>`<tr style="${S.tier===t?'background:var(--copper-l)':''}"><td>${esc(t.label)}</td><td>${esc(t.action)}</td><td class="num">${t.pct}%</td></tr>`).join('')}</tbody></table>`:`<div class="flag">${ic('info')}<div>Hợp đồng không quy định % trừ phí theo điểm đánh giá — điểm chỉ dùng để theo dõi.</div></div>`}
     <h4 style="margin:16px 0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--aub)">Tính khấu trừ</h4>
     <div class="calc">
       <div class="k">Phí dịch vụ chuẩn/tháng</div><div class="v">${fmtd(S.fee)}</div>
-      <div class="k">(1) Phạt theo ${S.approved.length} biên bản đã duyệt</div><div class="v">${fmtd(S.fines)}</div>
+      <div class="k">(1) Phạt theo ${S.approved.length} biên bản chính thức</div><div class="v">${fmtd(S.fines)}</div>
       <div class="k">(2) Trừ theo chất lượng (${S.qPct+S.extraPct}%)</div><div class="v">${fmtd(S.qualityDeduct)}</div>
       <div class="k">(3) Bồi thường thiệt hại</div><div class="v">${fmtd(S.comp)}</div>
       <div class="k tot">Tổng khấu trừ</div><div class="v tot">${fmtd(S.total)}</div>
@@ -1601,14 +1640,14 @@ function viewNotice(v){
     const prev=DB.notices.filter(n=>n.contractKey===F.key && n.issued && (n.period||'')>=addMonths(F.p,-5)).length;
     F.type=prev>=2?'final':prev===1?'remind2':'remind1'; F.subject=''; F.days=c?String(c.remedyDays||3):'3'; F.signer=''; F.role=''; F.body=''; F.editingId=null; }
   const prevN=DB.notices.filter(n=>n.contractKey===F.key).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  v.innerHTML=pageHead('Công văn gửi nhà thầu','Thông báo vi phạm & yêu cầu khắc phục','Chọn biên bản đã duyệt để đưa vào thông báo. Cấp thông báo được gợi ý theo số thông báo đã phát hành trong 6 tháng gần nhất.',
+  v.innerHTML=pageHead('Công văn gửi nhà thầu','Thông báo vi phạm & yêu cầu khắc phục','Chọn biên bản chính thức để đưa vào thông báo. Cấp thông báo được gợi ý theo số thông báo đã phát hành trong 6 tháng gần nhất.',
     `<select id="nK">${keys.map(k=>`<option value="${k}" ${F.key===k?'selected':''}>${esc(contractLabel(k))}</option>`).join('')}</select><input type="month" id="nP" value="${F.p}">`)+
   `<div class="sumgrid"><div style="display:flex;flex-direction:column;gap:16px">
-    <div class="card"><div class="card-h"><h3><span class="step">1</span>Biên bản đưa vào thông báo</h3><span class="hint" style="margin:0">${recs.length} BB đã duyệt</span></div><div class="card-b" style="padding:0">
-      ${recs.length?`<table class="t"><tbody>${recs.map(r=>`<tr><td style="width:30px"><input type="checkbox" data-sel="${r.id}" ${F.sel.includes(r.id)?'checked':''} style="width:auto"></td><td><b>${esc(r.no)}</b><div class="muted">${dDMY(r.dateTime)} · ${esc(r.violator||'')}</div></td><td>${(r.lines||[]).map(l=>esc(l.title.slice(0,70))).join('<br>')}</td><td class="num">${fmt(recTotals(r).fine)}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">Không có biên bản đã duyệt của hợp đồng này trong tháng ${periodLabel(F.p)}.</div>`}
+    <div class="card"><div class="card-h"><h3><span class="step">1</span>Biên bản đưa vào thông báo</h3><span class="hint" style="margin:0">${recs.length} BB chính thức</span></div><div class="card-b" style="padding:0">
+      ${recs.length?`<table class="t"><tbody>${recs.map(r=>`<tr><td style="width:30px"><input type="checkbox" data-sel="${r.id}" ${F.sel.includes(r.id)?'checked':''} style="width:auto"></td><td><b>${esc(r.no)}</b><div class="muted">${dDMY(r.dateTime)} · ${esc(r.violator||'')}</div></td><td>${(r.lines||[]).map(l=>esc(l.title.slice(0,70))).join('<br>')}</td><td class="num">${fmt(recTotals(r).fine)}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">Không có biên bản chính thức của hợp đồng này trong tháng ${periodLabel(F.p)}.</div>`}
     </div></div>
     <div class="card"><div class="card-h"><h3><span class="step">2</span>Nội dung thông báo</h3></div><div class="card-b"><div class="grid2">
-      <div><label class="f">Cấp thông báo</label><select id="nType">${Object.entries(NOTICE_TYPES).map(([k,t])=>`<option value="${k}" ${F.type===k?'selected':''}>${t.label}</option>`).join('')}</select><div class="hint">Đã phát hành ${prevN.filter(n=>n.issued).length} thông báo cho HĐ này.</div></div>
+      <div><label class="f">Cấp thông báo</label><select id="nType">${Object.entries(NOTICE_TYPES).map(([k,t])=>`<option value="${k}" ${F.type===k?'selected':''}>${t.label}</option>`).join('')}</select><div class="hint">Đã cấp số ${prevN.filter(n=>n.issued).length} thông báo cho HĐ này.</div></div>
       <div><label class="f">Thời hạn khắc phục (ngày)</label><input type="number" id="nDays" value="${esc(F.days)}"></div>
       <div class="span2"><label class="f">Trích yếu (V/v)</label><input id="nSubj" value="${esc(F.subject)}" placeholder="${esc(NOTICE_TYPES[F.type].subject)}"></div>
       <div class="span2"><label class="f">Nội dung bổ sung</label><textarea id="nBody" rows="3" placeholder="Nhận định thêm của BQL, yêu cầu riêng…">${esc(F.body)}</textarea></div>
@@ -1618,9 +1657,10 @@ function viewNotice(v){
     </div>
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
       <button class="btn btn-o" id="nPdf">${ic('pdf')}Xuất PDF dự thảo</button>
-      ${isAdmin()?`<button class="btn btn-p" id="nIssue">${ic('send')}Phát hành & xuất PDF</button>`:`<span class="hint">Chỉ Quản lý vận hành phát hành thông báo chính thức (có số).</span>`}
+      <button class="btn btn-p" id="nIssue">${ic('send')}Cấp số, lưu & xuất PDF</button>
+      <button class="btn btn-o" id="nMail">${ic('mail')}Email</button>
     </div></div></div>
-    <div class="card"><div class="card-h"><h3>Thông báo đã phát hành</h3></div><div class="card-b" style="padding:0">${prevN.filter(n=>n.issued).length?`<table class="t"><tbody>${prevN.filter(n=>n.issued).map(n=>`<tr><td><b>${esc(n.no)}</b><div class="muted">${dDMY(n.date)} · ${esc(NOTICE_TYPES[n.type]?NOTICE_TYPES[n.type].label:'')}</div></td><td>${(n.recordIds||[]).length} BB · tháng ${periodLabel(n.period)}</td><td style="text-align:right;white-space:nowrap"><button class="btn btn-g btn-sm" data-np="${n.id}">${ic('pdf')}PDF</button>${isAdmin()?`<button class="btn btn-g btn-sm" data-nd="${n.id}" title="Xóa">${ic('trash')}</button>`:''}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">Chưa có.</div>`}</div></div>
+    <div class="card"><div class="card-h"><h3>Thông báo đã cấp số</h3></div><div class="card-b" style="padding:0">${prevN.filter(n=>n.issued).length?`<table class="t"><tbody>${prevN.filter(n=>n.issued).map(n=>`<tr><td><b>${esc(n.no)}</b><div class="muted">${dDMY(n.date)} · ${esc(NOTICE_TYPES[n.type]?NOTICE_TYPES[n.type].label:'')}</div></td><td>${(n.recordIds||[]).length} BB · tháng ${periodLabel(n.period)}</td><td style="text-align:right;white-space:nowrap"><button class="btn btn-g btn-sm" data-np="${n.id}">${ic('pdf')}PDF</button><button class="btn btn-g btn-sm" data-nm="${n.id}" title="Email">${ic('mail')}</button><button class="btn btn-g btn-sm" data-nd="${n.id}" title="Xóa">${ic('trash')}</button></td></tr>`).join('')}</tbody></table>`:`<div class="empty">Chưa có.</div>`}</div></div>
   </div>
   <div class="pv-wrap" id="pvWrap"><div class="pv-head"><span>Xem trước thông báo</span></div><div id="pvBox"></div></div></div>`;
   const cur=()=>({id:F.editingId||uid(), contractKey:F.key, building:c.building, service:c.service, period:F.p, type:F.type, subject:F.subject, deadlineDays:Number(F.days)||c.remedyDays||3, body:F.body, signer:F.signer, signerRole:F.role, date:F.date, recordIds:F.sel.slice(), no:''});
@@ -1631,13 +1671,15 @@ function viewNotice(v){
   const b=(id,k)=>{ const e=$('#'+id); e.oninput=e.onchange=()=>{ F[k]=e.value; if(id==='nType') $('#nSubj').placeholder=NOTICE_TYPES[F.type].subject; pv(); }; };
   b('nType','type'); b('nDays','days'); b('nSubj','subject'); b('nBody','body'); b('nSigner','signer'); b('nRole','role'); b('nDate','date');
   $('#nPdf').onclick=()=>exportPDF(renderNoticeDoc(cur(),{pdf:true}), `Thong-bao_du-thao_${BUILDINGS[c.building].short}_${F.p}.pdf`);
+  $('#nMail').onclick=()=>emailForNotice(cur());
   if($('#nIssue')) $('#nIssue').onclick=async()=>{
     if(!F.sel.length && F.type!=='quality') return toast('Chọn ít nhất 1 biên bản.', true);
-    if(!(await confirmBox('Phát hành thông báo','Cấp số và lưu thông báo chính thức gửi '+partyBShort(c)+'?','Phát hành'))) return;
+    if(!(await confirmBox('Cấp số thông báo','Cấp số và lưu thông báo chính thức gửi '+partyBShort(c)+'?','Cấp số & xuất PDF'))) return;
     const n=cur(); n.no=nextNoticeNo(n); n.issued=true; n.issuedBy=CUR.user.name; n.createdAt=new Date().toISOString();
-    try{ await STORE.saveNotice(n); toast('Đã phát hành '+n.no); exportPDF(renderNoticeDoc(n,{pdf:true, issued:true}), `Thong-bao_${safeName(n.no)}.pdf`); F._init=false; }catch(e){ toast('Lỗi: '+e.message,true); }
+    try{ await STORE.saveNotice(n); toast('Đã cấp số '+n.no); exportPDF(renderNoticeDoc(n,{pdf:true, issued:true}), `Thong-bao_${safeName(n.no)}.pdf`); F._init=false; }catch(e){ toast('Lỗi: '+e.message,true); }
   };
   $$('[data-np]').forEach(x=>x.onclick=()=>{ const n=DB.notices.find(y=>y.id===x.dataset.np); exportPDF(renderNoticeDoc(n,{pdf:true, issued:true}), `Thong-bao_${safeName(n.no)}.pdf`); });
+  $$('[data-nm]').forEach(x=>x.onclick=()=>emailForNotice(DB.notices.find(y=>y.id===x.dataset.nm)));
   $$('[data-nd]').forEach(x=>x.onclick=async()=>{ if(!(await confirmBox('Xóa thông báo','Xóa thông báo đã phát hành khỏi hệ thống?','Xóa',true))) return; await STORE.deleteNotice(x.dataset.nd); toast('Đã xóa.'); });
   pv();
 }
@@ -1651,7 +1693,7 @@ function viewDash(v){
   const appr=recsM.filter(r=>r.status==='approved');
   const sums=keys.map(k=>monthSummary(k,P));
   const totalDeduct=sums.reduce((s,x)=>s+x.total,0);
-  const pending=DB.records.filter(r=>r.status==='pending' && keys.includes(r.contractKey));
+  const pending=DB.records.filter(r=>r.status!=='approved' && keys.includes(r.contractKey));
   const warnC=sums.filter(s=>s.alerts.some(a=>a.lv==='bad')).length;
   const months=[...Array(6)].map((_,i)=>addMonths(P,i-5));
   const trend=months.map(m=>({m, v:keys.reduce((s,k)=>s+monthSummary(k,m).fines,0), n:DB.records.filter(r=>r.status==='approved'&&periodOf(r.dateTime)===m&&keys.includes(r.contractKey)).length}));
@@ -1659,7 +1701,7 @@ function viewDash(v){
   const byC=sums.map(s=>({k:s.c.building+'_'+s.c.service, name:`${BUILDINGS[s.c.building].name} · ${SERVICES[s.c.service].name}`, v:s.total, n:s.approved.length})).sort((a,b)=>b.v-a.v);
   const mxC=Math.max(1,...byC.map(x=>x.v));
   // tái phạm
-  const rep={}; recsM.filter(r=>r.status!=='returned').forEach(r=>(r.lines||[]).forEach(l=>{ const k=r.contractKey+'|'+l.code; rep[k]=rep[k]||{k:r.contractKey, code:l.code, title:l.title, n:0, maxLv:0, amt:0}; rep[k].n++; rep[k].maxLv=Math.max(rep[k].maxLv,l.level||1); rep[k].amt+=Number(l.amount)||0; }));
+  const rep={}; recsM.forEach(r=>(r.lines||[]).forEach(l=>{ const k=r.contractKey+'|'+l.code; rep[k]=rep[k]||{k:r.contractKey, code:l.code, title:l.title, n:0, maxLv:0, amt:0}; rep[k].n++; rep[k].maxLv=Math.max(rep[k].maxLv,l.level||1); rep[k].amt+=Number(l.amount)||0; }));
   const repeats=Object.values(rep).filter(x=>x.n>=2).sort((a,b)=>b.n-a.n);
   // top lỗi 6 tháng
   const top={}; DB.records.filter(r=>r.status==='approved'&&months.includes(periodOf(r.dateTime))&&keys.includes(r.contractKey)).forEach(r=>(r.lines||[]).forEach(l=>{ const k=r.service+'|'+l.title; top[k]=top[k]||{s:r.service,title:l.title,n:0,amt:0}; top[k].n++; top[k].amt+=Number(l.amount)||0; }));
@@ -1667,9 +1709,9 @@ function viewDash(v){
   const expired=keys.map(getContract).filter(c=>contractExpired(c));
   v.innerHTML=pageHead('Theo dõi tái phạm','Dashboard chế tài', isAdmin()?'Toàn danh mục Non-CBD':'Tòa nhà '+esc(BUILDINGS[CUR.user.building].name), `<input type="month" id="dP" value="${P}">`)+`
   <div class="kpis">
-    <div class="card kpi"><div class="l">Biên bản đã duyệt</div><div class="v">${appr.length}</div><div class="s">${recsM.length} biên bản lập trong tháng ${periodLabel(P)}</div></div>
+    <div class="card kpi"><div class="l">Biên bản chính thức</div><div class="v">${appr.length}</div><div class="s">${recsM.length} biên bản lập trong tháng ${periodLabel(P)}</div></div>
     <div class="card kpi"><div class="l">Tổng khấu trừ tháng</div><div class="v">${fmt(totalDeduct)}</div><div class="s">đồng · phạt BB + chất lượng + bồi thường</div></div>
-    <div class="card kpi"><div class="l">Chờ duyệt</div><div class="v" style="color:${pending.length?'var(--copper)':''}">${pending.length}</div><div class="s">biên bản (mọi tháng)</div></div>
+    <div class="card kpi"><div class="l">Biên bản nháp</div><div class="v" style="color:${pending.length?'var(--copper)':''}">${pending.length}</div><div class="s">chưa lưu chính thức (mọi tháng)</div></div>
     <div class="card kpi"><div class="l">Hợp đồng chạm ngưỡng</div><div class="v" style="color:${warnC?'var(--bad)':''}">${warnC}</div><div class="s">có cảnh báo chấm dứt / vượt mức</div></div>
   </div>
   <div class="dgrid">
@@ -1776,32 +1818,110 @@ function itemEditor(item, onSave){
 }
 
 /* =====================================================================
-   DEMO DATA
+   SAO LƯU / KHÔI PHỤC DỮ LIỆU
    ===================================================================== */
-function seedDemo(){
-  const P=curPeriod(), P1=addMonths(P,-1), P2=addMonths(P,-2);
-  const mk=(key, dt, loc, violator, lines, status, extra={})=>{ const c=getContract(key); const r={id:uid(), building:c.building, service:c.service, contractKey:key, dateTime:dt, location:loc, source:'Tuần tra trực tiếp', repA:'Nguyễn Văn BQL', roleA:'Giám sát chất lượng dịch vụ – BQL Tòa nhà', repB:c.service==='SECURITY'?'Trần Văn Chỉ Huy':'Lê Thị Tổ Trưởng', roleB:defaultRoleB(c.service), violator, witness:'', lines:[], remedy:'', remedyDeadline:addDays(dt,c.remedyDays||3), opinionB:'Đã nhận thông tin, cam kết chấn chỉnh.', opinionA:'', status, photoCount:0, createdBy:{uid:'demo', name:'Nguyễn Văn BQL'}, createdAt:dt, ...extra};
-    lines.forEach(([code,level,detail,qty])=>{ const it=c.items.find(i=>i.code===code); const L={code, title:it.title, ref:it.ref, level, qty:qty||1, detail, comp:0, assetValue:0, pctUsed:null}; L.amount=contractAmount(c,it,L); L.stdAmount=L.amount; L.action=levelOf(it,level).t; r.lines.push(L); });
-    r.remedy=suggestRemedy(r); r.no=nextRecordNo(r); const t=recTotals(r); r.totalFine=t.fine; r.totalComp=t.comp;
-    if(status==='approved'){ r.approvedBy='Phạm Bill'; r.approvedAt=dt; }
-    DB.records.push(r); };
-  mk('lmak68_SECURITY', P2+'-08T02:15', 'Chốt sảnh tầng G', 'Võ Văn Long – ca đêm', [['05',1,'Ngủ tại bàn trực lúc 02h15, ghi nhận qua camera sảnh G']], 'approved');
-  mk('lmak68_SECURITY', P1+'-12T14:30', 'Hầm B1', 'Phan Minh Tâm – ca ngày', [['02',1,'Không đội mũ, áo không bỏ thùng']], 'approved');
-  mk('lmak68_SECURITY', P+'-03T01:40', 'Chốt cổng chính', 'Võ Văn Long – ca đêm', [['05',1,'Ngủ gật tại chốt cổng, tuần tra BQL phát hiện']], 'approved');
-  mk('lmak68_SECURITY', P+'-05T23:10', 'Chốt cổng chính', 'Võ Văn Long – ca đêm', [['05',2,'Tái phạm ngủ trong ca trực'],['06',2,'Xem phim trên điện thoại']], 'approved');
-  mk('lmak68_SECURITY', P+'-06T09:20', 'Quầy lễ tân LiteSpace', 'Đỗ Thị Mai – ca ngày', [['LS',1,'Bóc nhầm thư của khách hàng LiteSpace tầng 5']], 'pending');
-  mk('lmak68_CLEANING', P+'-04T10:00', 'WC nam tầng 7', 'Nguyễn Thị Hoa', [['10',1,'Khách thuê phản ánh WC hết giấy, sàn ướt']], 'approved');
-  mk('lmak68_CLEANING', P+'-05T15:30', 'Khu vực ngoại cảnh', 'Trần Thị Lan', [['02',1,'Hút thuốc phía sau tòa nhà trong giờ làm việc']], 'pending');
-  mk('hh130_CLEANING', P+'-02T07:10', 'Sảnh tầng 1', 'Lý Thị Thu', [['07',1,'Đến trễ 40 phút, sảnh chưa vệ sinh đầu giờ']], 'approved');
-  mk('hh130_CLEANING', P+'-04T11:00', 'WC tầng 3', 'Lý Thị Thu', [['02',1,'Còn rác, có mùi']], 'approved');
-  mk('hh130_CLEANING', P1+'-20T16:00', 'Hành lang tầng 4', 'Lý Thị Thu', [['06',1,'Không mặc đồng phục, không đeo thẻ']], 'approved');
-  mk('hh127_SECURITY', P+'-01T20:00', 'Bãi xe', 'Bảo vệ ca tối', [['05',1,'Thiếu 01 vị trí tuần tra bãi xe ca tối',1]], 'approved');
-  mk('hh127_SECURITY', P+'-05T13:00', 'Cổng kiểm soát bãi xe', 'Nguyễn Văn Bình', [['35',1,'Giữ xe khách vãng lai không xuất vé']], 'draft');
-  DB.audits[`lmak68_SECURITY_${P2}`]={score:82, contractKey:'lmak68_SECURITY', building:'lmak68', service:'SECURITY', period:P2};
-  DB.audits[`lmak68_SECURITY_${P1}`]={score:80, contractKey:'lmak68_SECURITY', building:'lmak68', service:'SECURITY', period:P1};
-  DB.audits[`lmak68_SECURITY_${P}`]={score:78, contractKey:'lmak68_SECURITY', building:'lmak68', service:'SECURITY', period:P, note:'Tiêu chí trực ca & vị trí chưa đạt.'};
-  DB.audits[`lmak68_CLEANING_${P}`]={score:86, contractKey:'lmak68_CLEANING', building:'lmak68', service:'CLEANING', period:P};
-  DB.audits[`hh130_CLEANING_${P}`]={score:72, contractKey:'hh130_CLEANING', building:'hh130', service:'CLEANING', period:P};
+function downloadText(text, filename, type='application/json'){
+  const blob=new Blob([text],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+async function doExport(){
+  busy(true,'Đang tạo file sao lưu…');
+  try{
+    const data=await STORE.exportData(CUR.user);
+    const d=new Date(); const stamp=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+    const scope=CUR.user.role==='admin'?'TOAN-BO':BUILDINGS[CUR.user.building].short;
+    downloadText(JSON.stringify(data), `ESTA-CLDV_${scope}_${stamp}.json`);
+    lsSet('esta_cldv_lastbackup_'+CUR.user.id, new Date().toISOString());
+    toast(`Đã xuất ${data.records.length} biên bản ra file sao lưu.`); updateBadges();
+  }catch(e){ toast('Xuất file lỗi: '+e.message, true); }
+  busy(false);
+}
+function dataModal(){
+  const mine=DB.records.length;
+  modal({title:'Dữ liệu trên máy này', body:`
+    <p style="margin:0 0 10px">Web không có máy chủ: biên bản, ảnh, điểm đánh giá và thông báo được lưu ngay trong trình duyệt của máy đang dùng (${mine} biên bản). Xóa lịch sử trình duyệt hoặc đổi máy sẽ mất dữ liệu nếu chưa sao lưu.</p>
+    <div class="card" style="padding:14px 16px;margin-bottom:12px;box-shadow:none"><b style="color:var(--aub)">1. Xuất file sao lưu</b><div class="hint">Tải về 1 file .json chứa toàn bộ dữ liệu ${isAdmin()?'của tất cả tòa nhà trên máy này':'của tòa nhà'} (kể cả ảnh). Nên làm mỗi tuần và gửi file cho Quản lý vận hành.</div><button class="btn btn-p btn-sm" id="dmExp" style="margin-top:8px">${ic('pdf')}Xuất file sao lưu</button></div>
+    <div class="card" style="padding:14px 16px;box-shadow:none"><b style="color:var(--aub)">2. Nhập file sao lưu</b><div class="hint">Gộp dữ liệu từ file vào máy này: biên bản mới được thêm, biên bản trùng giữ bản sửa sau cùng. ${isAdmin()?'Anh dùng để gộp file các BQL gửi về.':'Chỉ nhận dữ liệu của tòa nhà mình.'}</div>
+      <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="dmCt" style="width:auto" ${isAdmin()?'':'checked'}> Nhập cả cấu hình Hợp đồng &amp; mức phạt trong file (file do Quản lý vận hành xuất)</label>
+      <input type="file" id="dmFile" accept=".json,application/json" style="margin-top:8px"></div>`,
+    foot:`<button class="btn btn-o" data-x>Đóng</button>`,
+    onMount:(el,close)=>{
+      $('#dmExp',el).onclick=()=>doExport();
+      $('#dmFile',el).onchange=async e=>{
+        const f=e.target.files[0]; if(!f) return;
+        busy(true,'Đang nhập dữ liệu…');
+        try{ const data=JSON.parse(await f.text()); const r=await STORE.importData(data, CUR.user, $('#dmCt',el).checked);
+          toast(`Đã nhập: ${r.add} biên bản mới, ${r.upd} biên bản cập nhật${r.skip?`, bỏ qua ${r.skip}`:''}${r.ct?`, ${r.ct} cấu hình hợp đồng`:''}.`); close(); renderView(); }
+        catch(err){ toast('Không nhập được file: '+err.message, true); }
+        busy(false); e.target.value='';
+      };
+    }});
+}
+
+/* =====================================================================
+   NỘI DUNG EMAIL
+   ===================================================================== */
+function emailBox(subject, body){
+  modal({title:'Nội dung email gửi nhà thầu', wide:true, body:`
+    <label class="f" for="emSub">Tiêu đề</label><div style="display:flex;gap:8px"><input id="emSub" value="${esc(subject)}"><button class="btn btn-o btn-sm" data-cp="emSub">${ic('copy')}Sao chép</button></div>
+    <label class="f" for="emBody" style="margin-top:12px">Nội dung</label><textarea id="emBody" rows="16">${esc(body)}</textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;align-items:center"><button class="btn btn-p btn-sm" data-cp="emBody">${ic('copy')}Sao chép nội dung</button><span class="hint" style="margin:0">Dán vào Outlook/Gmail và đính kèm file PDF đã xuất.</span></div>`,
+    foot:`<button class="btn btn-o" data-x>Đóng</button>`,
+    onMount:(el)=>{ $$('[data-cp]',el).forEach(b=>b.onclick=async()=>{ const t=$('#'+b.dataset.cp,el); try{ await navigator.clipboard.writeText(t.value); toast('Đã sao chép.'); }catch(e){ t.focus(); t.select(); try{ document.execCommand('copy'); toast('Đã sao chép.'); }catch(_){ toast('Không tự sao chép được — nội dung đã được chọn, bấm Ctrl+C.', true); } } }); }});
+}
+function signature(){ return `\nTrân trọng,\n${CUR.user.name}\n${isAdmin()?'Quản lý vận hành Non-CBD':'Ban Quản lý Tòa nhà '+BUILDINGS[CUR.user.building].name}\nESTA Property Management – A L'MAK Company`; }
+function emailForRecord(r){
+  const c=getContract(r.contractKey); const b=BUILDINGS[r.building]; const t=recTotals(r);
+  const subject=`[${b.name}] Biên bản vi phạm ${r.no||''} – ${SERVICES[r.service].full} – ${dDMY(r.dateTime)}`;
+  const lines=(r.lines||[]).map((l,i)=>`  ${i+1}. ${l.title} (lần ${l.level}, SL ${l.qty}): ${l.action}${l.amount?` – ${fmtd(l.amount)}`:''}${l.comp?`; bồi thường ${fmtd(l.comp)}`:''}`).join('\n');
+  const body=`Kính gửi: ${c.partyB.name||'Quý Công ty'}${c.partyB.rep?`\nĐại diện: ${c.partyB.rep} – ${c.partyB.repRole}`:''}
+
+Căn cứ Hợp đồng dịch vụ số ${c.contractNo}${c.appendix?` và ${c.appendix}`:''}, Ban Quản lý Tòa nhà ${b.name} gửi Quý Công ty biên bản ghi nhận vi phạm số ${r.no||'(nháp)'} lập lúc ${tHM(r.dateTime)} ngày ${dDMY(r.dateTime)} tại ${r.location||'tòa nhà'}${r.violator?`, nhân sự vi phạm: ${r.violator}`:''}.
+
+Nội dung vi phạm và chế tài theo hợp đồng:
+${lines}
+
+Tổng tiền phạt${t.comp?' và bồi thường':''}: ${fmtd(t.fine+t.comp)} (${numToWords(t.fine+t.comp).toLowerCase()}), khấu trừ vào phí dịch vụ tháng ${periodLabel(periodOf(r.dateTime))}.
+
+Yêu cầu khắc phục: ${r.remedy||'Bên B chấn chỉnh nhân sự và báo cáo kết quả khắc phục bằng văn bản.'}${r.remedyDeadline?`\nThời hạn hoàn thành: trước ngày ${dDMY(r.remedyDeadline)}.`:''}
+
+Biên bản chi tiết (PDF) đính kèm email này. Đề nghị Quý Công ty xác nhận, ký biên bản và phản hồi kết quả khắc phục đúng thời hạn.
+${signature()}`;
+  emailBox(subject, body);
+}
+function emailForNotice(n){
+  const c=getContract(n.contractKey); const b=BUILDINGS[c.building]; const T=NOTICE_TYPES[n.type]||NOTICE_TYPES.remind1;
+  const recs=(n.recordIds||[]).map(id=>DB.records.find(r=>r.id===id)).filter(Boolean);
+  const sum=recs.reduce((s,r)=>s+recTotals(r).fine,0);
+  const subject=`[${b.name}] ${n.subject||T.subject}${n.no?` – Số ${n.no}`:''}`;
+  const body=`Kính gửi: ${c.partyB.name||'Quý Công ty'}
+
+Ban Quản lý Tòa nhà ${b.name} gửi Quý Công ty thông báo ${n.no?`số ${n.no} `:''}về việc: ${n.subject||T.subject}.
+
+Trong tháng ${periodLabel(n.period)}, Ban Quản lý đã lập ${recs.length} biên bản ghi nhận vi phạm${recs.length?` (${recs.map(r=>r.no).join(', ')})`:''}${sum?`, tổng tiền phạt ${fmtd(sum)} khấu trừ vào phí dịch vụ tháng ${periodLabel(n.period)}`:''}.
+
+Đề nghị Quý Công ty khắc phục triệt để trong vòng ${n.deadlineDays||c.remedyDays||3} ngày kể từ ngày nhận thông báo và báo cáo kết quả bằng văn bản cho Ban Quản lý.${n.type!=='remind1'&&c.clauses.notice?`\n\nLưu ý theo hợp đồng: ${c.clauses.notice}`:''}
+
+Thông báo chi tiết (PDF) đính kèm email này.
+${signature()}`;
+  emailBox(subject, body);
+}
+function emailForSummary(key, period){
+  const S=monthSummary(key, period); const c=S.c; const b=BUILDINGS[c.building];
+  const subject=`[${b.name}] Tổng hợp chế tài & khấu trừ phí dịch vụ ${SERVICES[c.service].name.toLowerCase()} tháng ${periodLabel(period)}`;
+  const body=`Kính gửi: ${c.partyB.name||'Quý Công ty'}
+
+Ban Quản lý Tòa nhà ${b.name} gửi Quý Công ty bảng tổng hợp chế tài và khấu trừ phí dịch vụ tháng ${periodLabel(period)} theo Hợp đồng số ${c.contractNo}:
+
+- Số biên bản vi phạm: ${S.approved.length}
+- Tiền phạt theo biên bản: ${fmtd(S.fines)}
+- Điểm đánh giá chất lượng: ${S.score!=null?S.score+'%':'chưa đánh giá'}${S.tier?` (${S.tier.label})`:''}; trừ theo chất lượng: ${fmtd(S.qualityDeduct)}
+- Bồi thường thiệt hại: ${fmtd(S.comp)}
+- Tổng khấu trừ vào phí dịch vụ tháng ${periodLabel(period)}: ${fmtd(S.total)} (${numToWords(S.total).toLowerCase()})
+
+Bảng tổng hợp chi tiết (PDF) đính kèm. Đề nghị Quý Công ty đối chiếu, ký xác nhận và xuất hóa đơn theo số tiền sau khấu trừ.
+${signature()}`;
+  emailBox(subject, body);
 }
 
 /* =====================================================================
@@ -1809,17 +1929,9 @@ function seedDemo(){
    ===================================================================== */
 window.addEventListener('beforeunload', e=>{ if(CUR.dirty){ e.preventDefault(); e.returnValue=''; } });
 (function boot(){
-  if(DEMO){ renderLogin(); return; }
-  firebase.initializeApp(firebaseConfig);
-  firebase.auth().onAuthStateChanged(async u=>{
-    busy(false);
-    if(!u){ CUR.user=null; renderLogin(); return; }
-    try{
-      const acc=ACCOUNTS[(u.email||'').toLowerCase()];
-      if(!acc){ await firebase.auth().signOut(); renderLogin('Email '+u.email+' chưa được phân quyền trên web này. Liên hệ Quản lý vận hành.'); return; }
-      startApp({uid:u.uid, email:u.email, name:acc.name, role:acc.role, building:acc.building||''});
-    }catch(e){ renderLogin('Không đọc được hồ sơ người dùng: '+e.message); }
-  });
+  const id=lsGet('esta_cldv_session'); const acc=id&&ACCOUNTS[id];
+  if(acc){ startApp({uid:id, id, name:lsGet('esta_cldv_name_'+id)||acc.name, account:acc.name, role:acc.role, building:acc.building||''}); return; }
+  renderLogin();
 })();
 
 </script>
