@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESTA — Đánh giá CLDV &amp; Chế tài</title>
-<meta name="description" content="Ghi nhận vi phạm, lập biên bản chế tài, tổng hợp khấu trừ tháng và thông báo nhà thầu dịch vụ An ninh – Vệ sinh cho L'MAK 68, Lite The Venture, 127 Hồng Hà, 130 Hồng Hà.">
+<title>ESTA — Đánh giá chất lượng dịch vụ &amp; Áp dụng chế tài</title>
+<meta name="description" content="Đánh giá chất lượng dịch vụ, ghi nhận vi phạm, áp dụng chế tài và tổng hợp khấu trừ tháng cho các dự án ESTA.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Cormorant+Garamond:ital,wght@1,400&display=swap" rel="stylesheet">
@@ -22,9 +22,9 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-family:'Montserrat',system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--paper);color:var(--ink);font-size:13px;line-height:1.55;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
-input,select,textarea{width:100%;border:1px solid var(--line-2);border-radius:4px;background:#fff;padding:8px 10px;font-size:12.5px;outline:none;transition:border-color .15s, box-shadow .15s}
+input,select,textarea{width:100%;border:1px solid var(--line-2);border-radius:7px;background:#fff;padding:9px 11px;font-size:12.5px;outline:none;transition:border-color .15s, box-shadow .15s}
 input:focus,select:focus,textarea:focus{border-color:var(--copper);box-shadow:0 0 0 3px rgba(164,100,39,.15)}
 input[type=number]{-moz-appearance:textfield}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
@@ -35,7 +35,7 @@ label.f{display:block;font-size:10.5px;font-weight:600;letter-spacing:.06em;text
 .hidden{display:none!important}
 
 /* buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;border-radius:4px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s, border-color .15s, opacity .15s;letter-spacing:.01em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s, border-color .15s, opacity .15s;letter-spacing:.01em}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn-p{background:var(--aub);color:var(--cream-l)} .btn-p:hover:not(:disabled){background:var(--aub-d)}
 .btn-c{background:var(--copper);color:#fff} .btn-c:hover:not(:disabled){background:#8c531e}
@@ -47,19 +47,23 @@ label.f{display:block;font-size:10.5px;font-weight:600;letter-spacing:.06em;text
 .ico{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* ======== LOGIN ======== */
-#login{min-height:100vh;display:flex;align-items:stretch;background:var(--cream)}
+#login{min-height:100vh;display:flex;align-items:stretch;background:var(--paper)}
 #login .brandside{flex:0 0 40%;background:linear-gradient(160deg,var(--aub) 0%,var(--aub-d) 100%);color:var(--cream);padding:56px 48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
 #login .brandside::after{content:'✱';position:absolute;right:-60px;bottom:-110px;font-size:420px;line-height:1;color:rgba(243,222,191,.06)}
 .wm{display:flex;align-items:center;gap:12px}
 .wm .star{color:var(--copper);font-size:26px;line-height:1}
 .wm .t1{font-weight:800;font-size:22px;letter-spacing:.18em}
 .wm .t2{font-weight:300;font-size:9.5px;letter-spacing:.32em;opacity:.8}
-#login h1{font-weight:300;font-size:30px;line-height:1.25;margin:0 0 14px;letter-spacing:-.01em}
+#login .wm{gap:15px}
+#login .wm .star{font-size:38px;text-shadow:0 2px 12px rgba(164,100,39,.28)}
+#login .wm .t1{font-size:28px;letter-spacing:.2em}
+#login .wm .t2{font-size:10px;letter-spacing:.34em}
+#login h1{font-weight:300;font-size:30px;line-height:1.25;margin:0 0 14px;letter-spacing:-.01em;text-transform:uppercase}
 #login h1 b{font-weight:700}
 #login .lede{font-size:13px;opacity:.8;max-width:360px}
-#login .quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;color:var(--cream);opacity:.85}
+#login .quote{font-size:14px;color:var(--cream);opacity:.75}
 #login .formside{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 20px}
-.lcard{width:min(400px,100%);background:var(--card);border-radius:4px;padding:34px 30px;box-shadow:0 20px 50px rgba(43,21,38,.12);position:relative}
+.lcard{width:min(400px,100%);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:34px 30px;box-shadow:0 20px 50px rgba(15,23,42,.1);position:relative}
 .lcard::before{content:'';position:absolute;top:0;left:22px;right:22px;height:2px;background:var(--copper)}
 .lcard h2{margin:0 0 4px;font-size:17px;color:var(--aub)}
 .lcard .sub{color:var(--ink-3);font-size:12px;margin-bottom:22px}
@@ -71,8 +75,8 @@ label.f{display:block;font-size:10.5px;font-weight:600;letter-spacing:.06em;text
 /* ======== SHELL ======== */
 header.top{background:var(--aub);color:var(--cream-l);position:sticky;top:0;z-index:40}
 .topin{max-width:1640px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:22px;min-height:58px}
-.topin .wm .t1{font-size:16px} .topin .wm .star{font-size:20px}
-.topin .apptitle{white-space:nowrap;border-left:1px solid rgba(243,222,191,.22);padding-left:18px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;opacity:.9}
+.topin .wm .t1{font-size:17px} .topin .wm .star{font-size:23px;text-shadow:0 1px 8px rgba(164,100,39,.3)}
+.topin .apptitle{white-space:nowrap;border-left:1px solid rgba(243,222,191,.22);padding-left:18px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--cream-l);opacity:.92}
 nav.tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
 nav.tabs button{background:none;border:0;color:rgba(245,236,208,.72);padding:19px 10px 17px;font-size:12px;white-space:nowrap;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px}
 nav.tabs button:hover{color:var(--cream-l)}
@@ -84,10 +88,22 @@ nav.tabs .badge{background:var(--copper);color:#fff;border-radius:9px;font-size:
 .userchip button{background:none;border:1px solid rgba(243,222,191,.3);color:var(--cream-l);border-radius:4px;padding:6px 9px;cursor:pointer;font-size:11px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .userchip button:hover{border-color:var(--copper)}
 .userchip .who{white-space:nowrap}
-@media (max-width:1640px){.topin .apptitle{display:none}}
+@media (max-width:1640px){
+  .topin{flex-wrap:wrap;gap:0 14px;padding-top:8px}
+  .topin .wm{order:1}
+  .topin .apptitle{display:block;order:2;flex:1 1 300px;white-space:normal;padding-left:14px;font-size:9.5px}
+  .topin .userchip{order:3;margin-left:auto}
+  .topin nav.tabs{order:4;width:100%;margin-left:0;justify-content:center;overflow-x:auto;flex-wrap:nowrap}
+}
 @media (max-width:1280px){.userchip #btnData .who{display:none}}
 @media (max-width:1100px){.userchip .who{display:none}}
-@media (max-width:900px){.topin{flex-wrap:wrap;gap:8px;padding:8px 12px}nav.tabs{order:3;width:100%;margin-left:0;overflow-x:auto;flex-wrap:nowrap}nav.tabs button{padding:10px 9px}.userchip{margin-left:auto}}
+@media (max-width:900px){
+  .topin{flex-wrap:wrap;gap:8px;padding:8px 12px}
+  .topin .apptitle{order:3;flex:1 0 100%;border-left:0;padding:0;text-align:center;font-size:9px}
+  .topin nav.tabs{order:4;width:100%;margin-left:0;overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start}
+  nav.tabs button{padding:10px 9px}
+  .topin .userchip{order:2;margin-left:auto}
+}
 .demo-bar{background:var(--copper);color:#fff;font-size:11.5px;text-align:center;padding:5px 12px}
 main{max-width:1640px;margin:0 auto;padding:22px 20px 60px}
 .pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
@@ -124,7 +140,7 @@ main{max-width:1640px;margin:0 auto;padding:22px 20px 60px}
 @media (max-width:640px){.segs{grid-template-columns:1fr 1fr}}
 .kv{background:var(--cream-l);border-radius:4px;padding:11px 13px;font-size:12px;display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin-top:12px}
 .kv dt{color:var(--stone)} .kv dd{margin:0;font-weight:600;text-align:right}
-.flag{display:flex;gap:8px;align-items:flex-start;background:var(--copper-l);color:#6d4218;border-radius:4px;padding:8px 10px;font-size:11.5px;margin-top:8px}
+.flag{display:flex;gap:8px;align-items:flex-start;background:var(--copper-l);color:#365A7A;border-radius:7px;padding:9px 11px;font-size:11.5px;margin-top:8px}
 .flag.bad{background:var(--bad-l);color:var(--bad)}
 .flag.ok{background:var(--ok-l);color:var(--ok)}
 .flag .ico{margin-top:1px}
@@ -156,6 +172,7 @@ main{max-width:1640px;margin:0 auto;padding:22px 20px 60px}
 .s-pending{background:var(--copper-l);color:#8a5320}
 .s-approved{background:var(--ok-l);color:var(--ok)}
 .s-returned{background:var(--bad-l);color:var(--bad)}
+.s-rejected{background:var(--bad-l);color:var(--bad)}
 
 /* preview */
 .pv-wrap{background:#E9E2D6;border-radius:var(--r);padding:18px;max-height:calc(100vh - 110px);overflow:auto}
@@ -586,7 +603,7 @@ Object.keys(CONTRACT_SEED).forEach(k=>{
 // Tài khoản đăng nhập (chỉ để phân vai trò & tòa nhà — không phải bảo mật thật).
 // Đổi ID / mật khẩu: sửa trực tiếp danh sách dưới đây.
 const ACCOUNTS = {
-  'admin':   {pass:'esta2026', role:'admin', name:'Quản lý vận hành Non-CBD'},
+  'admin':   {pass:'esta2026', role:'admin', name:'Bill Phạm'},
   'lmak68':  {pass:'6868', role:'bql', building:'lmak68',  name:"BQL L'MAK 68"},
   'venture': {pass:'6262', role:'bql', building:'venture', name:'BQL Lite The Venture'},
   '127hh':   {pass:'1270', role:'bql', building:'hh127',   name:'BQL 127 Hồng Hà'},
@@ -595,6 +612,7 @@ const ACCOUNTS = {
 const DEMO = false;
 const lsGet = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
 const lsSet = (k,v) => { try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){} };
+if(lsGet('esta_cldv_name_admin')==='Quản lý vận hành Non-CBD') lsSet('esta_cldv_name_admin', ACCOUNTS.admin.name);
 
 /* ---------- utils ---------- */
 const $ = (s, el=document) => el.querySelector(s);
@@ -615,7 +633,7 @@ const dLong = iso => { if(!iso) return 'ngày … tháng … năm …'; const d=
 const tHM = iso => iso && iso.length>=16 ? iso.slice(11,16).replace(':','h') : '';
 const stripTitle = s => String(s||'').replace(/^(Ông|Bà|Mr\.?|Ms\.?)\s+/i,'');
 const ckey = (b,s) => `${b}_${s}`;
-const STATUS = {draft:'Nháp', approved:'Chính thức', pending:'Nháp', returned:'Nháp'};
+const STATUS = {draft:'Nháp', pending:'Chờ duyệt', approved:'Chính thức', rejected:'Bị từ chối', returned:'Cần chỉnh sửa'};
 const statusPill = s => `<span class="pill s-${s}">${STATUS[s]||s}</span>`;
 const ICON = {
   plus:'<path d="M12 5v14M5 12h14"/>', file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>',
@@ -742,8 +760,7 @@ const LocalStore = (()=>{
       listeners=onChange;
       if(!(await KV.ok())) toast('Trình duyệt đang chặn bộ nhớ (chế độ ẩn danh?) — dữ liệu sẽ mất khi đóng trang. Hãy dùng cửa sổ thường.', true);
       DB.records=(await KV.get('records'))||[]; DB.contracts=(await KV.get('contracts'))||{}; DB.audits=(await KV.get('audits'))||{}; DB.notices=(await KV.get('notices'))||[];
-      // biên bản cũ ở trạng thái chờ duyệt/trả lại -> nháp (đã bỏ bước duyệt)
-      DB.records.forEach(r=>{ if(r.status==='pending'||r.status==='returned') r.status='draft'; });
+      DB.records.forEach(r=>{ if(!r.status) r.status='draft'; if(r.status==='returned') r.status='rejected'; });
       onChange('all');
     },
     async saveRecord(r){ r.updatedAt=new Date().toISOString(); const i=DB.records.findIndex(x=>x.id===r.id); if(i>=0) DB.records[i]=r; else DB.records.push(r); await save('records'); listeners('records'); return r.id; },
@@ -770,7 +787,7 @@ const LocalStore = (()=>{
       let add=0, upd=0, skip=0;
       for(const r of (data.records||[])){
         if(!inScope(r)){ skip++; continue; }
-        if(r.status==='pending'||r.status==='returned') r.status='draft';
+        if(!r.status) r.status='draft'; if(r.status==='returned') r.status='rejected';
         const i=DB.records.findIndex(x=>x.id===r.id);
         if(i<0){ DB.records.push(r); add++; }
         else if((r.updatedAt||'')>(DB.records[i].updatedAt||'')){ DB.records[i]=r; upd++; } else { skip++; continue; }
@@ -891,7 +908,7 @@ function monthSummary(key, period){
     else if(it.countRule.cumulative && all>=it.countRule.cumulative) alerts.push({lv:'bad', t:`Lỗi "${it.title}": ${all} biên bản cộng dồn (ngưỡng ${it.countRule.cumulative}) → Bên A có quyền chấm dứt HĐ (${it.ref}).`});
   });
   approved.forEach(r=>(r.lines||[]).forEach(l=>{ if(/chấm dứt|dừng/i.test(l.action||'')) alerts.push({lv:'bad', t:`BB ${r.no}: lỗi "${l.title}" có chế tài "${l.action}".`}); }));
-  if(notApproved.length) alerts.push({lv:'warn', t:`Còn ${notApproved.length} biên bản nháp trong tháng — chưa được tính vào tổng hợp.`});
+  if(notApproved.length) alerts.push({lv:'warn', t:`Còn ${notApproved.length} biên bản chưa được duyệt trong tháng — chưa được tính vào tổng hợp.`});
   return {c, recs, approved, notApproved, fines, comp, fee, audit, score, tier, gap, qPct, extraPct, qualityDeduct, penaltyTotal, capAmt, total:penaltyTotal+comp, alerts, lines};
 }
 
@@ -938,11 +955,12 @@ function renderRecordDoc(rec, photos, opt={}){
     : `<tr><td colspan="7" class="c" style="color:#999;padding:16px">(Chưa có lỗi vi phạm)</td></tr>`;
   const imgs=(photos||[]).filter(Boolean);
   const approved=rec.status==='approved';
+  const watermark=rec.status==='pending'?'CHỜ ADMIN DUYỆT':rec.status==='rejected'||rec.status==='returned'?'CHƯA ĐƯỢC DUYỆT':'BẢN NHÁP';
   const sigs=[{role:'Đại diện Bên A', note:'(BQL Tòa nhà)', name:rec.repA}, {role:'Đại diện Bên B', note:'(Nhà thầu)', name:rec.repB}];
   if(rec.violator) sigs.push({role:'Người vi phạm', name:(rec.violator||'').split(/[-–(]/)[0].trim()});
   if(rec.witness) sigs.push({role:'Người làm chứng', name:(rec.witness||'').split(/[-–(]/)[0].trim()});
   return `<div class="doc ${opt.pdf?'pdf':''}">
-    ${!approved && !opt.noWatermark ? `<div class="watermark">BẢN NHÁP</div>`:''}
+    ${!approved && !opt.noWatermark ? `<div class="watermark">${watermark}</div>`:''}
     ${docStrip('Biên bản chế tài nhà thầu · '+S.name)}
     ${docHdr(c, rec.no, rec.dateTime)}
     <h1>BIÊN BẢN GHI NHẬN VI PHẠM</h1>
@@ -971,7 +989,7 @@ function renderRecordDoc(rec, photos, opt={}){
     <p>${esc(c.clauses&&c.clauses.deduct||'')}</p>
     <p>Số tiền phạt nêu trên được khấu trừ trực tiếp vào phí dịch vụ tháng ${periodLabel(periodOf(rec.dateTime))} của Bên B. Biên bản được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản; các bên đã đọc lại, thống nhất nội dung và cùng ký tên dưới đây.${rec.witness?' Trường hợp người vi phạm không ký, biên bản có giá trị khi có chữ ký của người làm chứng.':''}</p>
     ${signBlock(sigs)}
-    ${approved?`<div class="approval">Mã biên bản: ${esc(rec.no||'')} · Lập trên hệ thống ESTA bởi ${esc(rec.createdBy&&rec.createdBy.name||'')} – ${dDMY(rec.approvedAt||rec.createdAt)}</div>`:''}
+    ${approved?`<div class="approval">Mã biên bản: ${esc(rec.no||'')} · Người lập: ${esc(rec.createdBy&&rec.createdBy.name||'')} · Admin duyệt: ${esc(rec.approvedBy||'')} – ${dDMY(rec.approvedAt||rec.createdAt)}</div>`:''}
     <div class="foot">${FOOTER}</div>
   </div>`;
 }
@@ -1160,6 +1178,7 @@ const CUR = {
   f:{ list:{b:'', s:'', st:'', p:curPeriod(), q:''}, sum:{p:curPeriod(), key:''}, notice:{key:'', p:curPeriod(), sel:[], type:'', subject:'', days:'', body:'', signer:'', role:'', date:new Date().toISOString().slice(0,10), editingId:null}, dash:{p:curPeriod()} },
 };
 const isAdmin = () => CUR.user && CUR.user.role==='admin';
+const visibleRecords = () => DB.records.filter(r=>isAdmin() || r.building===CUR.user.building);
 
 /* ---------------- LOGIN ---------------- */
 function renderLogin(err){
@@ -1167,7 +1186,7 @@ function renderLogin(err){
   $('#root').innerHTML=`<div id="login">
     <div class="brandside">
       <div class="wm"><span class="star">✱</span><div><div class="t1">ESTA</div><div class="t2">PROPERTY MANAGEMENT</div></div></div>
-      <div><h1>Đánh giá CLDV &amp; <b>chế tài nhà thầu</b></h1><div class="lede">Ghi nhận vi phạm, lập biên bản theo đúng điều khoản hợp đồng, tổng hợp khấu trừ tháng và thông báo nhà thầu — An ninh &amp; Vệ sinh, danh mục Non-CBD.</div></div>
+      <div><h1>Đánh giá chất lượng dịch vụ <b>&amp; áp dụng chế tài</b></h1><div class="lede">Ghi nhận vi phạm, lập biên bản theo đúng điều khoản hợp đồng, tổng hợp khấu trừ tháng và thông báo nhà thầu — An ninh &amp; Vệ sinh, danh mục Non-CBD.</div></div>
       <div class="quote">Asset Value Creator.</div>
     </div>
     <div class="formside"><div class="lcard">
@@ -1177,7 +1196,7 @@ function renderLogin(err){
       <div class="row"><label class="f" for="lgPass">Mật khẩu</label><input id="lgPass" type="password" autocomplete="current-password" inputmode="text"></div>
       <div class="row"><label class="f" for="lgName">Họ tên người lập (in trên biên bản)</label><input id="lgName" placeholder="VD: Nguyễn Văn A" value="${esc(lsGet('esta_cldv_name_'+lastId)||'')}"></div>
       <button class="btn btn-p" style="width:100%;padding:11px" id="lgGo">Đăng nhập</button>
-      <div class="hint" style="margin-top:12px;text-align:center">Dữ liệu lưu trên trình duyệt của máy này. Nhớ sao lưu định kỳ.</div>
+      <div class="hint" style="margin-top:12px;text-align:center">Bản demo: các tài khoản dùng chung dữ liệu trên trình duyệt này; chưa đồng bộ giữa nhiều máy.</div>
     </div></div></div>`;
   $('#lgId').oninput=()=>{ const n=lsGet('esta_cldv_name_'+$('#lgId').value.trim().toLowerCase()); if(n) $('#lgName').value=n; };
   const go=()=>{
@@ -1196,6 +1215,7 @@ function renderLogin(err){
 async function startApp(user){
   CUR.user=user;
   STORE = LocalStore;
+  CUR.view=user.role==='admin'?'approvals':'create';
   CUR.draft=newDraft();
   renderShell();
   busy(true,'Đang tải dữ liệu…');
@@ -1214,6 +1234,7 @@ function onData(what){
 const VIEWS=[
   {id:'create', label:'Lập biên bản', icon:'plus'},
   {id:'list', label:'Biên bản', icon:'list', badge:true},
+  {id:'approvals', label:'Duyệt biên bản', icon:'check', badge:true, adminOnly:true},
   {id:'summary', label:'Tổng hợp tháng', icon:'sum'},
   {id:'notice', label:'Thông báo', icon:'mail'},
   {id:'dash', label:'Dashboard', icon:'chart'},
@@ -1224,8 +1245,8 @@ function renderShell(){
   $('#root').innerHTML=`
     <header class="top"><div class="topin">
       <div class="wm"><span class="star">✱</span><div><div class="t1">ESTA</div><div class="t2">PROPERTY MANAGEMENT</div></div></div>
-      <div class="apptitle">Đánh giá CLDV &amp; chế tài nhà thầu</div>
-      <nav class="tabs">${VIEWS.map(v=>`<button data-v="${v.id}" class="${CUR.view===v.id?'on':''}">${ic(v.icon)}${v.label}${v.badge?`<span class="badge hidden" id="bdg-${v.id}"></span>`:''}</button>`).join('')}</nav>
+      <div class="apptitle">Đánh giá chất lượng dịch vụ &amp; áp dụng chế tài</div>
+      <nav class="tabs">${VIEWS.filter(v=>!v.adminOnly||isAdmin()).map(v=>`<button data-v="${v.id}" class="${CUR.view===v.id?'on':''}">${ic(v.icon)}${v.label}${v.badge?`<span class="badge hidden" id="bdg-${v.id}"></span>`:''}</button>`).join('')}</nav>
       <div class="userchip"><button id="btnData" title="Sao lưu / khôi phục dữ liệu">${ic('save')}<span class="who">Dữ liệu</span></button><div class="av">${esc(ini)}</div><div class="who"><div style="font-weight:600">${esc(u.name)}</div><div class="rl">${u.role==='admin'?'Quản lý vận hành':esc(BUILDINGS[u.building]?BUILDINGS[u.building].name:u.building)} · ID ${esc(u.id)}</div></div><button id="btnOut" title="Đăng xuất">${ic('out')}</button></div>
     </div></header>
     <div class="demo-bar" id="bkBar" style="display:none"></div>
@@ -1240,19 +1261,27 @@ async function go(v){
   CUR.view=v; $$('nav.tabs button').forEach(b=>b.classList.toggle('on', b.dataset.v===v)); renderView(); window.scrollTo(0,0);
 }
 function updateBadges(){
-  const el=$('#bdg-list'); if(!el) return;
-  const n=DB.records.filter(r=>r.status!=='approved').length;
-  el.textContent=n; el.classList.toggle('hidden', !n);
-  el.title='Biên bản còn ở dạng nháp';
+  const el=$('#bdg-list');
+  if(el){
+    const n=visibleRecords().filter(r=>r.status!=='approved').length;
+    el.textContent=n; el.classList.toggle('hidden', !n);
+    el.title='Biên bản chưa chính thức';
+  }
+  const queue=$('#bdg-approvals');
+  if(queue){
+    const n=DB.records.filter(r=>r.status==='pending').length;
+    queue.textContent=n; queue.classList.toggle('hidden', !n);
+    queue.title='Biên bản đang chờ duyệt';
+  }
   const bar=$('#bkBar'); if(bar){ const last=lsGet('esta_cldv_lastbackup_'+CUR.user.id); const days=last?Math.floor((Date.now()-Date.parse(last))/864e5):null;
     const need=DB.records.length && (days==null || days>=7);
     bar.style.display=need?'block':'none';
-    bar.innerHTML=need?`${days==null?'Chưa sao lưu dữ liệu lần nào':'Đã '+days+' ngày chưa sao lưu'} — dữ liệu chỉ nằm trên trình duyệt máy này. <a href="#" id="bkNow" style="color:#fff;text-decoration:underline">Sao lưu ngay</a>`:'';
+    bar.innerHTML=need?`${days==null?'Chưa sao lưu dữ liệu lần nào':'Đã '+days+' ngày chưa sao lưu'} — bản demo lưu dữ liệu trên trình duyệt máy này. <a href="#" id="bkNow" style="color:#fff;text-decoration:underline">Sao lưu ngay</a>`:'';
     const bn=$('#bkNow'); if(bn) bn.onclick=e=>{ e.preventDefault(); doExport(); }; }
 }
 function renderView(){
   const v=$('#view'); if(!v) return;
-  ({create:viewCreate, list:viewList, summary:viewSummary, notice:viewNotice, dash:viewDash, contracts:viewContracts})[CUR.view](v);
+  ({create:viewCreate, list:viewList, approvals:viewApprovals, summary:viewSummary, notice:viewNotice, dash:viewDash, contracts:viewContracts})[CUR.view](v);
   updateBadges();
 }
 function pageHead(kicker, title, desc, tools=''){
@@ -1270,8 +1299,8 @@ function newDraft(){
     lines:[], remedy:'', remedyDeadline:'', opinionB:'', opinionA:'', status:'draft', photoCount:0, createdBy:{uid:u.uid, name:u.name}};
 }
 function canEdit(r){
-  if(isAdmin()) return true;
-  return r.building===CUR.user.building;
+  if(isAdmin()) return r.status!=='approved';
+  return r.building===CUR.user.building && ['draft','rejected','returned'].includes(r.status);
 }
 function emptyLine(){ return {code:'', level:1, qty:1, amount:0, action:'', detail:'', comp:0, assetValue:0, pctUsed:null, _auto:true, _autoAction:true}; }
 
@@ -1283,7 +1312,9 @@ function viewCreate(v){
   const flags=[];
   if(c.missing) flags.push(`<div class="flag bad">${ic('alert')}<div>Chưa có hợp đồng ${SERVICES[d.service].name} cho ${esc(BUILDINGS[d.building].name)} trên hệ thống. ${isAdmin()?'Vào <b>Hợp đồng & mức phạt</b> để nhập.':'Liên hệ Quản lý vận hành để cập nhật.'}</div></div>`);
   else if(contractExpired(c)) flags.push(`<div class="flag">${ic('alert')}<div>Hợp đồng theo hồ sơ đã hết hạn ngày ${dDMY(c.termTo)}. Mức phạt đang áp dụng theo HĐ/phụ lục gần nhất — đề nghị cập nhật phụ lục gia hạn.</div></div>`);
-  if(d.status==='approved') flags.push(`<div class="flag ok">${ic('check')}<div>Biên bản chính thức, lập bởi ${esc(d.createdBy&&d.createdBy.name||'')}${d.approvedAt?' ngày '+dDMY(d.approvedAt):''}. Nếu sửa nội dung sau khi các bên đã ký, cần in lại để ký bản mới.</div></div>`);
+  if(d.status==='approved') flags.push(`<div class="flag ok">${ic('check')}<div>Biên bản chính thức, lập bởi ${esc(d.createdBy&&d.createdBy.name||'')}, admin duyệt bởi ${esc(d.approvedBy||'')}${d.approvedAt?' ngày '+dDMY(d.approvedAt):''}. Nếu sửa nội dung sau khi các bên đã ký, cần in lại để ký bản mới.</div></div>`);
+  if(d.status==='pending') flags.push(`<div class="flag">${ic('info')}<div>Biên bản đã gửi ngày ${d.submittedAt?dDMY(d.submittedAt):'—'} và đang chờ admin duyệt. ${isAdmin()?'Admin có thể rà soát, chỉnh sửa, duyệt hoặc từ chối.':'Nội dung đã khóa với tài khoản dự án.'}</div></div>`);
+  if(d.status==='rejected'||d.status==='returned') flags.push(`<div class="flag bad">${ic('alert')}<div>Biên bản chưa được duyệt.${d.reviewNote?' Lý do: '+esc(d.reviewNote):''} Có thể chỉnh sửa và gửi lại.</div></div>`);
 
   v.innerHTML = pageHead('Biên bản vi phạm', isNew?'Lập biên bản mới':'Biên bản '+esc(d.no||'(nháp)'), 'Chọn tòa nhà & dịch vụ → nhập thông tin → chọn lỗi theo phụ lục hợp đồng → đính kèm ảnh. Mức phạt tự tính theo lần tái phạm trong tháng.',
     `${!isNew?`<button class="btn btn-o" id="btnNew">${ic('plus')}Lập biên bản mới</button>`:''}`) + `
@@ -1485,17 +1516,25 @@ function scalePreview(){
 function renderActionBar(){
   const bar=$('#actbar'); if(!bar) return; const d=CUR.draft; const ed=canEdit(d); const exists=!!DB.records.find(r=>r.id===d.id);
   const b=[];
-  if(ed && d.status!=='approved') b.push(`<button class="btn btn-o" id="abSave">${ic('save')}Lưu nháp</button>`);
-  if(ed) b.push(`<button class="btn btn-p" id="abApprove">${ic('check')}${d.status==='approved'?'Lưu thay đổi':'Lưu biên bản'}</button>`);
+  if(ed && d.status==='pending' && isAdmin()){
+    b.push(`<button class="btn btn-o" id="abSave">${ic('save')}Lưu thay đổi</button>`);
+    b.push(`<button class="btn btn-bad" id="abReject">${ic('x')}Từ chối</button>`);
+    b.push(`<button class="btn btn-ok" id="abApprove">${ic('check')}Duyệt chính thức</button>`);
+  }else if(ed && ['draft','rejected','returned'].includes(d.status)){
+    b.push(`<button class="btn btn-o" id="abSave">${ic('save')}Lưu nháp</button>`);
+    b.push(`<button class="btn btn-p" id="abSubmit">${ic('send')}Gửi admin duyệt</button>`);
+  }
   b.push(`<button class="btn btn-c" id="abPdf">${ic('pdf')}Xuất PDF</button>`);
   if(exists) b.push(`<button class="btn btn-o" id="abMail">${ic('mail')}Email</button>`);
-  if(exists && ed) b.push(`<button class="btn btn-g" id="abDel" title="Xóa biên bản">${ic('trash')}</button>`);
+  if(exists && ed && d.status!=='pending') b.push(`<button class="btn btn-g" id="abDel" title="Xóa biên bản">${ic('trash')}</button>`);
   bar.innerHTML=`<div class="st">${CUR.dirty?'● Có thay đổi chưa lưu':exists?'Đã lưu '+(d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN'):''):'Chưa lưu'}</div>`+b.join('');
   const on=(id,f)=>{ const e=$('#'+id); if(e) e.onclick=f; };
-  on('abSave', ()=>saveDraft('draft'));
+  on('abSave', ()=>saveDraft(d.status==='pending'?'pending':'draft'));
+  on('abSubmit', ()=>saveDraft('pending'));
   on('abApprove', ()=>saveDraft('approved'));
+  on('abReject', rejectDraft);
   on('abMail', ()=>{ if(CUR.dirty) toast('Biên bản có thay đổi chưa lưu — email dùng nội dung đang hiển thị.'); emailForRecord(d); });
-  on('abPdf', ()=>{ if(d.status!=='approved') toast('Biên bản đang là NHÁP: PDF có dấu “Bản nháp”. Bấm “Lưu biên bản” để xuất bản chính thức.'); exportPDF(renderRecordDoc(d, CUR.draftPhotos, {pdf:true}), `Bien-ban_${safeName(d.no||('nhap_'+BUILDINGS[d.building].short))}.pdf`); });
+  on('abPdf', ()=>{ if(d.status!=='approved') toast('Biên bản chưa được admin duyệt; PDF sẽ mang dấu trạng thái chưa chính thức.'); exportPDF(renderRecordDoc(d, CUR.draftPhotos, {pdf:true}), `Bien-ban_${safeName(d.no||('nhap_'+BUILDINGS[d.building].short))}.pdf`); });
   on('abDel', async()=>{ if(!(await confirmBox('Xóa biên bản','Xóa vĩnh viễn biên bản '+(d.no||'nháp')+'?','Xóa',true))) return; busy(true); try{ await STORE.deleteRecord(d.id); toast('Đã xóa.'); CUR.dirty=false; CUR.draft=newDraft(); CUR.draftPhotos=[]; renderView(); }catch(e){ toast('Lỗi: '+e.message,true);} busy(false); });
 }
 function validateDraft(d, strict){
@@ -1507,24 +1546,50 @@ function validateDraft(d, strict){
 }
 async function saveDraft(status){
   const d=CUR.draft; const strict = status!=='draft';
+  if(status==='approved' && (!isAdmin() || d.status!=='pending')) return toast('Chỉ admin được duyệt biên bản đang chờ duyệt.', true);
+  if(status==='pending' && !canEdit(d)) return toast('Không thể gửi biên bản này để duyệt.', true);
+  if(status==='draft' && !canEdit(d)) return toast('Không thể chỉnh sửa biên bản này.', true);
   const errs=validateDraft(d, strict); if(errs.length) return toast(errs.join(' '), true);
   if(status==='approved'){
     const over=d.lines.filter(l=>Number(l.amount)!==Number(l.stdAmount));
-    if(over.length && !(await confirmBox('Lưu biên bản', `Có ${over.length} lỗi có số tiền khác mức hợp đồng. Vẫn lưu biên bản chính thức?`, 'Lưu'))) return;
+    if(over.length && !(await confirmBox('Duyệt biên bản', `Có ${over.length} lỗi có số tiền khác mức hợp đồng. Vẫn duyệt thành chính thức?`, 'Duyệt'))) return;
   }
   busy(true,'Đang lưu…');
   try{
     if(!d.no) d.no=nextRecordNo(d);
     const t=recTotals(d); d.totalFine=t.fine; d.totalComp=t.comp;
+    const previousStatus=d.status;
     d.status=status; d.photoCount=CUR.draftPhotos.length;
     if(!d.createdAt) d.createdAt=new Date().toISOString();
-    if(status==='approved' && !d.approvedAt){ d.approvedBy=CUR.user.name; d.approvedAt=new Date().toISOString(); }
+    if(status==='pending' && previousStatus!=='pending'){
+      d.submittedBy=CUR.user.name; d.submittedAt=new Date().toISOString(); d.reviewNote='';
+    }
+    if(status==='approved'){
+      d.approvedBy=CUR.user.name; d.approvedAt=new Date().toISOString(); d.reviewNote='';
+    }
     await STORE.savePhotos(d.id, d.building, CUR.draftPhotos, CUR.prevPhotoCount);
     CUR.prevPhotoCount=CUR.draftPhotos.length;
     await STORE.saveRecord(JSON.parse(JSON.stringify(d)));
     CUR.dirty=false;
-    toast((status==='approved'?'Đã lưu biên bản chính thức ':'Đã lưu nháp ')+d.no);
+    toast((status==='approved'?'Admin đã duyệt chính thức ':status==='pending'?'Đã gửi admin duyệt ':'Đã lưu nháp ')+d.no);
   }catch(e){ console.error(e); toast('Lưu thất bại: '+(e.code||e.message)+'. Dữ liệu vẫn còn trên màn hình — thử lại.', true); }
+  busy(false); renderView();
+}
+async function rejectDraft(){
+  const d=CUR.draft;
+  if(!isAdmin()||d.status!=='pending') return toast('Chỉ admin được từ chối biên bản đang chờ duyệt.', true);
+  const reason=await promptBox('Từ chối biên bản','Lý do từ chối (bắt buộc)','Nêu rõ nội dung cần chỉnh sửa hoặc căn cứ từ chối…');
+  if(reason===null) return;
+  if(!reason) return toast('Vui lòng nhập lý do từ chối.', true);
+  busy(true,'Đang lưu quyết định…');
+  try{
+    const t=recTotals(d); d.totalFine=t.fine; d.totalComp=t.comp;
+    d.status='rejected'; d.reviewNote=reason; d.rejectedBy=CUR.user.name; d.rejectedAt=new Date().toISOString();
+    d.photoCount=CUR.draftPhotos.length;
+    await STORE.savePhotos(d.id,d.building,CUR.draftPhotos,CUR.prevPhotoCount);
+    await STORE.saveRecord(JSON.parse(JSON.stringify(d)));
+    CUR.dirty=false; toast('Đã từ chối biên bản '+(d.no||''));
+  }catch(e){ console.error(e); toast('Không lưu được quyết định: '+(e.code||e.message),true); }
   busy(false); renderView();
 }
 async function openRecord(id){
@@ -1547,12 +1612,13 @@ function bldOptions(sel, all=true){
 }
 function viewList(v){
   const F=CUR.f.list;
-  const drafts=DB.records.filter(r=>r.status!=='approved').length;
-  v.innerHTML=pageHead('Quản lý biên bản','Danh sách biên bản', `Biên bản lưu trên máy này. Chỉ biên bản chính thức được tính vào tổng hợp tháng${drafts?` — đang có ${drafts} biên bản nháp`:''}.`,
+  if(!isAdmin()) F.b='';
+  const drafts=visibleRecords().filter(r=>r.status==='draft'||r.status==='rejected'||r.status==='returned').length;
+  v.innerHTML=pageHead('Quản lý biên bản','Danh sách biên bản', `Chỉ biên bản chính thức được tính vào tổng hợp tháng${drafts?` — có ${drafts} biên bản nháp/cần chỉnh sửa`:''}.`,
     `${isAdmin()?`<select id="fB">${bldOptions(F.b)}</select>`:''}
      <select id="fS"><option value="">Tất cả dịch vụ</option>${Object.entries(SERVICES).map(([k,s])=>`<option value="${k}" ${F.s===k?'selected':''}>${s.name}</option>`).join('')}</select>
      <input type="month" id="fP" value="${F.p}" title="Để trống = mọi tháng">
-     <select id="fSt"><option value="">Mọi trạng thái</option>${['draft','approved'].map(k=>`<option value="${k}" ${F.st===k?'selected':''}>${STATUS[k]}</option>`).join('')}</select>
+     <select id="fSt"><option value="">Mọi trạng thái</option>${['draft','pending','approved','rejected','returned'].map(k=>`<option value="${k}" ${F.st===k?'selected':''}>${STATUS[k]}</option>`).join('')}</select>
      <input id="fQ" placeholder="Tìm số BB, nhân sự, vị trí…" value="${esc(F.q)}" style="min-width:200px">`)+
     `<div class="card"><div class="tbl-wrap" id="listTbl"></div></div>`;
   const upd=()=>{ F.b=$('#fB')?$('#fB').value:''; F.s=$('#fS').value; F.p=$('#fP').value; F.st=$('#fSt').value; F.q=$('#fQ').value; drawList(); };
@@ -1561,7 +1627,7 @@ function viewList(v){
 }
 function drawList(){
   const F=CUR.f.list; const q=F.q.trim().toLowerCase();
-  let rows=DB.records.filter(r=>(!F.b||r.building===F.b)&&(!F.s||r.service===F.s)&&(!F.p||periodOf(r.dateTime)===F.p)&&(!F.st||r.status===F.st)
+  let rows=visibleRecords().filter(r=>(!isAdmin()||!F.b||r.building===F.b)&&(!F.s||r.service===F.s)&&(!F.p||periodOf(r.dateTime)===F.p)&&(!F.st||r.status===F.st)
     &&(!q||[r.no,r.violator,r.location,r.repA,r.repB,...(r.lines||[]).map(l=>l.title)].join(' ').toLowerCase().includes(q)));
   rows.sort((a,b)=>(b.dateTime||'').localeCompare(a.dateTime||''));
   const el=$('#listTbl'); if(!el) return;
@@ -1581,6 +1647,14 @@ function drawList(){
   $$('[data-pdf]',el).forEach(b=>b.onclick=()=>pdfRecord(b.dataset.pdf));
   $$('[data-mail]',el).forEach(b=>b.onclick=()=>emailForRecord(DB.records.find(r=>r.id===b.dataset.mail)));
 }
+function viewApprovals(v){
+  if(!isAdmin()){ CUR.view='list'; return viewList(v); }
+  const pending=DB.records.filter(r=>r.status==='pending').sort((a,b)=>(b.submittedAt||b.updatedAt||'').localeCompare(a.submittedAt||a.updatedAt||''));
+  v.innerHTML=pageHead('Quản lý phê duyệt','Biên bản chờ duyệt',`${pending.length} biên bản cần admin xem xét. Chỉ sau khi duyệt, biên bản mới có hiệu lực và được đưa vào báo cáo tháng.`)+
+    `<div class="kpis"><div class="card kpi"><div class="l">Đang chờ duyệt</div><div class="v">${pending.length}</div><div class="s">cần admin xử lý</div></div><div class="card kpi"><div class="l">Đã chính thức</div><div class="v">${DB.records.filter(r=>r.status==='approved').length}</div><div class="s">đã có hiệu lực</div></div><div class="card kpi"><div class="l">Bị từ chối</div><div class="v">${DB.records.filter(r=>r.status==='rejected').length}</div><div class="s">có thể chỉnh sửa và gửi lại</div></div><div class="card kpi"><div class="l">Bản demo</div><div class="v">Nội bộ</div><div class="s">dữ liệu chung trên trình duyệt này</div></div></div>`+
+    `<div class="card"><div class="tbl-wrap">${pending.length?`<table class="t"><thead><tr><th>Số biên bản</th><th>Dự án · Dịch vụ</th><th>Thời điểm</th><th>Người gửi</th><th class="num">Phạt + BT</th><th>Trạng thái</th><th></th></tr></thead><tbody>${pending.map(r=>{const t=recTotals(r);return `<tr><td><b>${esc(r.no||'(chưa cấp số)')}</b><div class="muted">Gửi ${r.submittedAt?dDMY(r.submittedAt):'—'}</div></td><td>${esc(BUILDINGS[r.building].name)}<div class="muted">${SERVICES[r.service].name}</div></td><td>${dDMY(r.dateTime)}<div class="muted">${tHM(r.dateTime)} · ${esc(r.location||'')}</div></td><td>${esc(r.submittedBy||r.createdBy&&r.createdBy.name||'')}</td><td class="num"><b>${fmt(t.fine+t.comp)}</b></td><td>${statusPill(r.status)}</td><td><button class="btn btn-p btn-sm" data-review="${esc(r.id)}">${ic('edit')}Xem &amp; xử lý</button></td></tr>`;}).join('')}</tbody></table>`:`<div class="empty">${ic('check')}<div style="margin-top:8px;font-weight:600;color:var(--ink)">Không có biên bản chờ duyệt</div><div class="hint">Các hồ sơ mới gửi sẽ xuất hiện tại đây.</div></div>`}</div></div>`;
+  $$('[data-review]',v).forEach(b=>b.onclick=()=>openRecord(b.dataset.review));
+}
 /* =====================================================================
    3. TỔNG HỢP THÁNG
    ===================================================================== */
@@ -1596,7 +1670,7 @@ function viewSummary(v){
   $('#sMail').onclick=()=>{ if(F.key) emailForSummary(F.key, F.p); };
   $('#sPdf').onclick=()=>{ if(!F.key) return; const c=getContract(F.key); exportPDF(renderSummaryDoc(F.key,F.p,{pdf:true, approver:isAdmin()?CUR.user.name:''}), `Tong-hop_${F.p}_${SERVICES[c.service].code}_${BUILDINGS[c.building].short}.pdf`); };
   // overview
-  $('#sOver').innerHTML = keys.length?`<table class="t"><thead><tr><th>Tòa nhà · Dịch vụ</th><th>Nhà thầu</th><th class="num">Phí DV/tháng</th><th class="num">BB chính thức</th><th class="num">Nháp</th><th class="num">Phạt BB</th><th class="num">Điểm CL</th><th class="num">Trừ CL</th><th class="num">Tổng khấu trừ</th><th class="num">% phí</th><th></th></tr></thead><tbody>
+  $('#sOver').innerHTML = keys.length?`<table class="t"><thead><tr><th>Tòa nhà · Dịch vụ</th><th>Nhà thầu</th><th class="num">Phí DV/tháng</th><th class="num">BB chính thức</th><th class="num">Chưa duyệt</th><th class="num">Phạt BB</th><th class="num">Điểm CL</th><th class="num">Trừ CL</th><th class="num">Tổng khấu trừ</th><th class="num">% phí</th><th></th></tr></thead><tbody>
     ${keys.map(k=>{ const S=monthSummary(k,F.p); const bad=S.alerts.some(a=>a.lv==='bad'); return `<tr data-k="${k}" style="cursor:pointer;${k===F.key?'background:var(--cream-l)':''}"><td><b>${esc(BUILDINGS[S.c.building].name)}</b><div class="muted">${SERVICES[S.c.service].name}</div></td><td>${esc(partyBShort(S.c))}</td><td class="num">${fmt(S.fee)}</td><td class="num">${S.approved.length}</td><td class="num">${S.notApproved.length||''}</td><td class="num">${fmt(S.fines)}</td><td class="num">${S.score!=null?S.score+'%':'<span class="muted">—</span>'}</td><td class="num">${fmt(S.qualityDeduct)}</td><td class="num"><b>${fmt(S.total)}</b></td><td class="num">${S.fee?(S.penaltyTotal/S.fee*100).toFixed(1)+'%':''}</td><td>${S.alerts.length?`<span title="${esc(S.alerts.map(a=>a.t).join('\n'))}" style="color:${bad?'var(--bad)':'var(--copper)'}">${ic('alert')}</span>`:''}</td></tr>`; }).join('')}
     </tbody></table>`:`<div class="empty">Chưa có hợp đồng nào.</div>`;
   $$('#sOver tr[data-k]').forEach(tr=>tr.onclick=()=>{ F.key=tr.dataset.k; viewSummary(v); });
@@ -1711,7 +1785,7 @@ function viewDash(v){
   <div class="kpis">
     <div class="card kpi"><div class="l">Biên bản chính thức</div><div class="v">${appr.length}</div><div class="s">${recsM.length} biên bản lập trong tháng ${periodLabel(P)}</div></div>
     <div class="card kpi"><div class="l">Tổng khấu trừ tháng</div><div class="v">${fmt(totalDeduct)}</div><div class="s">đồng · phạt BB + chất lượng + bồi thường</div></div>
-    <div class="card kpi"><div class="l">Biên bản nháp</div><div class="v" style="color:${pending.length?'var(--copper)':''}">${pending.length}</div><div class="s">chưa lưu chính thức (mọi tháng)</div></div>
+    <div class="card kpi"><div class="l">Biên bản chưa duyệt</div><div class="v" style="color:${pending.length?'var(--copper)':''}">${pending.length}</div><div class="s">nháp, chờ duyệt hoặc bị từ chối</div></div>
     <div class="card kpi"><div class="l">Hợp đồng chạm ngưỡng</div><div class="v" style="color:${warnC?'var(--bad)':''}">${warnC}</div><div class="s">có cảnh báo chấm dứt / vượt mức</div></div>
   </div>
   <div class="dgrid">
