@@ -600,19 +600,13 @@ Object.keys(CONTRACT_SEED).forEach(k=>{
    CORE — tài khoản, tiện ích, lưu trữ trên máy (IndexedDB), nghiệp vụ
    Web chạy độc lập trên GitHub Pages, không cần máy chủ / Firebase.
    ===================================================================== */
-// Tài khoản đăng nhập (chỉ để phân vai trò & tòa nhà — không phải bảo mật thật).
-// Đổi ID / mật khẩu: sửa trực tiếp danh sách dưới đây.
-const ACCOUNTS = {
-  'admin':   {pass:'esta2026', role:'admin', name:'Bill Phạm'},
-  'lmak68':  {pass:'6868', role:'bql', building:'lmak68',  name:"BQL L'MAK 68"},
-  'venture': {pass:'6262', role:'bql', building:'venture', name:'BQL Lite The Venture'},
-  '127hh':   {pass:'1270', role:'bql', building:'hh127',   name:'BQL 127 Hồng Hà'},
-  '130hh':   {pass:'1300', role:'bql', building:'hh130',   name:'BQL 130 Hồng Hà'},
-};
+// Máy chủ dữ liệu chung: Google Apps Script gắn với Google Sheet của Quản lý vận hành.
+// ID / mật khẩu đăng nhập quản lý trong file Code.gs (mục CONFIG.ACCOUNTS) — không để trong web công khai.
+const API_URL = 'https://script.google.com/macros/s/AKfycbxSW0YA0mis-Jb3q4M6wAxmn4aTh_uoUlpbGQX4e6jW-Kyw_ntEACzVF7_RtCyMxIED/exec';
 const DEMO = false;
 const lsGet = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
 const lsSet = (k,v) => { try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){} };
-if(lsGet('esta_cldv_name_admin')==='Quản lý vận hành Non-CBD') lsSet('esta_cldv_name_admin', ACCOUNTS.admin.name);
+if(lsGet('esta_cldv_name_admin')==='Quản lý vận hành Non-CBD') lsSet('esta_cldv_name_admin', 'Bill Phạm');
 
 /* ---------- utils ---------- */
 const $ = (s, el=document) => el.querySelector(s);
@@ -804,6 +798,159 @@ const LocalStore = (()=>{
   };
 })();
 
+/* ---------- Máy chủ dữ liệu chung (Google Apps Script) ---------- */
+async function api(action, payload, opt){
+  payload=payload||{}; opt=opt||{};
+  const a=CUR.auth||{};
+  const body=JSON.stringify(Object.assign({action, id:a.id, token:a.token, name:CUR.user&&CUR.user.name}, payload));
+  let res, lastErr;
+  for(let attempt=0; attempt<(opt.retry||1); attempt++){
+    try{ res=await fetch(API_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body, redirect:'follow', cache:'no-store'}); break; }
+    catch(e){ lastErr=e; await new Promise(r=>setTimeout(r, 1500)); }
+  }
+  if(!res){ const er=new Error('Không kết nối được máy chủ dữ liệu — kiểm tra mạng Internet rồi thử lại.'); er.code='network'; throw er; }
+  let j; try{ j=await res.json(); }catch(e){ const er=new Error('Máy chủ dữ liệu phản hồi lỗi (mã '+res.status+'). Thử lại sau ít phút.'); er.code='server'; throw er; }
+  if(!j.ok){ const er=new Error(j.error||'Lỗi máy chủ dữ liệu.'); er.code=j.code; er.data=j; if(j.code==='auth' && action!=='login') setTimeout(sessionExpired, 0); throw er; }
+  return j;
+}
+const SYNC={ok:true, at:null, err:'', timer:null};
+const photoSig = arr => (arr||[]).map(p=>p.length+':'+p.slice(-24)).join('|');
+const CloudStore = (()=>{
+  let listeners=()=>{}; let since=''; let pulling=null; const photoCache={};
+  const strip = d => { const o=JSON.parse(JSON.stringify(d)); delete o._edited; return o; };
+  function upsertList(col, d){ const i=DB[col].findIndex(x=>x.id===d.id); if(d.deleted){ if(i>=0){ DB[col].splice(i,1); return true; } return false; } if(col==='records'){ if(!d.status) d.status='draft'; if(d.status==='returned') d.status='rejected'; } if(i>=0){ if(DB[col][i].updatedAt===d.updatedAt) return false; DB[col][i]=d; } else DB[col].push(d); return true; }
+  function upsertMap(col, d){ if(d.deleted){ if(DB[col][d.id]){ delete DB[col][d.id]; return true; } return false; } if(DB[col][d.id] && DB[col][d.id].updatedAt===d.updatedAt) return false; DB[col][d.id]=d; return true; }
+  function apply(res){
+    const changed=new Set();
+    ['records','notices'].forEach(col=>(res[col]||[]).forEach(d=>{ if(upsertList(col,d)) changed.add(col); if(col==='records') delete photoCache[d.id]; }));
+    ['contracts','audits'].forEach(col=>(res[col]||[]).forEach(d=>{ if(upsertMap(col,d)) changed.add(col); }));
+    if(res.now && res.now>since) since=res.now;
+    return [...changed];
+  }
+  function setSync(ok, err){ SYNC.ok=ok; SYNC.err=err||''; if(ok) SYNC.at=new Date(); renderSyncBar(); }
+  async function pull(){
+    if(pulling) return pulling;
+    pulling=(async()=>{
+      try{ const res=await api('pull',{since}); const ch=apply(res); setSync(true); ch.forEach(c=>listeners(c)); return ch; }
+      catch(e){ setSync(false, e.message); if(e.code==='auth') return []; throw e; }
+      finally{ pulling=null; }
+    })();
+    return pulling;
+  }
+  function startPolling(){
+    stopPolling();
+    SYNC.timer=setInterval(()=>{ if(document.visibilityState==='visible' && CUR.user) pull().catch(()=>{}); }, 30000);
+  }
+  function stopPolling(){ if(SYNC.timer){ clearInterval(SYNC.timer); SYNC.timer=null; } }
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && CUR.user && STORE===CloudStore) pull().catch(()=>{}); });
+  window.addEventListener('online', ()=>{ if(CUR.user && STORE===CloudStore) pull().catch(()=>{}); });
+  async function save(col, doc, base){
+    try{ const j=await api('save',{col, doc, base}, {retry:2}); apply({[col]:[j.doc]}); return j.doc; }
+    catch(e){ if(e.code==='conflict' && e.data && e.data.current){ apply({[col]:[e.data.current]}); listeners(col); } throw e; }
+  }
+  return {
+    pull, stopPolling,
+    async init(user, onChange){
+      listeners=onChange; since=''; DB.records=[]; DB.contracts={}; DB.audits={}; DB.notices=[];
+      Object.keys(photoCache).forEach(k=>delete photoCache[k]);
+      try{ const res=await api('pull',{since:''},{retry:2}); apply(res); setSync(true); }
+      catch(e){ setSync(false, e.message); if(e.code!=='auth') toast('Không tải được dữ liệu: '+e.message, true); }
+      onChange('all'); startPolling();
+    },
+    async saveRecord(r){ CUR.saving=true; try{ const d=await save('records', strip(r), r.updatedAt||''); listeners('records'); return d; } finally{ CUR.saving=false; } },
+    async deleteRecord(id){ await api('delete',{col:'records', docId:id}); apply({records:[{id, deleted:true}]}); delete photoCache[id]; listeners('records'); },
+    async savePhotos(id, b, arr){
+      const sig=photoSig(arr); const c=photoCache[id];
+      if(c ? c.sig===sig : !(arr||[]).length) return;
+      await api('savePhotos',{recordId:id, building:b, photos:arr||[]}, {retry:2});
+      photoCache[id]={sig, photos:(arr||[]).slice()};
+    },
+    async loadPhotos(id){
+      if(photoCache[id]) return photoCache[id].photos.slice();
+      const j=await api('loadPhotos',{recordId:id},{retry:2}); const p=(j.photos&&j.photos[id])||[];
+      photoCache[id]={sig:photoSig(p), photos:p}; return p.slice();
+    },
+    async loadPhotosMany(ids){
+      const out={}; const need=ids.filter(id=>{ if(photoCache[id]){ out[id]=photoCache[id].photos.slice(); return false; } return true; });
+      for(let i=0;i<need.length;i+=8){ const part=need.slice(i,i+8); const j=await api('loadPhotos',{recordIds:part},{retry:2}); part.forEach(id=>{ const p=(j.photos&&j.photos[id])||[]; photoCache[id]={sig:photoSig(p), photos:p}; out[id]=p.slice(); }); }
+      return out;
+    },
+    async saveContract(k, c){ const doc=strip(c); doc.id=k; doc.building=doc.building||k.split('_')[0]; await save('contracts', doc); listeners('contracts'); },
+    async resetContract(k){ await api('delete',{col:'contracts', docId:k}); apply({contracts:[{id:k, deleted:true}]}); listeners('contracts'); },
+    async saveAudit(k, a){ const doc=strip(a); doc.id=k; await save('audits', doc); listeners('audits'); },
+    async saveNotice(n){ const d=await save('notices', strip(n), n.updatedAt||''); Object.assign(n, d); listeners('notices'); return d; },
+    async deleteNotice(id){ await api('delete',{col:'notices', docId:id}); apply({notices:[{id, deleted:true}]}); listeners('notices'); },
+    // ---- Sao lưu / khôi phục ----
+    async exportData(user){
+      const inScope = x => user.role==='admin' || x.building===user.building;
+      const records=DB.records.filter(inScope);
+      busy(true,'Đang tải ảnh hiện trường…');
+      const ph=await this.loadPhotosMany(records.filter(r=>r.photoCount).map(r=>r.id));
+      const photos={}; Object.entries(ph).forEach(([k,v])=>{ if(v&&v.length) photos[k]=v; });
+      const audits={}; Object.entries(DB.audits).forEach(([k,v])=>{ if(inScope(v)) audits[k]=v; });
+      return {app:'esta-danh-gia-cldv', version:2, exportedAt:new Date().toISOString(), exportedBy:user.id, scope:user.role==='admin'?'all':user.building,
+        records, photos, audits, notices:DB.notices.filter(inScope), contracts:user.role==='admin'?DB.contracts:{}};
+    },
+    async importData(data, user, withContracts){
+      if(!data || data.app!=='esta-danh-gia-cldv') throw new Error('File không đúng định dạng sao lưu của web này.');
+      await pull().catch(()=>{});
+      const inScope = x => user.role==='admin' || x.building===user.building;
+      const items=[]; let outScope=0;
+      for(const r of (data.records||[])){
+        if(!inScope(r)){ outScope++; continue; }
+        const onServer=DB.records.find(x=>x.id===r.id);
+        if(onServer && (onServer.updatedAt||'')>=(r.updatedAt||'')) continue;
+        if(!onServer && data.photos && data.photos[r.id] && data.photos[r.id].length){
+          busy(true,'Đang đưa ảnh lên ('+r.no+')…');
+          await api('savePhotos',{recordId:r.id, building:r.building, photos:data.photos[r.id]},{retry:2});
+        }
+        items.push({col:'records', doc:r});
+      }
+      Object.entries(data.audits||{}).forEach(([k,v])=>{ if(inScope(v)) items.push({col:'audits', doc:Object.assign({}, v, {id:k})}); });
+      (data.notices||[]).forEach(n=>{ if(inScope(n)) items.push({col:'notices', doc:n}); });
+      let ct=0;
+      if(withContracts && user.role==='admin') Object.entries(data.contracts||{}).forEach(([k,v])=>{ ct++; items.push({col:'contracts', doc:Object.assign(strip(v), {id:k, building:v.building||k.split('_')[0]})}); });
+      const tot={add:0, upd:0, skip:0, denied:0};
+      for(let i=0;i<items.length;i+=15){
+        busy(true,'Đang đưa dữ liệu lên hệ thống chung… '+Math.min(i+15,items.length)+'/'+items.length);
+        const j=await api('import',{items:items.slice(i,i+15)},{retry:2});
+        tot.add+=j.add; tot.upd+=j.upd; tot.skip+=j.skip; tot.denied+=j.denied;
+      }
+      await pull().catch(()=>{});
+      listeners('all');
+      const recItems=items.filter(x=>x.col==='records').length;
+      return {add:tot.add, upd:tot.upd, skip:tot.skip+outScope+tot.denied, ct, recItems};
+    },
+  };
+})();
+
+/* ---------- Dữ liệu cũ còn lưu riêng trên trình duyệt (bản trước) ---------- */
+async function legacyData(user){
+  try{
+    if(!(await KV.ok())) return null;
+    const inScope = x => user.role==='admin' || x.building===user.building;
+    const done=JSON.parse(lsGet('esta_cldv_legacy_done')||'[]');
+    const records=((await KV.get('records'))||[]).filter(r=>inScope(r) && !done.includes(r.id) && !DB.records.find(x=>x.id===r.id && (x.updatedAt||'')>=(r.updatedAt||'')));
+    const audits={}; Object.entries((await KV.get('audits'))||{}).forEach(([k,v])=>{ if(inScope(v)) audits[k]=v; });
+    const notices=((await KV.get('notices'))||[]).filter(n=>inScope(n) && !done.includes(n.id) && !DB.notices.find(x=>x.id===n.id));
+    if(!records.length && !notices.length) return null;
+    const photos={}; for(const r of records){ const p=await KV.get('ph_'+r.id); if(p&&p.length) photos[r.id]=p; }
+    return {app:'esta-danh-gia-cldv', version:1, records, photos, audits, notices, contracts:user.role==='admin'?((await KV.get('contracts'))||{}):{}};
+  }catch(e){ return null; }
+}
+async function migrateLegacy(){
+  const data=await legacyData(CUR.user); if(!data) return toast('Không còn dữ liệu cũ cần đưa lên.');
+  if(!(await confirmBox('Đưa dữ liệu cũ lên hệ thống chung', `Máy này còn <b>${data.records.length}</b> biên bản${data.notices.length?` và ${data.notices.length} thông báo`:''} lưu riêng từ bản web trước. Đưa lên hệ thống chung để ${isAdmin()?'các BQL':'admin'} cùng thấy?${isAdmin()?'':'<br><br>Biên bản đã chốt chính thức ở bản cũ sẽ chuyển sang <b>Chờ duyệt</b> để admin xác nhận.'}<br><br>Dữ liệu trên máy vẫn được giữ nguyên (không xóa).`, 'Đưa lên'))) return;
+  busy(true,'Đang đưa dữ liệu lên…');
+  try{
+    const r=await STORE.importData(data, CUR.user, isAdmin());
+    const done=JSON.parse(lsGet('esta_cldv_legacy_done')||'[]'); data.records.forEach(x=>done.push(x.id)); data.notices.forEach(x=>done.push(x.id));
+    lsSet('esta_cldv_legacy_done', JSON.stringify([...new Set(done)]));
+    toast(`Đã đưa lên: ${r.add} mới, ${r.upd} cập nhật${r.skip?`, bỏ qua ${r.skip} (đã có bản mới hơn hoặc không thuộc quyền)`:''}.`);
+  }catch(e){ toast('Chưa đưa lên được: '+e.message, true); }
+  busy(false); CUR.legacy=await legacyData(CUR.user); renderSyncBar(); renderView();
+}
+
 /* =====================================================================
    BUSINESS LOGIC
    ===================================================================== */
@@ -847,6 +994,7 @@ function priorCount(rec, code, uptoLineIdx){
   let n=0;
   DB.records.forEach(r=>{
     if(r.id===rec.id || r.contractKey!==rec.contractKey) return;
+    if(r.status==='rejected' || r.status==='returned') return; // biên bản bị từ chối không tính là 1 lần vi phạm
     if(per && periodOf(r.dateTime)!==per) return;
     if((r.dateTime||'') > (rec.dateTime||'')) return;
     (r.lines||[]).forEach(l=>{ if(l.code===code) n++; });
@@ -1174,7 +1322,7 @@ const safeName = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').repl
    UI — đăng nhập, khung app, các màn hình
    ===================================================================== */
 const CUR = {
-  user:null, view:'create', draft:null, draftPhotos:[], prevPhotoCount:0, dirty:false, lineEdit:null,
+  user:null, auth:null, legacy:null, view:'create', draft:null, draftPhotos:[], prevPhotoCount:0, dirty:false, lineEdit:null,
   f:{ list:{b:'', s:'', st:'', p:curPeriod(), q:''}, sum:{p:curPeriod(), key:''}, notice:{key:'', p:curPeriod(), sel:[], type:'', subject:'', days:'', body:'', signer:'', role:'', date:new Date().toISOString().slice(0,10), editingId:null}, dash:{p:curPeriod()} },
 };
 const isAdmin = () => CUR.user && CUR.user.role==='admin';
@@ -1196,36 +1344,68 @@ function renderLogin(err){
       <div class="row"><label class="f" for="lgPass">Mật khẩu</label><input id="lgPass" type="password" autocomplete="current-password" inputmode="text"></div>
       <div class="row"><label class="f" for="lgName">Họ tên người lập (in trên biên bản)</label><input id="lgName" placeholder="VD: Nguyễn Văn A" value="${esc(lsGet('esta_cldv_name_'+lastId)||'')}"></div>
       <button class="btn btn-p" style="width:100%;padding:11px" id="lgGo">Đăng nhập</button>
-      <div class="hint" style="margin-top:12px;text-align:center">Bản demo: các tài khoản dùng chung dữ liệu trên trình duyệt này; chưa đồng bộ giữa nhiều máy.</div>
+      <div class="hint" style="margin-top:12px;text-align:center">Dữ liệu lưu trên hệ thống chung — biên bản BQL gửi sẽ đến ngay tài khoản admin trên mọi máy.</div>
     </div></div></div>`;
   $('#lgId').oninput=()=>{ const n=lsGet('esta_cldv_name_'+$('#lgId').value.trim().toLowerCase()); if(n) $('#lgName').value=n; };
-  const go=()=>{
+  let going=false;
+  const go=async()=>{
+    if(going) return;
     const id=$('#lgId').value.trim().toLowerCase(), p=$('#lgPass').value.trim(), nm=$('#lgName').value.trim();
-    const acc=ACCOUNTS[id];
     if(!id||!p) return renderLogin('Nhập ID và mật khẩu.');
-    if(!acc || acc.pass!==p) return renderLogin('Sai ID hoặc mật khẩu.');
+    going=true; $('#lgGo').disabled=true; $('#lgGo').textContent='Đang đăng nhập…';
+    let j;
+    try{ CUR.auth=null; j=await api('login',{id, pass:p},{retry:2}); }
+    catch(e){ going=false; return renderLogin(e.code==='login'?'Sai ID hoặc mật khẩu.':e.message); }
+    const u=j.user;
     lsSet('esta_cldv_lastid', id); if(nm) lsSet('esta_cldv_name_'+id, nm);
-    lsSet('esta_cldv_session', id);
-    startApp({uid:id, id, name:nm||acc.name, account:acc.name, role:acc.role, building:acc.building||''});
+    const auth={id:u.id, token:j.token, role:u.role, building:u.building||'', account:u.account};
+    lsSet('esta_cldv_auth', JSON.stringify(auth)); lsSet('esta_cldv_session', null);
+    startApp(auth, nm||lsGet('esta_cldv_name_'+id)||u.account);
   };
   $('#lgGo').onclick=go; ['lgPass','lgName','lgId'].forEach(i=>$('#'+i).onkeydown=e=>{ if(e.key==='Enter') go(); });
   (lastId?$('#lgPass'):$('#lgId')).focus();
 }
 
-async function startApp(user){
+async function startApp(auth, name){
+  CUR.auth=auth;
+  const user={uid:auth.id, id:auth.id, name:name||auth.account, account:auth.account, role:auth.role, building:auth.building||''};
   CUR.user=user;
-  STORE = LocalStore;
+  STORE = CloudStore;
   CUR.view=user.role==='admin'?'approvals':'create';
-  CUR.draft=newDraft();
+  CUR.draft=newDraft(); CUR.draftPhotos=[]; CUR.dirty=false; CUR.legacy=null;
   renderShell();
-  busy(true,'Đang tải dữ liệu…');
-  try{ await STORE.init(user, (what)=>{ busy(false); onData(what); }); }
-  catch(e){ busy(false); toast('Không đọc được dữ liệu trên máy: '+e.message, true); }
+  busy(true,'Đang tải dữ liệu từ hệ thống chung…');
+  try{ await STORE.init(user, (what)=>{ onData(what); }); }
+  catch(e){ toast('Không tải được dữ liệu: '+e.message, true); }
   busy(false);
+  if(!CUR.user) return;
+  CUR.legacy=await legacyData(user); renderSyncBar();
+}
+function sessionExpired(){
+  if(!CUR.user) return;
+  if(STORE && STORE.stopPolling) STORE.stopPolling();
+  CUR.user=null; CUR.auth=null; CUR.dirty=false; lsSet('esta_cldv_auth', null); busy(false);
+  document.querySelectorAll('.modal-bg').forEach(m=>m.remove());
+  renderLogin('Phiên đăng nhập đã hết hạn hoặc mật khẩu đã đổi — vui lòng đăng nhập lại.');
 }
 function onData(what){
+  if(!CUR.user) return;
   updateBadges();
-  if(CUR.view==='create'){ if(what==='contracts'||what==='all') renderView(); else { refreshLineSuggest(); refreshPreview(); } return; }
+  if(CUR.view==='create'){
+    // biên bản đang mở vừa được người khác cập nhật (VD: admin vừa duyệt) → tải bản mới nếu chưa sửa dở
+    const d=CUR.draft; const srv=d && DB.records.find(r=>r.id===d.id);
+    if(d && d.updatedAt && !CUR.saving && (what==='records'||what==='all')){
+      if(!srv){ if(!CUR.dirty){ toast('Biên bản '+(d.no||'')+' đã bị xóa trên hệ thống.', true); CUR.draft=newDraft(); CUR.draftPhotos=[]; CUR.prevPhotoCount=0; renderView(); } return; }
+      if(srv.updatedAt!==d.updatedAt && !CUR.dirty){
+        CUR.draft=JSON.parse(JSON.stringify(srv)); CUR.lineEdit=null;
+        if(srv.status!==d.status) toast('Biên bản '+(srv.no||'')+' vừa chuyển sang: '+STATUS[srv.status]+(srv.updatedBy?' ('+srv.updatedBy+')':''));
+        STORE.loadPhotos(srv.id).then(p=>{ if(CUR.draft.id===srv.id){ CUR.draftPhotos=p; CUR.prevPhotoCount=p.length; renderView(); } }).catch(()=>{});
+        renderView(); return;
+      }
+    }
+    if(what==='contracts'||what==='all') renderView(); else { refreshLineSuggest(); refreshPreview(); renderActionBar(); }
+    return;
+  }
   if(document.querySelector('.modal-bg')) return; // không vẽ lại khi đang mở hộp thoại
   renderView();
 }
@@ -1247,13 +1427,14 @@ function renderShell(){
       <div class="wm"><span class="star">✱</span><div><div class="t1">ESTA</div><div class="t2">PROPERTY MANAGEMENT</div></div></div>
       <div class="apptitle">Đánh giá chất lượng dịch vụ &amp; áp dụng chế tài</div>
       <nav class="tabs">${VIEWS.filter(v=>!v.adminOnly||isAdmin()).map(v=>`<button data-v="${v.id}" class="${CUR.view===v.id?'on':''}">${ic(v.icon)}${v.label}${v.badge?`<span class="badge hidden" id="bdg-${v.id}"></span>`:''}</button>`).join('')}</nav>
-      <div class="userchip"><button id="btnData" title="Sao lưu / khôi phục dữ liệu">${ic('save')}<span class="who">Dữ liệu</span></button><div class="av">${esc(ini)}</div><div class="who"><div style="font-weight:600">${esc(u.name)}</div><div class="rl">${u.role==='admin'?'Quản lý vận hành':esc(BUILDINGS[u.building]?BUILDINGS[u.building].name:u.building)} · ID ${esc(u.id)}</div></div><button id="btnOut" title="Đăng xuất">${ic('out')}</button></div>
+      <div class="userchip"><button id="btnSync" title="Tải dữ liệu mới nhất từ hệ thống chung">${ic('undo')}<span class="who">Làm mới</span></button><button id="btnData" title="Sao lưu / khôi phục dữ liệu">${ic('save')}<span class="who">Dữ liệu</span></button><div class="av">${esc(ini)}</div><div class="who"><div style="font-weight:600">${esc(u.name)}</div><div class="rl">${u.role==='admin'?'Quản lý vận hành':esc(BUILDINGS[u.building]?BUILDINGS[u.building].name:u.building)} · ID ${esc(u.id)}</div></div><button id="btnOut" title="Đăng xuất">${ic('out')}</button></div>
     </div></header>
     <div class="demo-bar" id="bkBar" style="display:none"></div>
     <main id="view"></main>`;
   $$('nav.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.v));
-  $('#btnOut').onclick=async()=>{ if(CUR.dirty && !(await confirmBox('Đăng xuất','Biên bản đang soạn chưa lưu. Vẫn đăng xuất?','Đăng xuất',true))) return; CUR.dirty=false; CUR.user=null; lsSet('esta_cldv_session', null); renderLogin(); };
+  $('#btnOut').onclick=async()=>{ if(CUR.dirty && !(await confirmBox('Đăng xuất','Biên bản đang soạn chưa lưu. Vẫn đăng xuất?','Đăng xuất',true))) return; if(STORE&&STORE.stopPolling) STORE.stopPolling(); CUR.dirty=false; CUR.user=null; CUR.auth=null; lsSet('esta_cldv_auth', null); document.title=BASE_TITLE; renderLogin(); };
   $('#btnData').onclick=dataModal;
+  $('#btnSync').onclick=async()=>{ const b=$('#btnSync'); b.disabled=true; try{ const ch=await STORE.pull(); toast(ch&&ch.length?'Đã cập nhật dữ liệu mới.':'Dữ liệu đã là mới nhất.'); }catch(e){ toast(e.message,true); } b.disabled=false; };
   renderView();
 }
 async function go(v){
@@ -1273,11 +1454,18 @@ function updateBadges(){
     queue.textContent=n; queue.classList.toggle('hidden', !n);
     queue.title='Biên bản đang chờ duyệt';
   }
-  const bar=$('#bkBar'); if(bar){ const last=lsGet('esta_cldv_lastbackup_'+CUR.user.id); const days=last?Math.floor((Date.now()-Date.parse(last))/864e5):null;
-    const need=DB.records.length && (days==null || days>=7);
-    bar.style.display=need?'block':'none';
-    bar.innerHTML=need?`${days==null?'Chưa sao lưu dữ liệu lần nào':'Đã '+days+' ngày chưa sao lưu'} — bản demo lưu dữ liệu trên trình duyệt máy này. <a href="#" id="bkNow" style="color:#fff;text-decoration:underline">Sao lưu ngay</a>`:'';
-    const bn=$('#bkNow'); if(bn) bn.onclick=e=>{ e.preventDefault(); doExport(); }; }
+  if(isAdmin()){ const n=DB.records.filter(r=>r.status==='pending').length; document.title=(n?`(${n}) `:'')+BASE_TITLE; }
+  renderSyncBar();
+}
+const BASE_TITLE=document.title;
+function renderSyncBar(){
+  const bar=$('#bkBar'); if(!bar || !CUR.user) return;
+  let html='';
+  if(!SYNC.ok) html=`Mất kết nối hệ thống chung — dữ liệu đang xem có thể chưa mới nhất và chưa lưu được. (${esc(SYNC.err)}) <a href="#" id="bkRetry" style="color:#fff;text-decoration:underline">Thử lại</a>`;
+  else if(CUR.legacy && CUR.legacy.records.length) html=`Máy này còn ${CUR.legacy.records.length} biên bản lưu riêng từ bản web trước — chưa ai khác nhìn thấy. <a href="#" id="bkMig" style="color:#fff;text-decoration:underline">Đưa lên hệ thống chung</a>`;
+  bar.style.display=html?'block':'none'; bar.innerHTML=html;
+  const r=$('#bkRetry'); if(r) r.onclick=e=>{ e.preventDefault(); STORE.pull().then(()=>toast('Đã kết nối lại.')).catch(er=>toast(er.message,true)); };
+  const m=$('#bkMig'); if(m) m.onclick=e=>{ e.preventDefault(); migrateLegacy(); };
 }
 function renderView(){
   const v=$('#view'); if(!v) return;
@@ -1299,7 +1487,7 @@ function newDraft(){
     lines:[], remedy:'', remedyDeadline:'', opinionB:'', opinionA:'', status:'draft', photoCount:0, createdBy:{uid:u.uid, name:u.name}};
 }
 function canEdit(r){
-  if(isAdmin()) return r.status!=='approved';
+  if(isAdmin()) return r.status!=='approved';  // admin: muốn sửa biên bản chính thức thì bấm "Mở lại để sửa" 
   return r.building===CUR.user.building && ['draft','rejected','returned'].includes(r.status);
 }
 function emptyLine(){ return {code:'', level:1, qty:1, amount:0, action:'', detail:'', comp:0, assetValue:0, pctUsed:null, _auto:true, _autoAction:true}; }
@@ -1522,20 +1710,24 @@ function renderActionBar(){
     b.push(`<button class="btn btn-ok" id="abApprove">${ic('check')}Duyệt chính thức</button>`);
   }else if(ed && ['draft','rejected','returned'].includes(d.status)){
     b.push(`<button class="btn btn-o" id="abSave">${ic('save')}Lưu nháp</button>`);
-    b.push(`<button class="btn btn-p" id="abSubmit">${ic('send')}Gửi admin duyệt</button>`);
+    if(isAdmin()) b.push(`<button class="btn btn-ok" id="abApprove">${ic('check')}Duyệt chính thức</button>`);
+    else b.push(`<button class="btn btn-p" id="abSubmit">${ic('send')}Gửi admin duyệt</button>`);
+  }else if(isAdmin() && exists && d.status==='approved'){
+    b.push(`<button class="btn btn-o" id="abReopen" title="Đưa biên bản về Chờ duyệt để chỉnh sửa">${ic('undo')}Mở lại để sửa</button>`);
   }
   b.push(`<button class="btn btn-c" id="abPdf">${ic('pdf')}Xuất PDF</button>`);
   if(exists) b.push(`<button class="btn btn-o" id="abMail">${ic('mail')}Email</button>`);
-  if(exists && ed && d.status!=='pending') b.push(`<button class="btn btn-g" id="abDel" title="Xóa biên bản">${ic('trash')}</button>`);
+  if(exists && ed && (d.status!=='pending' || isAdmin())) b.push(`<button class="btn btn-g" id="abDel" title="Xóa biên bản">${ic('trash')}</button>`);
   bar.innerHTML=`<div class="st">${CUR.dirty?'● Có thay đổi chưa lưu':exists?'Đã lưu '+(d.updatedAt?new Date(d.updatedAt).toLocaleString('vi-VN'):''):'Chưa lưu'}</div>`+b.join('');
   const on=(id,f)=>{ const e=$('#'+id); if(e) e.onclick=f; };
   on('abSave', ()=>saveDraft(d.status==='pending'?'pending':'draft'));
   on('abSubmit', ()=>saveDraft('pending'));
   on('abApprove', ()=>saveDraft('approved'));
   on('abReject', rejectDraft);
+  on('abReopen', reopenRecord);
   on('abMail', ()=>{ if(CUR.dirty) toast('Biên bản có thay đổi chưa lưu — email dùng nội dung đang hiển thị.'); emailForRecord(d); });
   on('abPdf', ()=>{ if(d.status!=='approved') toast('Biên bản chưa được admin duyệt; PDF sẽ mang dấu trạng thái chưa chính thức.'); exportPDF(renderRecordDoc(d, CUR.draftPhotos, {pdf:true}), `Bien-ban_${safeName(d.no||('nhap_'+BUILDINGS[d.building].short))}.pdf`); });
-  on('abDel', async()=>{ if(!(await confirmBox('Xóa biên bản','Xóa vĩnh viễn biên bản '+(d.no||'nháp')+'?','Xóa',true))) return; busy(true); try{ await STORE.deleteRecord(d.id); toast('Đã xóa.'); CUR.dirty=false; CUR.draft=newDraft(); CUR.draftPhotos=[]; renderView(); }catch(e){ toast('Lỗi: '+e.message,true);} busy(false); });
+  on('abDel', async()=>{ if(!(await confirmBox('Xóa biên bản','Xóa vĩnh viễn biên bản '+(d.no||'nháp')+'?','Xóa',true))) return; busy(true); try{ await STORE.deleteRecord(d.id); toast('Đã xóa.'); CUR.dirty=false; CUR.draft=newDraft(); CUR.draftPhotos=[]; CUR.prevPhotoCount=0; renderView(); }catch(e){ toast('Không xóa được: '+e.message,true);} busy(false); });
 }
 function validateDraft(d, strict){
   const c=getContract(d.contractKey); const errs=[];
@@ -1546,7 +1738,8 @@ function validateDraft(d, strict){
 }
 async function saveDraft(status){
   const d=CUR.draft; const strict = status!=='draft';
-  if(status==='approved' && (!isAdmin() || d.status!=='pending')) return toast('Chỉ admin được duyệt biên bản đang chờ duyệt.', true);
+  if(status==='approved' && !isAdmin()) return toast('Chỉ admin được duyệt biên bản.', true);
+  if(status==='approved' && d.status==='approved') return toast('Biên bản đã chính thức.', true);
   if(status==='pending' && !canEdit(d)) return toast('Không thể gửi biên bản này để duyệt.', true);
   if(status==='draft' && !canEdit(d)) return toast('Không thể chỉnh sửa biên bản này.', true);
   const errs=validateDraft(d, strict); if(errs.length) return toast(errs.join(' '), true);
@@ -1555,6 +1748,7 @@ async function saveDraft(status){
     if(over.length && !(await confirmBox('Duyệt biên bản', `Có ${over.length} lỗi có số tiền khác mức hợp đồng. Vẫn duyệt thành chính thức?`, 'Duyệt'))) return;
   }
   busy(true,'Đang lưu…');
+  const prevSnapshot={no:d.no, status:d.status, submittedBy:d.submittedBy, submittedAt:d.submittedAt, approvedBy:d.approvedBy, approvedAt:d.approvedAt, reviewNote:d.reviewNote, createdAt:d.createdAt, photoCount:d.photoCount};
   try{
     if(!d.no) d.no=nextRecordNo(d);
     const t=recTotals(d); d.totalFine=t.fine; d.totalComp=t.comp;
@@ -1565,14 +1759,42 @@ async function saveDraft(status){
       d.submittedBy=CUR.user.name; d.submittedAt=new Date().toISOString(); d.reviewNote='';
     }
     if(status==='approved'){
+      if(!d.submittedAt){ d.submittedBy=CUR.user.name; d.submittedAt=new Date().toISOString(); }
       d.approvedBy=CUR.user.name; d.approvedAt=new Date().toISOString(); d.reviewNote='';
     }
     await STORE.savePhotos(d.id, d.building, CUR.draftPhotos, CUR.prevPhotoCount);
     CUR.prevPhotoCount=CUR.draftPhotos.length;
-    await STORE.saveRecord(JSON.parse(JSON.stringify(d)));
+    const saved=await STORE.saveRecord(JSON.parse(JSON.stringify(d)));
+    if(saved){ const renum = saved.no!==d.no; CUR.draft=JSON.parse(JSON.stringify(saved)); if(renum) toast('Số biên bản đã được cấp lại thành '+saved.no+' (số cũ trùng với biên bản khác).'); }
     CUR.dirty=false;
-    toast((status==='approved'?'Admin đã duyệt chính thức ':status==='pending'?'Đã gửi admin duyệt ':'Đã lưu nháp ')+d.no);
-  }catch(e){ console.error(e); toast('Lưu thất bại: '+(e.code||e.message)+'. Dữ liệu vẫn còn trên màn hình — thử lại.', true); }
+    toast((status==='approved'?'Admin đã duyệt chính thức ':status==='pending'?'Đã gửi admin duyệt ':'Đã lưu nháp ')+CUR.draft.no);
+  }catch(e){ console.error(e); saveError(e, d, prevSnapshot); }
+  busy(false); renderView();
+}
+function saveError(e, d, snap){
+  if(snap) Object.keys(snap).forEach(k=>{ d[k]=snap[k]; });
+  if(e.code==='conflict'){
+    const cur=e.data && e.data.current;
+    if(cur){ CUR.draft=JSON.parse(JSON.stringify(cur)); CUR.dirty=false; STORE.loadPhotos(cur.id).then(p=>{ if(CUR.draft.id===cur.id){ CUR.draftPhotos=p; CUR.prevPhotoCount=p.length; renderView(); } }).catch(()=>{}); }
+    toast('Biên bản này vừa được '+((cur&&cur.updatedBy)||'người khác')+' cập nhật'+(cur?' (trạng thái: '+STATUS[cur.status]+')':'')+'. Đã tải bản mới nhất — thay đổi vừa rồi CHƯA được lưu, vui lòng kiểm tra và làm lại nếu cần.', true);
+    return;
+  }
+  toast('Lưu thất bại: '+e.message+(e.code==='forbidden'?'':' Dữ liệu vẫn còn trên màn hình — thử lại.'), true);
+}
+async function reopenRecord(){
+  const d=CUR.draft;
+  if(!isAdmin()||d.status!=='approved') return;
+  const reason=await promptBox('Mở lại biên bản chính thức','Lý do mở lại (VD: sai số tiền, nhập nhầm lỗi…)','');
+  if(reason===null) return;
+  if(!reason) return toast('Vui lòng nhập lý do.', true);
+  busy(true,'Đang mở lại…');
+  const snap={status:d.status, reviewNote:d.reviewNote};
+  try{
+    d.status='pending'; d.reviewNote='Admin mở lại để chỉnh sửa: '+reason; d.reopenedBy=CUR.user.name; d.reopenedAt=new Date().toISOString();
+    const saved=await STORE.saveRecord(JSON.parse(JSON.stringify(d)));
+    if(saved) CUR.draft=JSON.parse(JSON.stringify(saved));
+    CUR.dirty=false; toast('Đã mở lại biên bản '+(d.no||'')+' — đang ở trạng thái Chờ duyệt.');
+  }catch(e){ console.error(e); saveError(e, d, snap); }
   busy(false); renderView();
 }
 async function rejectDraft(){
@@ -1582,14 +1804,16 @@ async function rejectDraft(){
   if(reason===null) return;
   if(!reason) return toast('Vui lòng nhập lý do từ chối.', true);
   busy(true,'Đang lưu quyết định…');
+  const snap={status:d.status, reviewNote:d.reviewNote, rejectedBy:d.rejectedBy, rejectedAt:d.rejectedAt};
   try{
     const t=recTotals(d); d.totalFine=t.fine; d.totalComp=t.comp;
     d.status='rejected'; d.reviewNote=reason; d.rejectedBy=CUR.user.name; d.rejectedAt=new Date().toISOString();
     d.photoCount=CUR.draftPhotos.length;
     await STORE.savePhotos(d.id,d.building,CUR.draftPhotos,CUR.prevPhotoCount);
-    await STORE.saveRecord(JSON.parse(JSON.stringify(d)));
+    const saved=await STORE.saveRecord(JSON.parse(JSON.stringify(d)));
+    if(saved) CUR.draft=JSON.parse(JSON.stringify(saved));
     CUR.dirty=false; toast('Đã từ chối biên bản '+(d.no||''));
-  }catch(e){ console.error(e); toast('Không lưu được quyết định: '+(e.code||e.message),true); }
+  }catch(e){ console.error(e); saveError(e, d, snap); }
   busy(false); renderView();
 }
 async function openRecord(id){
@@ -1597,11 +1821,11 @@ async function openRecord(id){
   if(CUR.view==='create' && CUR.dirty && CUR.draft.id!==id && !(await confirmBox('Mở biên bản','Bỏ thay đổi chưa lưu ở biên bản đang soạn?','Bỏ thay đổi',true))) return;
   busy(true,'Đang mở biên bản…');
   CUR.draft=JSON.parse(JSON.stringify(r)); CUR.lineEdit=null; CUR.dirty=false;
-  try{ CUR.draftPhotos=await STORE.loadPhotos(id); }catch(e){ CUR.draftPhotos=[]; }
+  try{ CUR.draftPhotos=await STORE.loadPhotos(id); }catch(e){ CUR.draftPhotos=[]; if(r.photoCount) toast('Chưa tải được ảnh hiện trường: '+e.message, true); }
   CUR.prevPhotoCount=CUR.draftPhotos.length;
   busy(false); CUR.view='create'; $$('nav.tabs button').forEach(b=>b.classList.toggle('on', b.dataset.v==='create')); renderView(); window.scrollTo(0,0);
 }
-async function pdfRecord(id){ const r=DB.records.find(x=>x.id===id); if(!r) return; busy(true,'Đang tải ảnh…'); let ph=[]; try{ ph=await STORE.loadPhotos(id);}catch(e){} busy(false); exportPDF(renderRecordDoc(r, ph, {pdf:true}), `Bien-ban_${safeName(r.no)}.pdf`); }
+async function pdfRecord(id){ const r=DB.records.find(x=>x.id===id); if(!r) return; busy(true,'Đang tải ảnh…'); let ph=[]; try{ ph=await STORE.loadPhotos(id);}catch(e){ if(r.photoCount) toast('Không tải được ảnh — PDF sẽ thiếu ảnh: '+e.message, true); } busy(false); exportPDF(renderRecordDoc(r, ph, {pdf:true}), `Bien-ban_${safeName(r.no)}.pdf`); }
 
 /* =====================================================================
    2. DANH SÁCH
@@ -1651,7 +1875,7 @@ function viewApprovals(v){
   if(!isAdmin()){ CUR.view='list'; return viewList(v); }
   const pending=DB.records.filter(r=>r.status==='pending').sort((a,b)=>(b.submittedAt||b.updatedAt||'').localeCompare(a.submittedAt||a.updatedAt||''));
   v.innerHTML=pageHead('Quản lý phê duyệt','Biên bản chờ duyệt',`${pending.length} biên bản cần admin xem xét. Chỉ sau khi duyệt, biên bản mới có hiệu lực và được đưa vào báo cáo tháng.`)+
-    `<div class="kpis"><div class="card kpi"><div class="l">Đang chờ duyệt</div><div class="v">${pending.length}</div><div class="s">cần admin xử lý</div></div><div class="card kpi"><div class="l">Đã chính thức</div><div class="v">${DB.records.filter(r=>r.status==='approved').length}</div><div class="s">đã có hiệu lực</div></div><div class="card kpi"><div class="l">Bị từ chối</div><div class="v">${DB.records.filter(r=>r.status==='rejected').length}</div><div class="s">có thể chỉnh sửa và gửi lại</div></div><div class="card kpi"><div class="l">Bản demo</div><div class="v">Nội bộ</div><div class="s">dữ liệu chung trên trình duyệt này</div></div></div>`+
+    `<div class="kpis"><div class="card kpi"><div class="l">Đang chờ duyệt</div><div class="v">${pending.length}</div><div class="s">cần admin xử lý</div></div><div class="card kpi"><div class="l">Đã chính thức</div><div class="v">${DB.records.filter(r=>r.status==='approved').length}</div><div class="s">đã có hiệu lực</div></div><div class="card kpi"><div class="l">Bị từ chối</div><div class="v">${DB.records.filter(r=>r.status==='rejected').length}</div><div class="s">có thể chỉnh sửa và gửi lại</div></div><div class="card kpi"><div class="l">Cập nhật</div><div class="v">${SYNC.at?SYNC.at.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'—'}</div><div class="s">tự làm mới mỗi 30 giây</div></div></div>`+
     `<div class="card"><div class="tbl-wrap">${pending.length?`<table class="t"><thead><tr><th>Số biên bản</th><th>Dự án · Dịch vụ</th><th>Thời điểm</th><th>Người gửi</th><th class="num">Phạt + BT</th><th>Trạng thái</th><th></th></tr></thead><tbody>${pending.map(r=>{const t=recTotals(r);return `<tr><td><b>${esc(r.no||'(chưa cấp số)')}</b><div class="muted">Gửi ${r.submittedAt?dDMY(r.submittedAt):'—'}</div></td><td>${esc(BUILDINGS[r.building].name)}<div class="muted">${SERVICES[r.service].name}</div></td><td>${dDMY(r.dateTime)}<div class="muted">${tHM(r.dateTime)} · ${esc(r.location||'')}</div></td><td>${esc(r.submittedBy||r.createdBy&&r.createdBy.name||'')}</td><td class="num"><b>${fmt(t.fine+t.comp)}</b></td><td>${statusPill(r.status)}</td><td><button class="btn btn-p btn-sm" data-review="${esc(r.id)}">${ic('edit')}Xem &amp; xử lý</button></td></tr>`;}).join('')}</tbody></table>`:`<div class="empty">${ic('check')}<div style="margin-top:8px;font-weight:600;color:var(--ink)">Không có biên bản chờ duyệt</div><div class="hint">Các hồ sơ mới gửi sẽ xuất hiện tại đây.</div></div>`}</div></div>`;
   $$('[data-review]',v).forEach(b=>b.onclick=()=>openRecord(b.dataset.review));
 }
@@ -1750,11 +1974,12 @@ function viewNotice(v){
     if(!F.sel.length && F.type!=='quality') return toast('Chọn ít nhất 1 biên bản.', true);
     if(!(await confirmBox('Cấp số thông báo','Cấp số và lưu thông báo chính thức gửi '+partyBShort(c)+'?','Cấp số & xuất PDF'))) return;
     const n=cur(); n.no=nextNoticeNo(n); n.issued=true; n.issuedBy=CUR.user.name; n.createdAt=new Date().toISOString();
-    try{ await STORE.saveNotice(n); toast('Đã cấp số '+n.no); exportPDF(renderNoticeDoc(n,{pdf:true, issued:true}), `Thong-bao_${safeName(n.no)}.pdf`); F._init=false; }catch(e){ toast('Lỗi: '+e.message,true); }
+    busy(true,'Đang cấp số…');
+    try{ await STORE.saveNotice(n); busy(false); toast('Đã cấp số '+n.no); exportPDF(renderNoticeDoc(n,{pdf:true, issued:true}), `Thong-bao_${safeName(n.no)}.pdf`); F._init=false; }catch(e){ busy(false); toast('Lỗi: '+e.message,true); }
   };
   $$('[data-np]').forEach(x=>x.onclick=()=>{ const n=DB.notices.find(y=>y.id===x.dataset.np); exportPDF(renderNoticeDoc(n,{pdf:true, issued:true}), `Thong-bao_${safeName(n.no)}.pdf`); });
   $$('[data-nm]').forEach(x=>x.onclick=()=>emailForNotice(DB.notices.find(y=>y.id===x.dataset.nm)));
-  $$('[data-nd]').forEach(x=>x.onclick=async()=>{ if(!(await confirmBox('Xóa thông báo','Xóa thông báo đã phát hành khỏi hệ thống?','Xóa',true))) return; await STORE.deleteNotice(x.dataset.nd); toast('Đã xóa.'); });
+  $$('[data-nd]').forEach(x=>x.onclick=async()=>{ if(!(await confirmBox('Xóa thông báo','Xóa thông báo đã phát hành khỏi hệ thống?','Xóa',true))) return; try{ await STORE.deleteNotice(x.dataset.nd); toast('Đã xóa.'); }catch(e){ toast('Không xóa được: '+e.message,true); } });
   pv();
 }
 
@@ -1829,7 +2054,7 @@ function viewContracts(v){
       <div style="display:flex;gap:8px;margin-top:12px"><button class="btn ${isAdmin()?'btn-p':'btn-o'} btn-sm" data-ce="${k}">${ic(isAdmin()?'edit':'list')}${isAdmin()?'Chỉnh sửa':'Xem chi tiết'}</button>${c._edited&&isAdmin()&&CONTRACT_SEED[k]&&!CONTRACT_SEED[k].missing?`<button class="btn btn-g btn-sm" data-cr="${k}">${ic('undo')}Khôi phục theo bản scan HĐ</button>`:''}${c._edited?'<span class="hint" style="margin:6px 0 0">Đã chỉnh sửa trên web</span>':''}</div>
     </div></div>`; }).join('')}</div>`;
   $$('[data-ce]',v).forEach(b=>b.onclick=()=>contractEditor(b.dataset.ce));
-  $$('[data-cr]',v).forEach(b=>b.onclick=async()=>{ if(!(await confirmBox('Khôi phục','Bỏ các chỉnh sửa trên web và dùng lại dữ liệu trích từ bản scan hợp đồng?','Khôi phục',true))) return; await STORE.resetContract(b.dataset.cr); toast('Đã khôi phục.'); });
+  $$('[data-cr]',v).forEach(b=>b.onclick=async()=>{ if(!(await confirmBox('Khôi phục','Bỏ các chỉnh sửa trên web và dùng lại dữ liệu trích từ bản scan hợp đồng?','Khôi phục',true))) return; try{ await STORE.resetContract(b.dataset.cr); toast('Đã khôi phục.'); }catch(e){ toast('Lỗi: '+e.message,true); } });
 }
 function levelSummary(L){ return L.map((l,i)=>`L${i+1}: ${l.pct!=null?(l.pct+(l.pctMax!=null?'–'+l.pctMax:'')+'% '+({fee:'phí tháng',contract:'giá trị HĐ',asset:'giá trị TS'}[l.base]||'')):l.min!=null?(fmt(l.min)+(l.max!=null?'–'+fmt(l.max):'+')):fmt(l.a)}`).join(' · '); }
 function contractEditor(key){
@@ -1912,19 +2137,21 @@ async function doExport(){
 }
 function dataModal(){
   const mine=DB.records.length;
-  modal({title:'Dữ liệu trên máy này', body:`
-    <p style="margin:0 0 10px">Web không có máy chủ: biên bản, ảnh, điểm đánh giá và thông báo được lưu ngay trong trình duyệt của máy đang dùng (${mine} biên bản). Xóa lịch sử trình duyệt hoặc đổi máy sẽ mất dữ liệu nếu chưa sao lưu.</p>
-    <div class="card" style="padding:14px 16px;margin-bottom:12px;box-shadow:none"><b style="color:var(--aub)">1. Xuất file sao lưu</b><div class="hint">Tải về 1 file .json chứa toàn bộ dữ liệu ${isAdmin()?'của tất cả tòa nhà trên máy này':'của tòa nhà'} (kể cả ảnh). Nên làm mỗi tuần và gửi file cho Quản lý vận hành.</div><button class="btn btn-p btn-sm" id="dmExp" style="margin-top:8px">${ic('pdf')}Xuất file sao lưu</button></div>
-    <div class="card" style="padding:14px 16px;box-shadow:none"><b style="color:var(--aub)">2. Nhập file sao lưu</b><div class="hint">Gộp dữ liệu từ file vào máy này: biên bản mới được thêm, biên bản trùng giữ bản sửa sau cùng. ${isAdmin()?'Anh dùng để gộp file các BQL gửi về.':'Chỉ nhận dữ liệu của tòa nhà mình.'}</div>
-      <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="dmCt" style="width:auto" ${isAdmin()?'':'checked'}> Nhập cả cấu hình Hợp đồng &amp; mức phạt trong file (file do Quản lý vận hành xuất)</label>
+  modal({title:'Dữ liệu', body:`
+    <p style="margin:0 0 10px">Biên bản, ảnh, điểm đánh giá và thông báo được lưu trên <b>hệ thống chung</b> (Google Sheet của Quản lý vận hành) — đăng nhập ở máy nào cũng thấy cùng dữ liệu${isAdmin()?'':' của tòa nhà'} (${mine} biên bản). ${SYNC.at?'Cập nhật lúc '+SYNC.at.toLocaleTimeString('vi-VN')+'. ':''}Web tự làm mới mỗi 30 giây.</p>
+    ${CUR.legacy&&CUR.legacy.records.length?`<div class="card" style="padding:14px 16px;margin-bottom:12px;box-shadow:none;border-color:var(--copper)"><b style="color:var(--aub)">Dữ liệu cũ trên máy này</b><div class="hint">Còn ${CUR.legacy.records.length} biên bản lưu riêng trên trình duyệt từ bản web trước.</div><button class="btn btn-p btn-sm" id="dmMig" style="margin-top:8px">${ic('send')}Đưa lên hệ thống chung</button></div>`:''}
+    <div class="card" style="padding:14px 16px;margin-bottom:12px;box-shadow:none"><b style="color:var(--aub)">1. Xuất file sao lưu</b><div class="hint">Tải về 1 file .json chứa dữ liệu ${isAdmin()?'của tất cả tòa nhà':'của tòa nhà'} (kể cả ảnh) để lưu trữ riêng. Không bắt buộc — dữ liệu đã nằm trên hệ thống chung.</div><button class="btn btn-p btn-sm" id="dmExp" style="margin-top:8px">${ic('pdf')}Xuất file sao lưu</button></div>
+    <div class="card" style="padding:14px 16px;box-shadow:none"><b style="color:var(--aub)">2. Nhập file sao lưu</b><div class="hint">Đưa dữ liệu trong file sao lưu (bản web cũ) lên hệ thống chung: biên bản mới được thêm, biên bản trùng giữ bản sửa sau cùng. ${isAdmin()?'':'Chỉ nhận dữ liệu của tòa nhà mình.'}</div>
+      <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="dmCt" style="width:auto" ${isAdmin()?'':'disabled'}> Nhập cả cấu hình Hợp đồng &amp; mức phạt trong file (file do Quản lý vận hành xuất)</label>
       <input type="file" id="dmFile" accept=".json,application/json" style="margin-top:8px"></div>`,
     foot:`<button class="btn btn-o" data-x>Đóng</button>`,
     onMount:(el,close)=>{
       $('#dmExp',el).onclick=()=>doExport();
+      if($('#dmMig',el)) $('#dmMig',el).onclick=()=>{ close(); migrateLegacy(); };
       $('#dmFile',el).onchange=async e=>{
         const f=e.target.files[0]; if(!f) return;
         busy(true,'Đang nhập dữ liệu…');
-        try{ const data=JSON.parse(await f.text()); const r=await STORE.importData(data, CUR.user, $('#dmCt',el).checked);
+        try{ const data=JSON.parse(await f.text()); const r=await STORE.importData(data, CUR.user, isAdmin() && $('#dmCt',el).checked);
           toast(`Đã nhập: ${r.add} biên bản mới, ${r.upd} biên bản cập nhật${r.skip?`, bỏ qua ${r.skip}`:''}${r.ct?`, ${r.ct} cấu hình hợp đồng`:''}.`); close(); renderView(); }
         catch(err){ toast('Không nhập được file: '+err.message, true); }
         busy(false); e.target.value='';
@@ -2003,8 +2230,8 @@ ${signature()}`;
    ===================================================================== */
 window.addEventListener('beforeunload', e=>{ if(CUR.dirty){ e.preventDefault(); e.returnValue=''; } });
 (function boot(){
-  const id=lsGet('esta_cldv_session'); const acc=id&&ACCOUNTS[id];
-  if(acc){ startApp({uid:id, id, name:lsGet('esta_cldv_name_'+id)||acc.name, account:acc.name, role:acc.role, building:acc.building||''}); return; }
+  let auth=null; try{ auth=JSON.parse(lsGet('esta_cldv_auth')||'null'); }catch(e){}
+  if(auth && auth.id && auth.token){ startApp(auth, lsGet('esta_cldv_name_'+auth.id)||auth.account); return; }
   renderLogin();
 })();
 
